@@ -135,6 +135,23 @@ void testSymbols()
     EXPECT_EQ_STRING("NOT !\n", lexer.getTokens(), lexer.getToklen());
 }
 
+void testExpression()
+{
+    Lexer lexer = Lexer();
+    lexer.parse("class Foo extends Bar{}");
+    EXPECT_EQ_STRING("CLASS class\nIDENTIFIER Foo\nEXTENDS extends\nIDENTIFIER Bar\nLBRACE {\nRBRACE }\n", lexer.getTokens(), lexer.getToklen());
+    lexer.parse("public static void main(int number, String string, boolean bool);");
+    EXPECT_EQ_STRING("PUBLIC public\nSTATIC static\nVOID void\nMAIN main\nLPAREN (\nINT int\nIDENTIFIER number\nCOMMA ,\nSTRING String\nIDENTIFIER string\nCOMMA ,\nBOOLEAN boolean\nIDENTIFIER bool\nRPAREN )\nSEMICOLON ;\n", lexer.getTokens(), lexer.getToklen());
+    lexer.parse("this.array = new int[5];");
+    EXPECT_EQ_STRING("THIS this\nDOT .\nIDENTIFIER array\nASSIGN =\nNEW new\nINT int\nLBRACK [\nINTEGER 5\nRBRACK ]\nSEMICOLON ;\n", lexer.getTokens(), lexer.getToklen());
+    lexer.parse("if (!array.length < 5) return false; else System.out.println(5);");
+    EXPECT_EQ_STRING("IF if\nLPAREN (\nNOT !\nIDENTIFIER array\nDOT .\nLENGTH length\nLT <\nINTEGER 5\nRPAREN )\nRETURN return\nFALSE false\nSEMICOLON ;\nELSE else\nPRINT System.out.println\nLPAREN (\nINTEGER 5\nRPAREN )\nSEMICOLON ;\n", lexer.getTokens(), lexer.getToklen());
+    lexer.parse("while(true);");
+    EXPECT_EQ_STRING("WHILE while\nLPAREN (\nTRUE true\nRPAREN )\nSEMICOLON ;\n", lexer.getTokens(), lexer.getToklen());
+    lexer.parse("(1 + 2) * (3 - 4)");
+    EXPECT_EQ_STRING("LPAREN (\nINTEGER 1\nADD +\nINTEGER 2\nRPAREN )\nMULTI *\nLPAREN (\nINTEGER 3\nSUB -\nINTEGER 4\nRPAREN )\n", lexer.getTokens(), lexer.getToklen());
+}
+
 void testError()
 {
     Lexer lexer = Lexer();
@@ -144,6 +161,10 @@ void testError()
     EXPECT_EQ_STRING("ERROR: Unknown character &\n", lexer.getTokens(), lexer.getToklen());
     lexer.parse(">");
     EXPECT_EQ_STRING("ERROR: Unknown character >\n", lexer.getTokens(), lexer.getToklen());
+    lexer.parse("|");
+    EXPECT_EQ_STRING("ERROR: Unknown character |\n", lexer.getTokens(), lexer.getToklen());
+    lexer.parse("/");
+    EXPECT_EQ_STRING("ERROR: Unknown character /\n", lexer.getTokens(), lexer.getToklen());
     lexer.parse("_abc123");
     EXPECT_EQ_STRING("ERROR: Identifiers can not begin with an underscore _abc123\n", lexer.getTokens(), lexer.getToklen());
     lexer.parse("123abc");
@@ -156,6 +177,7 @@ int main()
     testInteger();
     testKeywords();
     testSymbols();
+    testExpression();
     testError();
     printf("%d/%d (%3.2f%%) passed\n", test_pass, test_count, test_pass * 100.0 / test_count);
     return 0;
