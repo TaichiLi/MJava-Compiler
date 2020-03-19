@@ -1,3 +1,9 @@
+// THIS FILE IS PART OF MJava-Compiler PROJECT
+// lexer.cpp - The core part of the lexer
+ 
+// Created by Li Taiji 2020-03-18
+// Copyright (c) 2020 Li Taiji All rights reserved
+
 #include <cstdio>
 #include <cstdlib>
 #include <cctype>

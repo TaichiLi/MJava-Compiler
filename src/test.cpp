@@ -1,3 +1,9 @@
+// THIS FILE IS PART OF MJava-Compiler PROJECT
+// test.cpp - The unit test of the lexer
+ 
+// Created by Li Taiji 2020-03-18
+// Copyright (c) 2020 Li Taiji All rights reserved
+
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -18,6 +24,36 @@ static int test_pass = 0;
 
 #define EXPECT_EQ_STRING(expect, actual, alength) \
     EXPECT_EQ_BASE(sizeof(expect) - 1 == alength && memcmp(expect, actual, alength + 1) == 0, expect, actual, "%s")
+
+void testIdentifiers()
+{
+    Lexer lexer = Lexer();
+    lexer.parse("a");
+    EXPECT_EQ_STRING("IDENTIFIER a\n", lexer.getTokens(), lexer.getToklen());
+    lexer.parse("abc");
+    EXPECT_EQ_STRING("IDENTIFIER abc\n", lexer.getTokens(), lexer.getToklen());
+    lexer.parse("abc123");
+    EXPECT_EQ_STRING("IDENTIFIER abc123\n", lexer.getTokens(), lexer.getToklen());
+    lexer.parse("abc_123");
+    EXPECT_EQ_STRING("IDENTIFIER abc_123\n", lexer.getTokens(), lexer.getToklen());
+    lexer.parse("abc123_");
+    EXPECT_EQ_STRING("IDENTIFIER abc123_\n", lexer.getTokens(), lexer.getToklen());
+    lexer.parse("a1b2_c3");
+    EXPECT_EQ_STRING("IDENTIFIER a1b2_c3\n", lexer.getTokens(), lexer.getToklen());
+}
+
+void testInteger()
+{
+    Lexer lexer = Lexer();
+    lexer.parse("0");
+    EXPECT_EQ_STRING("INTEGER 0\n", lexer.getTokens(), lexer.getToklen());
+    lexer.parse("10");
+    EXPECT_EQ_STRING("INTEGER 10\n", lexer.getTokens(), lexer.getToklen());
+    lexer.parse("1234567890");
+    EXPECT_EQ_STRING("INTEGER 1234567890\n", lexer.getTokens(), lexer.getToklen());
+    lexer.parse("0123456789");
+    EXPECT_EQ_STRING("INTEGER 0123456789\n", lexer.getTokens(), lexer.getToklen());
+}
 
 void testKeywords()
 {
@@ -106,6 +142,8 @@ void testError()
     EXPECT_EQ_STRING("ERROR: Floating Numbers are not supported 0.0\n", lexer.getTokens(), lexer.getToklen());
     lexer.parse("&");
     EXPECT_EQ_STRING("ERROR: Unknown character &\n", lexer.getTokens(), lexer.getToklen());
+    lexer.parse(">");
+    EXPECT_EQ_STRING("ERROR: Unknown character >\n", lexer.getTokens(), lexer.getToklen());
     lexer.parse("_abc123");
     EXPECT_EQ_STRING("ERROR: Identifiers can not begin with an underscore _abc123\n", lexer.getTokens(), lexer.getToklen());
     lexer.parse("123abc");
@@ -114,6 +152,8 @@ void testError()
 
 int main()
 {
+    testIdentifiers();
+    testInteger();
     testKeywords();
     testSymbols();
     testError();
