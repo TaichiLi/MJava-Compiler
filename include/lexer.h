@@ -9,6 +9,9 @@
 
 #include <cstdio>
 #include <cstdlib>
+#include <cstring>
+
+#define BUFFER 1024
 
 extern const char *labels[];
 extern const char *literals[];
@@ -21,21 +24,31 @@ class Lexer
     public:
     Lexer()
     {
-        tokens = (char *)malloc(1024);
+        tokens = new char[BUFFER];
         toklen = 0;
     }
-
+    Lexer(const Lexer &lexer)
+    {
+        tokens = new char[BUFFER];
+        strncpy(tokens, lexer.getTokens(), BUFFER);
+        toklen = lexer.getToklen();
+    }
+    ~Lexer()
+    {
+        if (tokens != NULL)
+            delete[] tokens;
+    }
     void parse(const char *line)
     {
         lineScanner(line, this->tokens, &this->toklen);
     }
 
-    char* getTokens()
+    char* getTokens() const
     {
         return this->tokens;
     }
 
-    int getToklen()
+    int getToklen() const
     {
         return this->toklen;
     }

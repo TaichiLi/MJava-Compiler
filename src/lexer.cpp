@@ -141,7 +141,7 @@ void lineScanner(const char *line, char *tokens, int *toklen)
 {
     tokens[0] = '\0';
     *toklen = 0;
-    char *tmp = (char *)malloc(256);
+    char *tmp = new char[256];
     int length = strlen(line);
     int startIndex = 0;
     int endIndex = startIndex;
@@ -158,12 +158,13 @@ void lineScanner(const char *line, char *tokens, int *toklen)
         {
             while (isalpha(line[endIndex]) || isdigit(line[endIndex]) || line[endIndex] == '_')
                 ++endIndex;
-            char *token = (char *)malloc((endIndex - startIndex + 1) * sizeof(char));
+            char *token = new char[endIndex - startIndex + 1];
             strncpy(token, line + startIndex, endIndex - startIndex);
             token[endIndex - startIndex] = '\0';
             startIndex = endIndex;
             int len = sprintf(tmp, "ERROR: Identifiers can not begin with an underscore %s\n", token);
             *toklen += len;
+            delete[] token;
             strncat(tokens, tmp, len);
             continue;
         }
@@ -171,7 +172,7 @@ void lineScanner(const char *line, char *tokens, int *toklen)
         {
             while (isalpha(line[endIndex]) || isdigit(line[endIndex]) || line[endIndex] == '_')
                 ++endIndex;
-            char *token = (char *)malloc((endIndex - startIndex + 1) * sizeof(char));
+            char *token = new char[endIndex - startIndex + 1];
             strncpy(token, line + startIndex, endIndex - startIndex);
             token[endIndex - startIndex] = '\0';
             for (int i = (enum Token)CLASS; i <= (enum Token)NEW; i++)
@@ -181,13 +182,14 @@ void lineScanner(const char *line, char *tokens, int *toklen)
                     if (strncmp(literals[i], line + startIndex, endIndex - startIndex + 12) == 0)
                     {
                         endIndex += 12;
-                        token = (char *)malloc((endIndex - startIndex + 1) * sizeof(char));
+                        token = new char[endIndex - startIndex + 1];
                         strncpy(token, line + startIndex, endIndex - startIndex);
                         token[endIndex - startIndex] = '\0';
+                        startIndex = endIndex;
                         int len = sprintf(tmp, "%s %s\n", labels[i], token);
                         *toklen += len;
+                        delete[] token;
                         strncat(tokens, tmp, len);
-                        startIndex = endIndex;
                         break;
                     }
                 }
@@ -195,8 +197,9 @@ void lineScanner(const char *line, char *tokens, int *toklen)
                 {
                     int len = sprintf(tmp, "%s %s\n", labels[i], token);
                     *toklen += len;
-                    strncat(tokens, tmp, len);
                     startIndex = endIndex;
+                    delete[] token;
+                    strncat(tokens, tmp, len);
                     break;
                 }
             }
@@ -215,12 +218,13 @@ void lineScanner(const char *line, char *tokens, int *toklen)
                 ++endIndex;
             if (!isalpha(line[endIndex]) && line[endIndex] != '_' && line[endIndex] != '.')
             {
-                char* token = (char *)malloc((endIndex - startIndex + 1) * sizeof(char));
+                char* token = new char[endIndex - startIndex + 1];
                 strncpy(token, line + startIndex, endIndex - startIndex);
                 token[endIndex - startIndex] = '\0';
                 startIndex = endIndex;
                 int len = sprintf(tmp, "%s %s\n", labels[(enum Token)INTEGER], token);
                 *toklen += len;
+                delete[] token;
                 strncat(tokens, tmp, len);
                 continue;
             }
@@ -228,12 +232,13 @@ void lineScanner(const char *line, char *tokens, int *toklen)
             {
                 while (isalpha(line[endIndex]) || isdigit(line[endIndex]) || line[endIndex] == '_')
                     ++endIndex;
-                char* token = (char *)malloc((endIndex - startIndex + 1) * sizeof(char));
+                char* token = new char[endIndex - startIndex + 1];
                 strncpy(token, line + startIndex, endIndex - startIndex);
                 token[endIndex - startIndex] = '\0';
                 startIndex = endIndex;
                 int len = sprintf(tmp, "ERROR: Identifiers can not begin with a number %s\n", token);
                 *toklen += len;
+                delete[] token;
                 strncat(tokens, tmp, len);
                 continue;
             }
@@ -242,12 +247,13 @@ void lineScanner(const char *line, char *tokens, int *toklen)
                 ++endIndex;
                 while (isdigit(line[endIndex]))
                     ++endIndex;
-                char* token = (char *)malloc((endIndex - startIndex + 1) * sizeof(char));
+                char* token = new char[endIndex - startIndex + 1];
                 strncpy(token, line + startIndex, endIndex - startIndex);
                 token[endIndex - startIndex] = '\0';
                 startIndex = endIndex;
                 int len = sprintf(tmp, "ERROR: Floating Numbers are not supported %s\n", token);
                 *toklen += len;
+                delete[] token;
                 strncat(tokens, tmp, len);
                 continue;
             }
@@ -292,6 +298,7 @@ void lineScanner(const char *line, char *tokens, int *toklen)
             startIndex = endIndex;
         }
     }
+    delete[] tmp;
 }
 
 // scanner 
@@ -321,18 +328,19 @@ void fileScanner(FILE* fp)
             {
                 while (isalpha(line[endIndex]) || isdigit(line[endIndex]) || line[endIndex] == '_')
                     ++endIndex;
-                char *token = (char *)malloc((endIndex - startIndex + 1) * sizeof(char));
+                char *token = new char[endIndex - startIndex + 1];
                 strncpy(token, line + startIndex, endIndex - startIndex);
                 token[endIndex - startIndex] = '\0';
                 startIndex = endIndex;
                 fprintf(of, "#%d ERROR: Identifiers can not begin with an underscore %s\n", lineCount, token);
+                delete[] token;
                 continue;
             }
             if (isalpha(line[endIndex]))
             {
                 while (isalpha(line[endIndex]) || isdigit(line[endIndex]) || line[endIndex] == '_')
                     ++endIndex;
-                char *token = (char *)malloc((endIndex - startIndex + 1) * sizeof(char));
+                char *token = new char[endIndex - startIndex + 1];
                 strncpy(token, line + startIndex, endIndex - startIndex);
                 token[endIndex - startIndex] = '\0';
                 for (int i = (enum Token)CLASS; i <= (enum Token)NEW; i++)
@@ -342,17 +350,19 @@ void fileScanner(FILE* fp)
                         if (strncmp(literals[i], line + startIndex, endIndex - startIndex + 12) == 0)
                         {
                             endIndex += 12;
-                            token = (char *)malloc((endIndex - startIndex + 1) * sizeof(char));
+                            token = new char[endIndex - startIndex + 1];
                             strncpy(token, line + startIndex, endIndex - startIndex);
                             token[endIndex - startIndex] = '\0';
-                            fprintf(of, "#%d %s %s\n", lineCount, labels[i], token);
                             startIndex = endIndex;
+                            fprintf(of, "#%d %s %s\n", lineCount, labels[i], token);
+                            delete[] token;
                             break;
                         }
                     }
                     if (strcmp(literals[i], token) == 0)
                     {
                         fprintf(of, "#%d %s %s\n", lineCount, labels[i], token);
+                        delete[] token;
                         startIndex = endIndex;
                         break;
                     }
@@ -360,6 +370,7 @@ void fileScanner(FILE* fp)
                 if (startIndex != endIndex)
                 {
                     fprintf(of, "#%d %s %s\n", lineCount, labels[(enum Token)IDENTIFIER], token);
+                    delete[] token;
                     startIndex = endIndex;
                 }
                 continue;
@@ -370,22 +381,24 @@ void fileScanner(FILE* fp)
                     ++endIndex;
                 if (!isalpha(line[endIndex]) && line[endIndex] != '_' && line[endIndex] != '.')
                 {
-                    char* token = (char *)malloc((endIndex - startIndex + 1) * sizeof(char));
+                    char* token = new char[endIndex - startIndex + 1];
                     strncpy(token, line + startIndex, endIndex - startIndex);
                     token[endIndex - startIndex] = '\0';
                     startIndex = endIndex;
                     fprintf(of, "#%d %s %s\n", lineCount, labels[(enum Token)INTEGER], token);
+                    delete[] token;
                     continue;
                 }
                 else if (isalpha(line[endIndex]) || line[endIndex] == '_')
                 {
                     while (isalpha(line[endIndex]) || isdigit(line[endIndex]) || line[endIndex] == '_')
                         ++endIndex;
-                    char* token = (char *)malloc((endIndex - startIndex + 1) * sizeof(char));
+                    char* token = new char[endIndex - startIndex + 1];
                     strncpy(token, line + startIndex, endIndex - startIndex);
                     token[endIndex - startIndex] = '\0';
                     startIndex = endIndex;
                     fprintf(of, "#%d ERROR: Identifiers can not begin with a number %s\n", lineCount, token);
+                    delete[] token;
                     continue;
                 }
                 else if (line[endIndex] == '.')
@@ -393,11 +406,12 @@ void fileScanner(FILE* fp)
                     ++endIndex;
                     while (isdigit(line[endIndex]))
                         ++endIndex;
-                    char* token = (char *)malloc((endIndex - startIndex + 1) * sizeof(char));
+                    char* token = new char[endIndex - startIndex + 1];
                     strncpy(token, line + startIndex, endIndex - startIndex);
                     token[endIndex - startIndex] = '\0';
                     startIndex = endIndex;
                     fprintf(of, "#%d ERROR: Floating Numbers are not supported %s\n", lineCount, token);
+                    delete[] token;
                     continue;
                 }
                 
