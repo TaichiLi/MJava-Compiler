@@ -1,3 +1,6 @@
 *.exe
-*.txt
+t*.txt
 *.json
+*.xml
+/build
+/bin
