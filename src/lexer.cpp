@@ -344,10 +344,8 @@ void lineScanner(const char *line, char *tokens, int *toklen)
 
 // scanner 
 // Lexical analysis of the file line by line
-void fileScanner(FILE* fp)
+void fileScanner(FILE* fp, FILE* of)
 {
-    FILE *of = NULL;
-    of = fopen("./tokenOut.txt", "w+");
     char line[MAX_BUFFER];
     int lineCount = 0;
     while(fgets(line, MAX_BUFFER, fp) != NULL)
@@ -496,5 +494,4 @@ void fileScanner(FILE* fp)
             }
         }
     }
-    fclose(of);
 }

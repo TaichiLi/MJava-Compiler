@@ -12,11 +12,13 @@ int main(int argc,char** argv)
     if (argc < 2)
     {
         printf("Missing source file!\n");
+        printf("Usage: Lexer.exe <Source File> [Output File]\nSource file is required. Output File is \"tokenOut.txt\".\n");
         return 0;
     }
-    if (argc > 2)
+    if (argc > 3)
     {
         printf("Too many Arguments!\n");
+        printf("Usage: Lexer.exe <Source File> [Output File]\nSource file is required. Output File is \"tokenOut.txt\".\n");
         return 0;
     }
     FILE *sf = NULL;
@@ -25,7 +27,26 @@ int main(int argc,char** argv)
         printf("Source file do not exist!");
         return 0;
     }
-    fileScanner(sf);
+    if (argc == 3)
+    {
+        FILE *of = fopen(argv[2], "w+");
+        if (of == NULL)
+        {
+            printf("Output file can not be created!");
+            return 0;
+        }
+        fileScanner(sf, of);
+        fclose(sf);
+        fclose(of);
+    }
+    FILE *of = fopen("./tokenOut.txt", "w+");
+    if (of == NULL)
+    {
+        printf("Output file can not be created!");
+        return 0;
+    }
+    fileScanner(sf, of);
     fclose(sf);
+    fclose(of);
     return 0;
 }

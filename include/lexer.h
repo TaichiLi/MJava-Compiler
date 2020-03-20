@@ -17,7 +17,7 @@ extern const char *labels[];
 extern const char *literals[];
 
 void lineScanner(const char *line, char *tokens, int *toklen);
-void fileScanner(FILE *fp);
+void fileScanner(FILE *fp, FILE* of);
 
 class Lexer
 {
