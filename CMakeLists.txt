@@ -18,6 +18,13 @@ add_executable(${PROJECT_NAME}
                src/lexer.cpp
 )
 
+# 添加头文件目录
+target_include_directories(
+    ${PROJECT_NAME}
+    PUBLIC
+    ${PROJECT_SOURCE_DIR}/include 
+)
+
 # 搜索第三方包
 enable_testing()
 find_package(GTest)
@@ -59,13 +66,6 @@ else()
         ${PROJECT_SOURCE_DIR}/include 
     )
 endif()
-
-# 添加头文件目录
-target_include_directories(
-    ${PROJECT_NAME}
-    PUBLIC
-    ${PROJECT_SOURCE_DIR}/include 
-)
 
 # 指定安装地址
 install (TARGETS ${PROJECT_NAME}

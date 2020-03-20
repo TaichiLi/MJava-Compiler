@@ -11,8 +11,8 @@
 #include <cstdlib>
 #include <cstring>
 
-#define BUFFER 1024
-
+extern const int MAX_BUFFER;
+extern const int LINE_BUFFER;
 extern const char *labels[];
 extern const char *literals[];
 
@@ -22,37 +22,13 @@ void fileScanner(FILE *fp);
 class Lexer
 {
     public:
-    Lexer()
-    {
-        tokens = new char[BUFFER];
-        toklen = 0;
-    }
-    Lexer(const Lexer &lexer)
-    {
-        tokens = new char[BUFFER];
-        strncpy(tokens, lexer.getTokens(), BUFFER);
-        toklen = lexer.getToklen();
-    }
-    ~Lexer()
-    {
-        if (tokens != NULL)
-            delete[] tokens;
-    }
-    void parse(const char *line)
-    {
-        lineScanner(line, this->tokens, &this->toklen);
-    }
+        Lexer();
+        Lexer(const Lexer &lexer);
+        ~Lexer();
+        void parse(const char *line);
+        char *getTokens() const;
+        int getToklen() const;
 
-    char* getTokens() const
-    {
-        return this->tokens;
-    }
-
-    int getToklen() const
-    {
-        return this->toklen;
-    }
-    
     private:
         char *tokens;
         int toklen;

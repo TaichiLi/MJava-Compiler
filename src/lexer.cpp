@@ -11,7 +11,43 @@
 #include "lexer.h"
 
 // the max length of line
-#define BUFFER 1024
+const int MAX_BUFFER = 1024;
+// the length of temporary variable
+const int LINE_BUFFER = 256;
+
+Lexer::Lexer()
+{
+    tokens = new char[MAX_BUFFER];
+    toklen = 0;
+}
+
+Lexer::Lexer(const Lexer &lexer)
+{
+    tokens = new char[MAX_BUFFER];
+    strncpy(tokens, lexer.getTokens(), MAX_BUFFER);
+    toklen = lexer.getToklen();
+}
+
+Lexer::~Lexer()
+{
+    if (tokens != NULL)
+        delete[] tokens;
+}
+
+void Lexer::parse(const char *line)
+{
+    lineScanner(line, this->tokens, &this->toklen);
+}
+
+char* Lexer::getTokens() const
+{
+    return this->tokens;
+}
+
+int Lexer::getToklen() const
+{
+    return this->toklen;
+}
 
 // the id of tokens
 enum Token
@@ -141,7 +177,7 @@ void lineScanner(const char *line, char *tokens, int *toklen)
 {
     tokens[0] = '\0';
     *toklen = 0;
-    char *tmp = new char[256];
+    char *tmp = new char[LINE_BUFFER];
     int length = strlen(line);
     int startIndex = 0;
     int endIndex = startIndex;
@@ -181,6 +217,7 @@ void lineScanner(const char *line, char *tokens, int *toklen)
                 {
                     if (strncmp(literals[i], line + startIndex, endIndex - startIndex + 12) == 0)
                     {
+                        // The length of "System.out.println" after 'm' is 12
                         endIndex += 12;
                         token = new char[endIndex - startIndex + 1];
                         strncpy(token, line + startIndex, endIndex - startIndex);
@@ -244,29 +281,33 @@ void lineScanner(const char *line, char *tokens, int *toklen)
             }
             else if (line[endIndex] == '.')
             {
-                ++endIndex;
-                while (isdigit(line[endIndex]))
+                if (isdigit(line[endIndex + 1]))
+                {
                     ++endIndex;
-                char* token = new char[endIndex - startIndex + 1];
-                strncpy(token, line + startIndex, endIndex - startIndex);
-                token[endIndex - startIndex] = '\0';
-                startIndex = endIndex;
-                int len = sprintf(tmp, "ERROR: Floating Numbers are not supported %s\n", token);
-                *toklen += len;
-                delete[] token;
-                strncat(tokens, tmp, len);
+                    while (isdigit(line[endIndex]))
+                        ++endIndex;
+                    char* token = new char[endIndex - startIndex + 1];
+                    strncpy(token, line + startIndex, endIndex - startIndex);
+                    token[endIndex - startIndex] = '\0';
+                    startIndex = endIndex;
+                    int len = sprintf(tmp, "ERROR: Floating Numbers are not supported %s\n", token);
+                    *toklen += len;
+                    delete[] token;
+                    strncat(tokens, tmp, len);
+                    continue;
+                }
                 continue;
             }
             
         }
-        int matched = 0;
+        bool matched = false;
         for (int i = (enum Token)LBRACK; i <= (enum Token)NOT; i++)
         {
             if (line[endIndex] == literals[i][0])
             {
                 if (i != (enum Token)AND)
                 {
-                    matched = 1;
+                    matched = true;
                     ++endIndex;
                     startIndex = endIndex;
                     int len = sprintf(tmp, "%s %s\n", labels[i], literals[i]);
@@ -278,7 +319,7 @@ void lineScanner(const char *line, char *tokens, int *toklen)
                 {
                     if (line[endIndex + 1] == '&')
                     {
-                        matched = 1;
+                        matched = true;
                         endIndex += 2;
                         startIndex = endIndex;
                         int len = sprintf(tmp, "%s %s\n", labels[(enum Token)AND], literals[i]);
@@ -289,7 +330,7 @@ void lineScanner(const char *line, char *tokens, int *toklen)
                 }
             }
         }
-        if (matched == 0)
+        if (!matched)
         {
             int len = sprintf(tmp, "ERROR: Unknown character %c\n", line[endIndex]);
             *toklen += len;
@@ -307,9 +348,9 @@ void fileScanner(FILE* fp)
 {
     FILE *of = NULL;
     of = fopen("./tokenOut.txt", "w+");
-    char line[BUFFER];
+    char line[MAX_BUFFER];
     int lineCount = 0;
-    while(fgets(line, BUFFER, fp) != NULL)
+    while(fgets(line, MAX_BUFFER, fp) != NULL)
     {
         ++lineCount;
         int length = strlen(line);
@@ -349,6 +390,7 @@ void fileScanner(FILE* fp)
                     {
                         if (strncmp(literals[i], line + startIndex, endIndex - startIndex + 12) == 0)
                         {
+                            // The length of "System.out.println" after 'm' is 12
                             endIndex += 12;
                             token = new char[endIndex - startIndex + 1];
                             strncpy(token, line + startIndex, endIndex - startIndex);
@@ -403,27 +445,31 @@ void fileScanner(FILE* fp)
                 }
                 else if (line[endIndex] == '.')
                 {
-                    ++endIndex;
-                    while (isdigit(line[endIndex]))
+                    if (isdigit(line[endIndex]))
+                    {
                         ++endIndex;
-                    char* token = new char[endIndex - startIndex + 1];
-                    strncpy(token, line + startIndex, endIndex - startIndex);
-                    token[endIndex - startIndex] = '\0';
-                    startIndex = endIndex;
-                    fprintf(of, "#%d ERROR: Floating Numbers are not supported %s\n", lineCount, token);
-                    delete[] token;
+                        while (isdigit(line[endIndex]))
+                            ++endIndex;
+                        char* token = new char[endIndex - startIndex + 1];
+                        strncpy(token, line + startIndex, endIndex - startIndex);
+                        token[endIndex - startIndex] = '\0';
+                        startIndex = endIndex;
+                        fprintf(of, "#%d ERROR: Floating Numbers are not supported %s\n", lineCount, token);
+                        delete[] token;
+                        continue;
+                    }
                     continue;
                 }
                 
             }
-            int matched = 0;
+            bool matched = false;
             for (int i = (enum Token)LBRACK; i <= (enum Token)NOT; i++)
             {
                 if (line[endIndex] == literals[i][0])
                 {
                     if (i != (enum Token)AND)
                     {
-                        matched = 1;
+                        matched = true;
                         ++endIndex;
                         startIndex = endIndex;
                         fprintf(of, "#%d %s %s\n", lineCount, labels[i], literals[i]);
@@ -433,7 +479,7 @@ void fileScanner(FILE* fp)
                     {
                         if (line[endIndex + 1] == '&')
                         {
-                            matched = 1;
+                            matched = true;
                             endIndex += 2;
                             startIndex = endIndex;
                             fprintf(of, "#%d %s %s\n", lineCount, labels[(enum Token)AND], literals[i]);
@@ -442,7 +488,7 @@ void fileScanner(FILE* fp)
                     }
                 }
             }
-            if (matched == 0)
+            if (!matched)
             {
                 fprintf(of, "#%d ERROR: Unknown character %c\n", lineCount, line[endIndex]);
                 ++endIndex;
