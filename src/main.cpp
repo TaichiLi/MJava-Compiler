@@ -26,5 +26,6 @@ int main(int argc,char** argv)
         return 0;
     }
     fileScanner(sf);
+    fclose(sf);
     return 0;
 }

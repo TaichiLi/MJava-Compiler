@@ -450,4 +450,5 @@ void fileScanner(FILE* fp)
             }
         }
     }
+    fclose(of);
 }

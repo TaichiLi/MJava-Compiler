@@ -148,6 +148,10 @@ void testExpression()
     EXPECT_EQ_STRING("IF if\nLPAREN (\nNOT !\nIDENTIFIER array\nDOT .\nLENGTH length\nLT <\nINTEGER 5\nRPAREN )\nRETURN return\nFALSE false\nSEMICOLON ;\nELSE else\nPRINT System.out.println\nLPAREN (\nINTEGER 5\nRPAREN )\nSEMICOLON ;\n", lexer.getTokens(), lexer.getToklen());
     lexer.parse("while(true);");
     EXPECT_EQ_STRING("WHILE while\nLPAREN (\nTRUE true\nRPAREN )\nSEMICOLON ;\n", lexer.getTokens(), lexer.getToklen());
+    lexer.parse("a0.b_ = 5;");
+    EXPECT_EQ_STRING("IDENTIFIER a0\nDOT .\nIDENTIFIER b_\nASSIGN =\nINTEGER 5\nSEMICOLON ;\n", lexer.getTokens(), lexer.getToklen());
+    lexer.parse("a1 = b2.get();");
+    EXPECT_EQ_STRING("IDENTIFIER a1\nASSIGN =\nIDENTIFIER b2\nDOT .\nIDENTIFIER get\nLPAREN (\nRPAREN )\nSEMICOLON ;\n", lexer.getTokens(), lexer.getToklen());
     lexer.parse("(1 + 2) * (3 - 4)");
     EXPECT_EQ_STRING("LPAREN (\nINTEGER 1\nADD +\nINTEGER 2\nRPAREN )\nMULTI *\nLPAREN (\nINTEGER 3\nSUB -\nINTEGER 4\nRPAREN )\n", lexer.getTokens(), lexer.getToklen());
 }
