@@ -35,7 +35,7 @@ enum TokenType
     PRINT,
     LENGTH,
     TRUE,
-    FLASE,
+    FALSE,
     THIS,
     NEW,
     LBRACK,
