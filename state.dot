@@ -7,17 +7,21 @@ digraph identifier {
     edge [fontname = "Microsoft YaHei"];
     
     node [shape = "circle", label = "0\n开始", fontname = "Microsoft YaHei", width = 1.75, height = 1.5, fixedsize = true] 0;
-    node [shape = "doublecircle", label = "1\n标识符或关键字", fontname = "Microsoft YaHei", width = 1.75, height = 1.5, fixedsize = true] 1;
-    node [shape = "doublecircle", label = "2\n整数", fontname = "Microsoft YaHei", width = 1.75, height = 1.5, fixedsize = true] 2;
+    node [shape = "circle", label = "1\n标识符或关键字", fontname = "Microsoft YaHei", width = 1.75, height = 1.5, fixedsize = true] 1;
+    node [shape = "doublecircle", label = "8\n错误识别", fontname = "Microsoft YaHei", width = 1.75, height = 1.5, fixedsize = true] 8;
+    node [shape = "circle", label = "2\n整数", fontname = "Microsoft YaHei", width = 1.75, height = 1.5, fixedsize = true] 2;
+    node [shape = "doublecircle", label = "9\n错误识别", fontname = "Microsoft YaHei", width = 1.75, height = 1.5, fixedsize = true] 9;
     node [shape = "doublecircle", label = "3\n运算符", fontname = "Microsoft YaHei", width = 1.75, height = 1.5, fixedsize = true] 3;
     node [shape = "circle", label = "4\n逻辑且运算符", fontname = "Microsoft YaHei", width = 1.75, height = 1.5, fixedsize = true] 4;
-    node [shape = "doublecircle", label = "4\n逻辑且运算符", fontname = "Microsoft YaHei", width = 1.75, height = 1.5, fixedsize = true] 5;
-    node [shape = "doublecircle", label = "5\n括号", fontname = "Microsoft YaHei", width = 1.75, height = 1.5, fixedsize = true] 6;
-    node [shape = "doublecircle", label = "6\n分隔符", fontname = "Microsoft YaHei", width = 1.75, height = 1.5, fixedsize = true] 7;
+    node [shape = "doublecircle", label = "5\n逻辑且运算符", fontname = "Microsoft YaHei", width = 1.75, height = 1.5, fixedsize = true] 5;
+    node [shape = "doublecircle", label = "6\n括号", fontname = "Microsoft YaHei", width = 1.75, height = 1.5, fixedsize = true] 6;
+    node [shape = "doublecircle", label = "7\n分隔符", fontname = "Microsoft YaHei", width = 1.75, height = 1.5, fixedsize = true] 7;
     0 -> 1 [dir = forward, label = "a-zA-Z"]
     1 -> 1 [dir = forward, label = "a-zA-Z0-9_"]
+    1 -> 8 [dir = forward, label = "其他字符"]
     0 -> 2 [dir = forward, label = "0-9"]
-    0 -> 3 [dir = forward, label = "= | < | + | - | * | . | !"]
+    2 -> 9 [dir = forward, label = "其他字符"]
+    0 -> 3 [dir = forward, label = "= < + - * . !"]
     0 -> 4 [dir = forward, xlabel = "&"]
     4 -> 5 [dir = forward, label = "&"]
     0 -> 6 [dir = forward, xlabel = "[ ] ( ) { }"]

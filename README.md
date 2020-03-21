@@ -16,3 +16,13 @@ mingw32-make install
 ```
 
 I use `MinGW Makefiles` here, but you can use others.
+
+There are two `bat` files in the project directory, `lexer.bat` , `test.bat` . You can run them in `cmd`.
+
+```
+lexer.bat <Source File> [Output File]
+```
+
+Source file is required, and output file is `tokenOut.txt` by default.
+
+Run `test.bat` , you will get the test result of lexer.
