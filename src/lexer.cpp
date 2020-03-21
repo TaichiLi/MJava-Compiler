@@ -49,48 +49,6 @@ int Lexer::getToklen() const
     return this->toklen;
 }
 
-// the id of tokens
-enum Token
-{
-    CLASS = 0,
-    PUBLIC,
-    STATIC,
-    VOID,
-    MAIN,
-    STRING,
-    EXTENDS,
-    RETURN,
-    INT,
-    BOOLEAN,
-    IF,
-    ELSE,
-    WHILE,
-    PRINT,
-    LENGTH,
-    TRUE,
-    FLASE,
-    THIS,
-    NEW,
-    LBRACK,
-    RBRACK,
-    LPAREN,
-    RPAREN,
-    LBRACE,
-    RBRACE,
-    COMMA,
-    SEMICOLON,
-    ASSIGN,
-    AND,
-    LT,
-    ADD,
-    SUB,
-    MULTI,
-    DOT,
-    NOT,
-    IDENTIFIER,
-    INTEGER
-};
-
 // the labels of tokens
 const char* labels[] = 
 {
@@ -211,9 +169,9 @@ void lineScanner(const char *line, char *tokens, int *toklen)
             char *token = new char[endIndex - startIndex + 1];
             strncpy(token, line + startIndex, endIndex - startIndex);
             token[endIndex - startIndex] = '\0';
-            for (int i = (enum Token)CLASS; i <= (enum Token)NEW; i++)
+            for (int i = (enum TokenType)CLASS; i <= (enum TokenType)NEW; i++)
             {
-                if (i == (enum Token)PRINT)
+                if (i == (enum TokenType)PRINT)
                 {
                     if (strncmp(literals[i], line + startIndex, endIndex - startIndex + 12) == 0)
                     {
@@ -242,7 +200,7 @@ void lineScanner(const char *line, char *tokens, int *toklen)
             }
             if (startIndex != endIndex)
             {
-                int len = sprintf(tmp, "%s %s\n", labels[(enum Token)IDENTIFIER], token);
+                int len = sprintf(tmp, "%s %s\n", labels[(enum TokenType)IDENTIFIER], token);
                 *toklen += len;
                 strncat(tokens, tmp, len);
                 startIndex = endIndex;
@@ -259,7 +217,7 @@ void lineScanner(const char *line, char *tokens, int *toklen)
                 strncpy(token, line + startIndex, endIndex - startIndex);
                 token[endIndex - startIndex] = '\0';
                 startIndex = endIndex;
-                int len = sprintf(tmp, "%s %s\n", labels[(enum Token)INTEGER], token);
+                int len = sprintf(tmp, "%s %s\n", labels[(enum TokenType)INTEGER], token);
                 *toklen += len;
                 delete[] token;
                 strncat(tokens, tmp, len);
@@ -301,11 +259,11 @@ void lineScanner(const char *line, char *tokens, int *toklen)
             
         }
         bool matched = false;
-        for (int i = (enum Token)LBRACK; i <= (enum Token)NOT; i++)
+        for (int i = (enum TokenType)LBRACK; i <= (enum TokenType)NOT; i++)
         {
             if (line[endIndex] == literals[i][0])
             {
-                if (i != (enum Token)AND)
+                if (i != (enum TokenType)AND)
                 {
                     matched = true;
                     ++endIndex;
@@ -322,7 +280,7 @@ void lineScanner(const char *line, char *tokens, int *toklen)
                         matched = true;
                         endIndex += 2;
                         startIndex = endIndex;
-                        int len = sprintf(tmp, "%s %s\n", labels[(enum Token)AND], literals[i]);
+                        int len = sprintf(tmp, "%s %s\n", labels[(enum TokenType)AND], literals[i]);
                         *toklen += len;
                         strncat(tokens, tmp, len);
                         break;
@@ -382,9 +340,9 @@ void fileScanner(FILE* fp, FILE* of)
                 char *token = new char[endIndex - startIndex + 1];
                 strncpy(token, line + startIndex, endIndex - startIndex);
                 token[endIndex - startIndex] = '\0';
-                for (int i = (enum Token)CLASS; i <= (enum Token)NEW; i++)
+                for (int i = (enum TokenType)CLASS; i <= (enum TokenType)NEW; i++)
                 {
-                    if (i == (enum Token)PRINT)
+                    if (i == (enum TokenType)PRINT)
                     {
                         if (strncmp(literals[i], line + startIndex, endIndex - startIndex + 12) == 0)
                         {
@@ -409,7 +367,7 @@ void fileScanner(FILE* fp, FILE* of)
                 }
                 if (startIndex != endIndex)
                 {
-                    fprintf(of, "#%d %s %s\n", lineCount, labels[(enum Token)IDENTIFIER], token);
+                    fprintf(of, "#%d %s %s\n", lineCount, labels[(enum TokenType)IDENTIFIER], token);
                     delete[] token;
                     startIndex = endIndex;
                 }
@@ -425,7 +383,7 @@ void fileScanner(FILE* fp, FILE* of)
                     strncpy(token, line + startIndex, endIndex - startIndex);
                     token[endIndex - startIndex] = '\0';
                     startIndex = endIndex;
-                    fprintf(of, "#%d %s %s\n", lineCount, labels[(enum Token)INTEGER], token);
+                    fprintf(of, "#%d %s %s\n", lineCount, labels[(enum TokenType)INTEGER], token);
                     delete[] token;
                     continue;
                 }
@@ -461,11 +419,11 @@ void fileScanner(FILE* fp, FILE* of)
                 
             }
             bool matched = false;
-            for (int i = (enum Token)LBRACK; i <= (enum Token)NOT; i++)
+            for (int i = (enum TokenType)LBRACK; i <= (enum TokenType)NOT; i++)
             {
                 if (line[endIndex] == literals[i][0])
                 {
-                    if (i != (enum Token)AND)
+                    if (i != (enum TokenType)AND)
                     {
                         matched = true;
                         ++endIndex;
@@ -480,7 +438,7 @@ void fileScanner(FILE* fp, FILE* of)
                             matched = true;
                             endIndex += 2;
                             startIndex = endIndex;
-                            fprintf(of, "#%d %s %s\n", lineCount, labels[(enum Token)AND], literals[i]);
+                            fprintf(of, "#%d %s %s\n", lineCount, labels[(enum TokenType)AND], literals[i]);
                             break;
                         }
                     }

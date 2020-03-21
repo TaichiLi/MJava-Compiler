@@ -16,6 +16,48 @@ extern const int LINE_BUFFER;
 extern const char *labels[];
 extern const char *literals[];
 
+// the type of tokens
+enum TokenType
+{
+    CLASS = 0,
+    PUBLIC,
+    STATIC,
+    VOID,
+    MAIN,
+    STRING,
+    EXTENDS,
+    RETURN,
+    INT,
+    BOOLEAN,
+    IF,
+    ELSE,
+    WHILE,
+    PRINT,
+    LENGTH,
+    TRUE,
+    FLASE,
+    THIS,
+    NEW,
+    LBRACK,
+    RBRACK,
+    LPAREN,
+    RPAREN,
+    LBRACE,
+    RBRACE,
+    COMMA,
+    SEMICOLON,
+    ASSIGN,
+    AND,
+    LT,
+    ADD,
+    SUB,
+    MULTI,
+    DOT,
+    NOT,
+    IDENTIFIER,
+    INTEGER
+};
+
 void lineScanner(const char *line, char *tokens, int *toklen);
 void fileScanner(FILE *fp, FILE* of);
 
