@@ -10,11 +10,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-
-extern const int MAX_BUFFER;
-extern const int LINE_BUFFER;
-extern const char *labels[];
-extern const char *literals[];
+#include <unordered_map>
 
 // the type of tokens
 enum TokenType
@@ -55,25 +51,63 @@ enum TokenType
     DOT,
     NOT,
     IDENTIFIER,
-    INTEGER
+    INTEGER,
+    ERROR
+};
+
+enum LexerParseState {
+    LEXER_PARSE_OK = 0,
+    LEXER_PARSE_EMPTY,
+    LEXER_PARSE_INVALID_IDENTIFIER,
+    LEXER_PARSE_INVALID_NUMBER,
+    LEXER_PARSE_INVAILD_CHARACTERS,
+    LEXER_PARSE_INTEGER_TOO_BIG
 };
 
 void lineScanner(const char *line, char *tokens, int *toklen);
 void fileScanner(FILE *fp, FILE* of);
 
+union Value
+{
+    int integer;
+    bool boolean;
+    char *literal;
+};
+
+class Token
+{
+    public:
+        void setTokenType(TokenType tokenType);
+        void setValue(int integer);
+        void setValue(bool boolean);
+        void setValue(char *literal);
+        TokenType getTokenType() const;
+        Value getValue() const;
+
+    private:
+        TokenType tokenType;
+        Value value;
+};
+
 class Lexer
 {
     public:
         Lexer();
+        Lexer(int length);
         Lexer(const Lexer &lexer);
         ~Lexer();
-        void parse(const char *line);
-        char *getTokens() const;
-        int getToklen() const;
+        void setText(const char *text);
+        char *getText() const;
+        LexerParseState getToken(Token *token);
 
     private:
-        char *tokens;
-        int toklen;
+        char *text;
 };
+
+extern const int MAX_BUFFER;
+extern const int LINE_BUFFER;
+extern const char *labels[];
+extern const char *literals[];
+extern const std::unordered_map<char*, TokenType> tokenTypeMap;
 
 #endif
