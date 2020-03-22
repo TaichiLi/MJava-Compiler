@@ -12,13 +12,13 @@ int main(int argc,char** argv)
     if (argc < 2)
     {
         printf("Missing source file!\n");
-        printf("Usage: Lexer.exe <Source File> [Output File]\nSource file is required. Output File is \"tokenOut.txt\".\n");
+        printf("Usage: Lexer.exe <Source File> [Output File]\nSource file is required. Output File is \"tokenOut.txt\" by default.\n");
         return 0;
     }
     if (argc > 3)
     {
         printf("Too many Arguments!\n");
-        printf("Usage: Lexer.exe <Source File> [Output File]\nSource file is required. Output File is \"tokenOut.txt\".\n");
+        printf("Usage: Lexer.exe <Source File> [Output File]\nSource file is required. Output File is \"tokenOut.txt\" by default.\n");
         return 0;
     }
     FILE *sf = NULL;
