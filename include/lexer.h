@@ -13,8 +13,6 @@
 
 extern const int MAX_BUFFER;
 extern const int LINE_BUFFER;
-extern const char *labels[];
-extern const char *literals[];
 
 // the type of tokens
 enum TokenType

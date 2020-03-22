@@ -8,6 +8,8 @@
 #include <cstdlib>
 #include <cctype>
 #include <cstring>
+#include <map>
+#include <iterator>
 #include "lexer.h"
 
 // the max length of line
@@ -49,86 +51,50 @@ int Lexer::getToklen() const
     return this->toklen;
 }
 
-// the labels of tokens
-const char* labels[] = 
+struct CharCmp
 {
-    "CLASS",
-    "PUBLIC",
-    "STATIC",
-    "VOID",
-    "MAIN",
-    "STRING",
-    "EXTENDS",
-    "RETURN",
-    "INT",
-    "BOOLEAN",
-    "IF",
-    "ELSE",
-    "WHILE",
-    "PRINT",
-    "LENGTH",
-    "TRUE",
-    "FALSE",
-    "THIS",
-    "NEW",
-    "LBRACK",
-    "RBRACK",
-    "LPAREN",
-    "RPAREN",
-    "LBRACE",
-    "RBRACE",
-    "COMMA",
-    "SEMICOLON",
-    "ASSIGN",
-    "AND",
-    "LT",
-    "ADD",
-    "SUB",
-    "MULTI",
-    "DOT",
-    "NOT",
-    "IDENTIFIER",
-    "INTEGER"
+    bool operator()(char const *a, char const *b) const
+    {
+        return strcmp(a, b) < 0;
+    }
 };
 
-// the literals of tokens
-const char* literals[] = 
-{
-    "class",
-    "public",
-    "static",
-    "void",
-    "main",
-    "String",
-    "extends",
-    "return",
-    "int",
-    "boolean",
-    "if",
-    "else",
-    "while",
-    "System.out.println",
-    "length",
-    "true",
-    "false",
-    "this",
-    "new",
-    "[",
-    "]",
-    "(",
-    ")",
-    "{",
-    "}",
-    ",",
-    ";",
-    "=",
-    "&&",
-    "<",
-    "+",
-    "-",
-    "*",
-    ".",
-    "!"
+const std::map<const char*, const char*, CharCmp> tokenLabelMap = {
+    {"class", "CLASS"},
+    {"public", "PUBLIC"},
+    {"static", "STATIC"},
+    {"void", "VOID"},
+    {"main", "MAIN"},
+    {"String", "STRING"},
+    {"extends", "EXTENDS"},
+    {"return", "RETURN"},
+    {"int", "INT"},
+    {"boolean", "BOOLEAN"},
+    {"if", "IF"},
+    {"else", "ELSE"},
+    {"while", "WHILE"},
+    {"System.out.println", "PRINT"},
+    {"length", "LENGTH"},
+    {"true", "TRUE"},
+    {"false", "FALSE"},
+    {"this", "THIS"},
+    {"new", "NEW"},
+    {"[", "LBRACK"},
+    {"]", "RBRACK"},
+    {"(", "LPAREN"},
+    {")", "RPAREN"},
+    {"{", "LBRACE"},
+    {"}", "RBRACE"},
+    {",", "COMMA"},
+    {";", "SEMICOLON"},
+    {"=", "ASSIGN"},
+    {"&&", "AND"},
+    {"<", "LT"},
+    {"+", "ADD"},
+    {"-", "SUB"},
+    {"*", "MULTI"},
+    {".", "DOT"},
+    {"!", "NOT"}
 };
 
 void lineScanner(const char *line, char *tokens, int *toklen)
@@ -169,43 +135,38 @@ void lineScanner(const char *line, char *tokens, int *toklen)
             char *token = new char[endIndex - startIndex + 1];
             strncpy(token, line + startIndex, endIndex - startIndex);
             token[endIndex - startIndex] = '\0';
-            for (int i = (enum TokenType)CLASS; i <= (enum TokenType)NEW; i++)
+            auto it = tokenLabelMap.find(token);
+            if (it != tokenLabelMap.end())
             {
-                if (i == (enum TokenType)PRINT)
-                {
-                    if (strncmp(literals[i], line + startIndex, endIndex - startIndex + 12) == 0)
-                    {
-                        // The length of "System.out.println" after 'm' is 12
-                        endIndex += 12;
-                        token = new char[endIndex - startIndex + 1];
-                        strncpy(token, line + startIndex, endIndex - startIndex);
-                        token[endIndex - startIndex] = '\0';
-                        startIndex = endIndex;
-                        int len = sprintf(tmp, "%s %s\n", labels[i], token);
-                        *toklen += len;
-                        delete[] token;
-                        strncat(tokens, tmp, len);
-                        break;
-                    }
-                }
-                if (strcmp(literals[i], token) == 0)
-                {
-                    int len = sprintf(tmp, "%s %s\n", labels[i], token);
-                    *toklen += len;
-                    startIndex = endIndex;
-                    delete[] token;
-                    strncat(tokens, tmp, len);
-                    break;
-                }
+                int len = sprintf(tmp, "%s %s\n", it->second, token);
+                *toklen += len;
+                startIndex = endIndex;
+                delete[] token;
+                strncat(tokens, tmp, len);
+                continue;
             }
-            if (startIndex != endIndex)
+            if (strncmp("System.out.println", line + startIndex, endIndex - startIndex + 12) == 0)
             {
-                int len = sprintf(tmp, "%s %s\n", labels[(enum TokenType)IDENTIFIER], token);
+                // The length of "System.out.println" after 'm' is 12
+                endIndex += 12;
+                token = new char[endIndex - startIndex + 1];
+                strncpy(token, line + startIndex, endIndex - startIndex);
+                token[endIndex - startIndex] = '\0';
+                startIndex = endIndex;
+                int len = sprintf(tmp, "%s %s\n", "PRINT", token);
+                *toklen += len;
+                delete[] token;
+                strncat(tokens, tmp, len);
+                continue;
+            }
+            else
+            {
+                int len = sprintf(tmp, "%s %s\n", "IDENTIFIER", token);
                 *toklen += len;
                 strncat(tokens, tmp, len);
                 startIndex = endIndex;
+                continue;
             }
-            continue;
         }
         if (isdigit(line[endIndex]))
         {
@@ -217,7 +178,7 @@ void lineScanner(const char *line, char *tokens, int *toklen)
                 strncpy(token, line + startIndex, endIndex - startIndex);
                 token[endIndex - startIndex] = '\0';
                 startIndex = endIndex;
-                int len = sprintf(tmp, "%s %s\n", labels[(enum TokenType)INTEGER], token);
+                int len = sprintf(tmp, "%s %s\n", "INTEGER", token);
                 *toklen += len;
                 delete[] token;
                 strncat(tokens, tmp, len);
@@ -258,44 +219,33 @@ void lineScanner(const char *line, char *tokens, int *toklen)
             }
             
         }
-        bool matched = false;
-        for (int i = (enum TokenType)LBRACK; i <= (enum TokenType)NOT; i++)
+        char *token = new char[2];
+        token[0] = line[endIndex];
+        token[1] = '\0';
+        auto it = tokenLabelMap.find(token);
+        if (it != tokenLabelMap.end())
         {
-            if (line[endIndex] == literals[i][0])
-            {
-                if (i != (enum TokenType)AND)
-                {
-                    matched = true;
-                    ++endIndex;
-                    startIndex = endIndex;
-                    int len = sprintf(tmp, "%s %s\n", labels[i], literals[i]);
-                    *toklen += len;
-                    strncat(tokens, tmp, len);
-                    break;
-                }
-                else
-                {
-                    if (line[endIndex + 1] == '&')
-                    {
-                        matched = true;
-                        endIndex += 2;
-                        startIndex = endIndex;
-                        int len = sprintf(tmp, "%s %s\n", labels[(enum TokenType)AND], literals[i]);
-                        *toklen += len;
-                        strncat(tokens, tmp, len);
-                        break;
-                    }
-                }
-            }
-        }
-        if (!matched)
-        {
-            int len = sprintf(tmp, "ERROR: Unknown character %c\n", line[endIndex]);
-            *toklen += len;
-            strncat(tokens, tmp, len);
             ++endIndex;
             startIndex = endIndex;
+            int len = sprintf(tmp, "%s %s\n", it->second, it->first);
+            *toklen += len;
+            strncat(tokens, tmp, len);
+            continue;
         }
+        if (strncmp("&&", line + startIndex, 2) == 0)
+        {
+            endIndex += 2;
+            startIndex = endIndex;
+            int len = sprintf(tmp, "%s %s\n", "AND", "&&");
+            *toklen += len;
+            strncat(tokens, tmp, len);
+            continue;
+        }
+        int len = sprintf(tmp, "ERROR: Unknown character %c\n", line[endIndex]);
+        *toklen += len;
+        strncat(tokens, tmp, len);
+        ++endIndex;
+        startIndex = endIndex;
     }
     delete[] tmp;
 }
@@ -340,38 +290,33 @@ void fileScanner(FILE* fp, FILE* of)
                 char *token = new char[endIndex - startIndex + 1];
                 strncpy(token, line + startIndex, endIndex - startIndex);
                 token[endIndex - startIndex] = '\0';
-                for (int i = (enum TokenType)CLASS; i <= (enum TokenType)NEW; i++)
+                auto it = tokenLabelMap.find(token);
+                if (it != tokenLabelMap.end())
                 {
-                    if (i == (enum TokenType)PRINT)
-                    {
-                        if (strncmp(literals[i], line + startIndex, endIndex - startIndex + 12) == 0)
-                        {
-                            // The length of "System.out.println" after 'm' is 12
-                            endIndex += 12;
-                            token = new char[endIndex - startIndex + 1];
-                            strncpy(token, line + startIndex, endIndex - startIndex);
-                            token[endIndex - startIndex] = '\0';
-                            startIndex = endIndex;
-                            fprintf(of, "#%d %s %s\n", lineCount, labels[i], token);
-                            delete[] token;
-                            break;
-                        }
-                    }
-                    if (strcmp(literals[i], token) == 0)
-                    {
-                        fprintf(of, "#%d %s %s\n", lineCount, labels[i], token);
-                        delete[] token;
-                        startIndex = endIndex;
-                        break;
-                    }
-                }
-                if (startIndex != endIndex)
-                {
-                    fprintf(of, "#%d %s %s\n", lineCount, labels[(enum TokenType)IDENTIFIER], token);
+                    fprintf(of, "#%d %s %s\n", lineCount, it->second, token);
                     delete[] token;
                     startIndex = endIndex;
+                    continue;
                 }
-                continue;
+                if (strncmp("System.out.println", line + startIndex, endIndex - startIndex + 12) == 0)
+                {
+                    // The length of "System.out.println" after 'm' is 12
+                    endIndex += 12;
+                    token = new char[endIndex - startIndex + 1];
+                    strncpy(token, line + startIndex, endIndex - startIndex);
+                    token[endIndex - startIndex] = '\0';
+                    startIndex = endIndex;
+                    fprintf(of, "#%d %s %s\n", lineCount, "PRINT", token);
+                    delete[] token;
+                    continue;
+                }
+                else
+                {
+                    fprintf(of, "#%d %s %s\n", lineCount, "IDENTIFIER", token);
+                    delete[] token;
+                    startIndex = endIndex;
+                    continue;
+                }
             }
             if (isdigit(line[endIndex]))
             {
@@ -383,7 +328,7 @@ void fileScanner(FILE* fp, FILE* of)
                     strncpy(token, line + startIndex, endIndex - startIndex);
                     token[endIndex - startIndex] = '\0';
                     startIndex = endIndex;
-                    fprintf(of, "#%d %s %s\n", lineCount, labels[(enum TokenType)INTEGER], token);
+                    fprintf(of, "#%d %s %s\n", lineCount, "INTEGER", token);
                     delete[] token;
                     continue;
                 }
@@ -401,7 +346,7 @@ void fileScanner(FILE* fp, FILE* of)
                 }
                 else if (line[endIndex] == '.')
                 {
-                    if (isdigit(line[endIndex]))
+                    if (isdigit(line[endIndex + 1]))
                     {
                         ++endIndex;
                         while (isdigit(line[endIndex]))
@@ -418,38 +363,27 @@ void fileScanner(FILE* fp, FILE* of)
                 }
                 
             }
-            bool matched = false;
-            for (int i = (enum TokenType)LBRACK; i <= (enum TokenType)NOT; i++)
+            char *token = new char[2];
+            token[0] = line[endIndex];
+            token[1] = '\0';
+            auto it = tokenLabelMap.find(token);
+            if (it != tokenLabelMap.end())
             {
-                if (line[endIndex] == literals[i][0])
-                {
-                    if (i != (enum TokenType)AND)
-                    {
-                        matched = true;
-                        ++endIndex;
-                        startIndex = endIndex;
-                        fprintf(of, "#%d %s %s\n", lineCount, labels[i], literals[i]);
-                        break;
-                    }
-                    else
-                    {
-                        if (line[endIndex + 1] == '&')
-                        {
-                            matched = true;
-                            endIndex += 2;
-                            startIndex = endIndex;
-                            fprintf(of, "#%d %s %s\n", lineCount, labels[(enum TokenType)AND], literals[i]);
-                            break;
-                        }
-                    }
-                }
-            }
-            if (!matched)
-            {
-                fprintf(of, "#%d ERROR: Unknown character %c\n", lineCount, line[endIndex]);
                 ++endIndex;
                 startIndex = endIndex;
+                fprintf(of, "#%d %s %s\n", lineCount, it->second, it->first);
+                continue;
             }
+            if (strncmp("&&", line + startIndex, 2) == 0)
+            {
+                endIndex += 2;
+                startIndex = endIndex;
+                fprintf(of, "#%d %s %s\n", lineCount, "AND", "&&");
+                continue;
+            }
+            fprintf(of, "#%d ERROR: Unknown character %c\n", lineCount, line[endIndex]);
+            ++endIndex;
+            startIndex = endIndex;
         }
     }
 }
