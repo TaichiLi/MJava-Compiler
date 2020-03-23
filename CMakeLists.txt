@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
 
-add_compile_definitions (GTEST_INCLUDE_DIR=${GTEST_INCLUDE_DIR})
+add_compile_definitions (GTEST_INCLUDE_DIR="./include")
 add_compile_definitions (GTEST_LIBRARY_DIR="./lib")
 
 set (GTEST_LIBRARY ${GTEST_LIBRARY_DIR}/libgtest.a)

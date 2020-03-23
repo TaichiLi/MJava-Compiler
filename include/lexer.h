@@ -10,9 +10,16 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <unordered_map>
+
+namespace lexer
+{
 
 extern const int MAX_BUFFER;
 extern const int LINE_BUFFER;
+struct HashCode;
+struct CharCmp;
+extern const std::unordered_map<const char *, const char *, HashCode, CharCmp> tokenLabelMap;
 
 // the type of tokens
 enum TokenType
@@ -73,5 +80,7 @@ class Lexer
         char *tokens;
         int toklen;
 };
+
+}
 
 #endif

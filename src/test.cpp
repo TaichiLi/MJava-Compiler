@@ -9,6 +9,8 @@
 #include <cstring>
 #include "lexer.h"
 
+using lexer::Lexer;
+
 static int test_count = 0;
 static int test_pass = 0;
 

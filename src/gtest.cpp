@@ -2,6 +2,8 @@
 #include "gtest/gtest.h"
 #include "lexer.h"
 
+using lexer::Lexer;
+
 TEST(LexerTest, HandleIdentifierInput) {
     Lexer lexer = Lexer();
     lexer.parse("a");

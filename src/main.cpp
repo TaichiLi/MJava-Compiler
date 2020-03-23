@@ -35,7 +35,7 @@ int main(int argc,char** argv)
             printf("Output file can not be created!");
             return 0;
         }
-        fileScanner(sf, of);
+        lexer::fileScanner(sf, of);
         fclose(sf);
         fclose(of);
     }
@@ -45,7 +45,7 @@ int main(int argc,char** argv)
         printf("Output file can not be created!");
         return 0;
     }
-    fileScanner(sf, of);
+    lexer::fileScanner(sf, of);
     fclose(sf);
     fclose(of);
     return 0;
