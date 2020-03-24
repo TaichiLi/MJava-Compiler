@@ -1,0 +1,19 @@
+// THIS FILE IS PART OF MJava-Compiler PROJECT
+// error.h - process error
+ 
+// Created by Li Taiji 2020-03-18
+// Copyright (c) 2020 Li Taiji All rights reserved
+
+#ifndef ERROR_H_
+#define ERROR_H_
+
+#include <string>
+#include <cassert>
+
+namespace MJava
+{
+    extern void errorToken(const std::string& msg);
+    extern void errorSyntax(const std::string& msg);
+}
+
+#endif // error.h

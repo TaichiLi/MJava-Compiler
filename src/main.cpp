@@ -4,49 +4,52 @@
 // Created by Li Taiji 2020-03-18
 // Copyright (c) 2020 Li Taiji All rights reserved
 
-#include <cstdio>
-#include "lexer.h"
+#include <fstream>
+#include <string>
+#include "scanner.h"
 
 int main(int argc,char** argv)
 {
     if (argc < 2)
     {
-        printf("Missing source file!\n");
-        printf("Usage: Lexer.exe <Source File> [Output File]\nSource file is required. Output File is \"tokenOut.txt\".\n");
+        std::cerr <<"Missing source file!\n";
+        std::cout <<"Usage: Lexer.exe <Source File> [Output File]\nSource file is required. Output File is \"tokenOut.txt\".\n";
         return 0;
     }
     if (argc > 3)
     {
-        printf("Too many Arguments!\n");
-        printf("Usage: Lexer.exe <Source File> [Output File]\nSource file is required. Output File is \"tokenOut.txt\".\n");
-        return 0;
-    }
-    FILE *sf = NULL;
-    if ((sf = fopen(argv[1], "r")) == NULL)
-    {
-        printf("Source file do not exist!");
+        std::cerr << "Too many Arguments!\n";
+        std::cout << "Usage: Lexer.exe <Source File> [Output File]\nSource file is required. Output File is \"tokenOut.txt\".\n";
         return 0;
     }
     if (argc == 3)
     {
-        FILE *of = fopen(argv[2], "w+");
-        if (of == NULL)
+        std::ofstream of;
+        of.open(std::string(argv[2]));
+        if (of.fail())
         {
-            printf("Output file can not be created!");
+            std::cout << "Output file can not be created!";
             return 0;
         }
-        fileScanner(sf, of);
-        fclose(sf);
-        fclose(of);
+        MJava::Scanner scanner = MJava::Scanner(argv[1]);
+        while(scanner.getToken().getTokenType() != MJava::TokenType::END_OF_FILE)
+        {
+            of << scanner.getNextToken().toString() << std::endl;;
+        }
+        of.close();
     }
-    FILE *of = fopen("./tokenOut.txt", "w+");
-    if (of == NULL)
+    std::ofstream of;
+    of.open("./tokenOut.txt");
+    if (of.fail())
     {
-        printf("Output file can not be created!");
+        std::cout << "Output file can not be created!";
         return 0;
     }
-    fileScanner(sf, of);
-    fclose(sf);
-    fclose(of);
+    MJava::Scanner scanner = MJava::Scanner(argv[1]);
+    while(scanner.getToken().getTokenType() != MJava::TokenType::END_OF_FILE)
+    {
+        of << scanner.getNextToken().toString() << std::endl;
+    }
+    of.close();
     return 0;
 }
