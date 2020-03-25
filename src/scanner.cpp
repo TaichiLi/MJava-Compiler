@@ -393,8 +393,9 @@ namespace MJava
 
         while (true)
         {
-            if (currentChar_ == '\'')
+            if (currentChar_ != '\\' && peekChar() == '\'')
             {
+                addToBuffer(currentChar_);
                 break;
             }
 
@@ -411,6 +412,7 @@ namespace MJava
         if (!input_.eof())
         {
             // eat end ' and update currentChar_ .
+            getNextChar();
             getNextChar();
         }
 
@@ -438,8 +440,9 @@ namespace MJava
 
         while (true)
         {
-            if (currentChar_ == '\"')
+            if (currentChar_ != '\\' && peekChar() == '\"')
             {
+                addToBuffer(currentChar_);
                 break;
             }
 
@@ -456,6 +459,7 @@ namespace MJava
         if (!input_.eof())
         {
             // eat end " and update currentChar_ .
+            getNextChar();
             getNextChar();
         }
 

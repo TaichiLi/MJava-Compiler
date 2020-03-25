@@ -73,7 +73,7 @@ namespace MJava
                 break;
 
             case MJava::TokenType::CHAR_LITERAL:
-                buffer = "char";
+                buffer = "char literal";
                 break;
 
             case MJava::TokenType::STRING_LITERAL:
@@ -89,7 +89,7 @@ namespace MJava
                 break;
 
             case MJava::TokenType::TYPE:
-                buffer = "type";
+                buffer = "data type";
                 break;
 
             case MJava::TokenType::OPERATOR:
@@ -117,7 +117,7 @@ namespace MJava
 
     std::string Token::toString() const
     {
-        return std::string("Token Type: " + tokenTypeDescription() + "\t" + "Token Name: " + name_);
+        return std::string("Token Type:\t " + tokenTypeDescription() + "\t" + "Token Name:\t" + name_);
     }
 
     void Token::dump(std::ostream& out /* = std::cout */) const
