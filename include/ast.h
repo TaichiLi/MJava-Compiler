@@ -128,11 +128,11 @@ namespace MJava
     class ReturnStatementAST : public ExprAST
     {
     public:
-        ReturnStatementAST(const TokenLocation& loc, ExprASTPtr expr);
+        ReturnStatementAST(const TokenLocation& loc, ExprASTPtr returnStatement);
         std::string toString() const;
 
     private:
-        ExprASTPtr          expr_;
+        ExprASTPtr          returnStatement_;
     };
 
     class BinaryOpExpressionAST : public ExprAST

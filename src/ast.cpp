@@ -144,13 +144,13 @@ namespace MJava
         return std::string("{\n\"type\": \"WhileStatement\",\n\"condition\": " + condition_->toString() + ",\n\"body\": [" + body_->toString() + "]\n}");
     }
 
-    ReturnStatementAST::ReturnStatementAST(const TokenLocation& loc, ExprASTPtr expr)
-        : ExprAST(loc), expr_(expr)
+    ReturnStatementAST::ReturnStatementAST(const TokenLocation& loc, ExprASTPtr returnStatement)
+        : ExprAST(loc), returnStatement_(returnStatement)
     {}
 
     std::string ReturnStatementAST::toString() const
     {
-        return std::string("{\n\"type\": \"ReturnStatement\",\n\"expression\" :" + expr_->toString() + "\n}");
+        return std::string("{\n\"type\": \"ReturnStatement\",\n\"expression\" :" + returnStatement_->toString() + "\n}");
     }
 
     BinaryOpExpressionAST::BinaryOpExpressionAST(const TokenLocation& loc, const std::string &binaryOp, ExprASTPtr lhs, ExprASTPtr rhs)
