@@ -18,7 +18,7 @@ namespace MJava
         scanner_.getNextToken();
     }
     
-    std::string Parser::toString ()
+    std::string Parser::toString()
     {
         std::string str = "[\n";
         // std::cout << ast_.size() << std::endl;
