@@ -276,7 +276,7 @@ namespace MJava
     }
 
     
-    ExprASTPtr Parser::parseMethodCallStatement(Token token)
+    ExprASTPtr Parser::parseMethodCallStatement(const Token &token)
     {
         scanner_.getNextToken();
 
@@ -470,7 +470,7 @@ namespace MJava
         return new VariableDeclarationAST(loc, type, name);
     }
 
-    ExprASTPtr Parser::parseVariableDeclaration(Token token)
+    ExprASTPtr Parser::parseVariableDeclaration(const Token &token)
     {
         std::string type = token.getTokenName();
 

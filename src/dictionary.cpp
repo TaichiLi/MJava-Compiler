@@ -48,7 +48,7 @@ namespace MJava
         addToken("String",              std::make_tuple(TokenValue::STRING,            TokenType::TYPE,  -1));
     }
 
-    void Dictionary::addToken(std::string name,
+    void Dictionary::addToken(const std::string &name,
                               std::tuple<TokenValue, TokenType, int> tokenMeta)
     {
         dictionary_.insert(std::pair<decltype(name), decltype(tokenMeta)>(name, tokenMeta));
