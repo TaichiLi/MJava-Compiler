@@ -8,7 +8,6 @@
 #include <string>
 #include "scanner.h"
 #include "parser.h"
-#include "jsonformatter.h"
 
 int main(int argc,char** argv)
 {
@@ -36,7 +35,7 @@ int main(int argc,char** argv)
         MJava::Scanner scanner = MJava::Scanner(argv[1]);
         MJava::Parser parser = MJava::Parser(scanner);
         parser.parse();
-        of << JSONFormatter::format(parser.toString()) << std::endl;
+        of << parser.toString() << std::endl;
         of.close();
     }
     std::ofstream of;
@@ -49,7 +48,7 @@ int main(int argc,char** argv)
     MJava::Scanner scanner = MJava::Scanner(argv[1]);
     MJava::Parser parser = MJava::Parser(scanner);
     parser.parse();
-    of << JSONFormatter::format(parser.toString()) << std::endl;
+    of << parser.toString() << std::endl;
     of.close();
     return 0;
 }

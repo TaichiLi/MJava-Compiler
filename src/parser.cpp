@@ -5,8 +5,10 @@
 // Copyright (c) 2020 Li Taiji All rights reserved
 
 #include <memory>
+#include <sstream>
 #include "parser.h"
 #include "error.h"
+#include "jsonformatter.h"
 
 namespace MJava
 {
@@ -20,15 +22,17 @@ namespace MJava
     
     std::string Parser::toString()
     {
-        std::string str = "[\n";
-        // std::cout << ast_.size() << std::endl;
+        std::ostringstream str;
+        str << "[\n";
+
         size_t size = ast_.size();
         for (size_t i = 0; i < size - 1; i++)
         {
-            str += ast_[i]->toString() + ",\n";
+            str << ast_[i]->toString() << ",\n";
         }
-        str += ast_[size - 1]->toString() + "\n]";
-        return str;
+        str << ast_[size - 1]->toString() << "\n]";
+
+        return JSONFormatter::format(str.str());
     }
 
     VecExprASTPtr& Parser::parse()
@@ -59,7 +63,6 @@ namespace MJava
 
                 default:
                 {
-                    // It is very like LLVM Kaleidoscope tutorial "ParseExpression" :-)
                     currentASTPtr = parseExpression();
                     break;
                 }
@@ -160,10 +163,10 @@ namespace MJava
             VecExprASTPtr parameters;
             while (!validateToken(TokenValue::RPAREN, true))
             {
-                ExprASTPtr currentASTPtr = parseMethodParameter();
-                if (currentASTPtr != nullptr)
+                ExprASTPtr parameter = parseMethodParameter();
+                if (parameter != nullptr)
                 {
-                    parameters.push_back(currentASTPtr);
+                    parameters.push_back(parameter);
                 }
             }
 
@@ -209,10 +212,10 @@ namespace MJava
             VecExprASTPtr parameters;
             while (!validateToken(TokenValue::RPAREN, true))
             {
-                ExprASTPtr currentASTPtr = parseMethodParameter();
-                if (currentASTPtr != nullptr)
+                ExprASTPtr parameter = parseMethodParameter();
+                if (parameter != nullptr)
                 {
-                    parameters.push_back(currentASTPtr);
+                    parameters.push_back(parameter);
                 }
             }
 
@@ -275,8 +278,6 @@ namespace MJava
     
     ExprASTPtr Parser::parseMethodCallStatement(Token token)
     {
-        // TokenLocation loc = token.getTokenLocation();
-
         scanner_.getNextToken();
 
         VecExprASTPtr args;
@@ -345,8 +346,8 @@ namespace MJava
             return nullptr;
         }
 
-        ExprASTPtr currentASTPtr = parseExpression();
-        if (currentASTPtr == nullptr)
+        ExprASTPtr printStatement = parseExpression();
+        if (printStatement == nullptr)
         {
             return nullptr;
         }
@@ -361,7 +362,7 @@ namespace MJava
             return nullptr;
         }
 
-        return new PrintStatementAST(loc, currentASTPtr);
+        return new PrintStatementAST(loc, printStatement);
     }
 
     ExprASTPtr Parser::parseReturnStatement()
@@ -373,13 +374,13 @@ namespace MJava
             return nullptr;
         }
 
-        ExprASTPtr currentASTPtr = parseExpression();
-        if (currentASTPtr == nullptr)
+        ExprASTPtr returnStatement = parseExpression();
+        if (returnStatement == nullptr)
         {
             return nullptr;
         }
 
-        return new ReturnStatementAST(loc, currentASTPtr);
+        return new ReturnStatementAST(loc, returnStatement);
     }
 
     ExprASTPtr Parser::parseNewStatement()
@@ -509,6 +510,7 @@ namespace MJava
         ExprASTPtr currentASTPtr = parseBinOpRHS(0, lhs);
 
         validateToken(TokenValue::SEMICOLON, true);
+
         return currentASTPtr;
     }
 
@@ -646,18 +648,6 @@ namespace MJava
         return new BooleanAST(loc, boolean);
     }
 
-    Token Parser::parseToken(const Token& token)
-    {
-        if (token.getTokenType() == TokenType::IDENTIFIER)
-        {
-            // TODO:
-            // if this is a constant identifier, we will translate it to get its value.
-            // i.e. call XXXConstant::getValue() function.
-        }
-
-        return token;
-    }
-
     ExprASTPtr Parser::parseBinOpRHS(int precedence, ExprASTPtr lhs)
     {
         TokenLocation loc = scanner_.getToken().getTokenLocation();
@@ -673,6 +663,7 @@ namespace MJava
 
             std::string binOp = scanner_.getToken().getTokenName();
             scanner_.getNextToken();
+
             ExprASTPtr rhs = parsePrimary();
 
             if (rhs == nullptr)
@@ -816,15 +807,6 @@ namespace MJava
         return new IfStatementAST(loc, condition, thenPart, elsePart);
     }
 
-    // 6.8.3.9 For-statements
-    // for-statement = 'for' control-variable ':=' initial-value ( 'to' | 'downto' )
-    //                  final-value 'do' statement
-    //
-    // control-variable = entire-variable
-    // initial-value = expression
-    // fi nal-value = expression
-
-    // for v := e1 to | downto e2 do body
     // ExprASTPtr Parser::parseForStatement()
     // {
     //     TokenLocation loc = scanner_.getToken().getTokenLocation();

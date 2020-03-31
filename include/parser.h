@@ -15,9 +15,6 @@
 
 namespace MJava
 {
-    // others XXXPtr* such as ExprASTPtr) are located in the ast.h
-    // using ConstantDeclPtr = std::unique_ptr <Constant>;
-
     class Parser
     {
     public:
@@ -28,17 +25,12 @@ namespace MJava
         std::string             toString();
 
     private:
-        // parseExpression, parseBinOpRHS and parseUnaryOp,
-        // parseIdentifierExpression, parseParenExpression functions are just like 
-        // llvm kaleidoscope tutorial 02
-        // see the link: http://llvm.org/docs/tutorial/LangImpl2.html
         ExprASTPtr              parseExpression();
         ExprASTPtr              parseBinOpRHS(int precedence, ExprASTPtr lhs);
         ExprASTPtr              parseUnaryOp();
         ExprASTPtr              parseIdentifierExpression();
         ExprASTPtr              parseParenExpression();
         ExprASTPtr              parseClass();
-        // BlockASTPtr             parseClassBody();
         ExprASTPtr              parseBlockOrStatement();
         ExprASTPtr              parsePrimary();
         ExprASTPtr              parseReturnStatement();
@@ -68,8 +60,6 @@ namespace MJava
         // I/O routines
         ExprASTPtr              parsePrintStatement();
 
-        // Type
-        Token                   parseToken(const Token& token);
         // TODO:
         // ........... many types related ............
 
