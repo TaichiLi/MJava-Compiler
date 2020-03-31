@@ -1,7 +1,7 @@
 // THIS FILE IS PART OF MJava-Compiler PROJECT
-// ast.h - ast
+// ast.h - abstract syntax tree
  
-// Created by Li Taiji 2020-03-18
+// Created by Li Taiji 2020-03-28
 // Copyright (c) 2020 Li Taiji All rights reserved
 
 #ifndef AST_H_
@@ -14,36 +14,17 @@
 
 namespace MJava
 {
-    // this is very like llvm kaleidoscope tutorial 02
-    // in fact, the prototype is also from there, but it
-    // will become different as the project become complex.
-    // but now, it will be simple as the tutorial.
-    // additionally, I just leave empty implementation when
-    // I implement parser part.
-    // see the link: http://llvm.org/docs/tutorial/LangImpl2.html
-    
-    // base class. I will consider to use llvm style rtti rather than C++ standard rtti
-    // to intereact with LLVM API more smoothly. (MAYBE, not decided now.)
-    // see the link: http://llvm.org/docs/HowToSetUpLLVMStyleRTTI.html
-
     class ExprAST;
     class ClassAST;
-    class VariableAST;
-    class BlockAST;
 
     using VecExprASTPtr = std::vector <ExprAST*>;
     using ExprASTPtr = ExprAST*;
-    using ClassASTPtr = ClassAST*;
-    using VarExprASTPtr = VariableAST*;
-    using BlockASTPtr = BlockAST*;
-
-
 
     class ExprAST
     {
     public:
         ExprAST(const TokenLocation& loc);
-        //virtual       ~ExprAST() = default;
+        virtual       ~ExprAST() = default;
         TokenLocation getLocation() const;
         virtual std::string toString() const;
 

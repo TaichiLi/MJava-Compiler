@@ -1,5 +1,5 @@
 // THIS FILE IS PART OF MJava-Compiler PROJECT
-// dicitonary.h - dicitonary
+// dicitonary.h - dicitonary of keywords, operators and symbols
  
 // Created by Li Taiji 2020-03-18
 // Copyright (c) 2020 Li Taiji All rights reserved

@@ -1,3 +1,9 @@
+// THIS FILE IS PART OF MJava-Compiler PROJECT
+// parser.cpp - parser
+ 
+// Created by Li Taiji 2020-03-28
+// Copyright (c) 2020 Li Taiji All rights reserved
+
 #include <memory>
 #include "parser.h"
 #include "error.h"
@@ -71,7 +77,7 @@ namespace MJava
         }
     }
 
-    ClassASTPtr Parser::parseClass()
+    ExprASTPtr Parser::parseClass()
     {
         TokenLocation loc = scanner_.getToken().getTokenLocation();
 
@@ -119,30 +125,6 @@ namespace MJava
         {
             return new ClassAST(loc, className, isBaseClass, classBody);
         }   
-    }
-
-    BlockASTPtr Parser::parseClassBody()
-    {
-        TokenLocation loc = scanner_.getToken().getTokenLocation();
-
-        if (!expectToken(TokenValue::LBRACE, "{", true))
-        {
-            return nullptr;
-        }
-
-        VecExprASTPtr stmts;
-
-        while (!validateToken(TokenValue::RBRACE, false))
-        {
-            auto currentASTPtr = parseExpression();
-            if (currentASTPtr != nullptr)
-            {
-                stmts.push_back(currentASTPtr);
-            }
-        }
-        scanner_.getNextToken();
-
-        return new BlockAST(loc, stmts);
     }
 
     ExprASTPtr Parser::parseMethodDeclaration()
@@ -728,12 +710,6 @@ namespace MJava
             return nullptr;
         }
         return new UnaryOpExpressionAST(loc, unaryOp, currentASTPtr);
-    }
-
-    ExprASTPtr Parser::parseArrayIndex(MJava::Token)
-    {
-        assert(0 && "I have not implemented parseIfStatement.");
-        return nullptr;   
     }
 
     ExprASTPtr Parser::parseParenExpression()

@@ -1,7 +1,7 @@
 // THIS FILE IS PART OF MJava-Compiler PROJECT
-// ast.cpp - ast
+// ast.cpp - Abstract syntax tree
  
-// Created by Li Taiji 2020-03-18
+// Created by Li Taiji 2020-03-28
 // Copyright (c) 2020 Li Taiji All rights reserved
 
 #include "ast.h"

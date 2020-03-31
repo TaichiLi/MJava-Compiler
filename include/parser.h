@@ -1,3 +1,9 @@
+// THIS FILE IS PART OF MJava-Compiler PROJECT
+// parser.h - parser
+ 
+// Created by Li Taiji 2020-03-28
+// Copyright (c) 2020 Li Taiji All rights reserved
+
 #ifndef PARSER_H_
 #define PARSER_H_
 
@@ -31,11 +37,10 @@ namespace MJava
         ExprASTPtr              parseUnaryOp();
         ExprASTPtr              parseIdentifierExpression();
         ExprASTPtr              parseParenExpression();
-        ClassASTPtr             parseClass();
-        BlockASTPtr             parseClassBody();
+        ExprASTPtr              parseClass();
+        // BlockASTPtr             parseClassBody();
         ExprASTPtr              parseBlockOrStatement();
         ExprASTPtr              parsePrimary();
-        ExprASTPtr              parseArrayIndex(Token token);
         ExprASTPtr              parseReturnStatement();
         ExprASTPtr              parseLengthStatement();
         ExprASTPtr              parseNewStatement();
