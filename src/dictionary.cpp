@@ -16,7 +16,8 @@ namespace MJava
         addToken("-",                   std::make_tuple(TokenValue::SUB,               TokenType::OPERATOR, 10));
         addToken("*",                   std::make_tuple(TokenValue::MULTI,             TokenType::OPERATOR, 20));
         addToken("&&",                  std::make_tuple(TokenValue::AND,               TokenType::OPERATOR, 20));
-        addToken("!",                   std::make_tuple(TokenValue::NOT,               TokenType::OPERATOR,  40));
+        addToken("!",                   std::make_tuple(TokenValue::NOT,               TokenType::OPERATOR, 40));
+        addToken(".",                   std::make_tuple(TokenValue::DOT,               TokenType::OPERATOR, 60));
         addToken("(",                   std::make_tuple(TokenValue::LPAREN,            TokenType::DELIMITER, -1));
         addToken(")",                   std::make_tuple(TokenValue::RPAREN,            TokenType::DELIMITER, -1));
         addToken("[",                   std::make_tuple(TokenValue::LBRACK,            TokenType::DELIMITER, -1));
@@ -25,7 +26,6 @@ namespace MJava
         addToken("}",                   std::make_tuple(TokenValue::RBRACE,            TokenType::DELIMITER, -1));
         addToken(",",                   std::make_tuple(TokenValue::COMMA,             TokenType::DELIMITER, -1));
         addToken(";",                   std::make_tuple(TokenValue::SEMICOLON,         TokenType::DELIMITER, -1));
-        addToken(".",                   std::make_tuple(TokenValue::DOT,               TokenType::DELIMITER, -1));
         addToken("class",               std::make_tuple(TokenValue::CLASS,             TokenType::KEYWORD,  -1));
         addToken("public",              std::make_tuple(TokenValue::PUBLIC,            TokenType::KEYWORD,  -1));
         addToken("static",              std::make_tuple(TokenValue::STATIC,            TokenType::KEYWORD,  -1));

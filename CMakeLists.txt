@@ -13,6 +13,8 @@ add_executable(${PROJECT_NAME}
                src/error.cpp
                src/dictionary.cpp
                src/token.cpp
+               src/ast.cpp
+               src/parser.cpp
 )
 
 # 添加头文件目录

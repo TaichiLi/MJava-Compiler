@@ -488,6 +488,23 @@ namespace MJava
             getNextChar();
         }
         // end while. currentChar_ is not alpha, number and _.
+        std::string copy = buffer_;
+        if (buffer_ == "System")
+        {
+            int length = 12;
+            std::streampos index = input_.tellg();
+            while (length > 0)
+            {
+                addToBuffer(currentChar_);
+                getNextChar();
+                --length;
+            }
+            if (buffer_ != "System.out.println")
+            {
+                buffer_ = copy;
+                input_.seekg(index);
+            }
+        }
 
         // use dictionary to judge it is keyword or not
         auto tokenMeta = dictionary_.lookup(buffer_);

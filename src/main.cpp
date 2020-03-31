@@ -7,6 +7,7 @@
 #include <fstream>
 #include <string>
 #include "scanner.h"
+#include "parser.h"
 
 int main(int argc,char** argv)
 {
@@ -32,10 +33,13 @@ int main(int argc,char** argv)
             return 0;
         }
         MJava::Scanner scanner = MJava::Scanner(argv[1]);
-        while(scanner.getToken().getTokenType() != MJava::TokenType::END_OF_FILE)
-        {
-            of << scanner.getNextToken().toString() << std::endl;;
-        }
+        MJava::Parser parser = MJava::Parser(scanner);
+        parser.parse();
+        std::cout << parser.toString() << std::endl;
+        // while(scanner.getToken().getTokenType() != MJava::TokenType::END_OF_FILE)
+        // {
+        //     of << scanner.getNextToken().toString() << std::endl;
+        // }
         of.close();
     }
     std::ofstream of;
@@ -46,10 +50,13 @@ int main(int argc,char** argv)
         return 0;
     }
     MJava::Scanner scanner = MJava::Scanner(argv[1]);
-    while(scanner.getToken().getTokenType() != MJava::TokenType::END_OF_FILE)
-    {
-        of << scanner.getNextToken().toString() << std::endl;
-    }
+    MJava::Parser parser = MJava::Parser(scanner);
+    parser.parse();
+    std::cout << parser.toString() << std::endl;
+    // while(scanner.getToken().getTokenType() != MJava::TokenType::END_OF_FILE)
+    // {
+    //     of << scanner.getNextToken().toString() << std::endl;
+    // }
     of.close();
     return 0;
 }

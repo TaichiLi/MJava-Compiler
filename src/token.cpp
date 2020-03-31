@@ -117,7 +117,7 @@ namespace MJava
 
     std::string Token::toString() const
     {
-        return std::string("Token Type:\t " + tokenTypeDescription() + "\t" + "Token Name:\t" + name_);
+        return std::string(location_.toString() + " Token Type:\t " + tokenTypeDescription() + "\t" + "Token Name:\t" + name_);
     }
 
     void Token::dump(std::ostream& out /* = std::cout */) const

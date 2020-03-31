@@ -7,6 +7,7 @@
 #include <iostream>
 #include "error.h"
 #include "scanner.h"
+#include "parser.h"
 
 namespace MJava
 {
@@ -16,9 +17,9 @@ namespace MJava
         Scanner::setErrorFlag(true);
     }
 
-    // void errorSyntax(const std::string& msg)
-    // {
-    //     std::cerr << "Syntax Error: " << msg << std::endl;
-    //     Parser::setErrorFlag(true);
-    // }
+    void errorSyntax(const std::string& msg)
+    {
+        std::cerr << "Syntax Error: " << msg << std::endl;
+        Parser::setErrorFlag(true);
+    }
 }
