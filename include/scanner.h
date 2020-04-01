@@ -31,15 +31,15 @@ namespace MJava
         void            reduceBuffer();
 
         void            makeToken(TokenType tt, TokenValue tv,
-                                  const TokenLocation& loc, std::string name, int symbolPrecedence);
+                                  const TokenLocation& loc, const std::string& name, int symbolPrecedence);
 
         void            makeToken(TokenType tt, TokenValue tv,
-                                  const TokenLocation& loc, long intValue, std::string name);
+                                  const TokenLocation& loc, long intValue, const std::string& name);
 
         void            makeToken(TokenType tt, TokenValue tv,
-                                  const TokenLocation& loc, double realValue, std::string name);
+                                  const TokenLocation& loc, double realValue, const std::string& name);
         void            makeToken(TokenType tt, TokenValue tv,
-                                  const TokenLocation& loc, const std::string& strVale, std::string name);
+                                  const TokenLocation& loc, const std::string& strVale, const std::string& name);
 
         void            handleEOFState();
         void            handleIdentifierState();

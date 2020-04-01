@@ -12,7 +12,7 @@
 class JSONFormatter
 {
 public:
-    static std::string format(const std::string &JSONString);
+    static std::string format(const std::string& JSONString);
     
 private: 
     static std::string getSpaceOrTab(int tabNum);

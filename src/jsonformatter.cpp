@@ -17,7 +17,7 @@ std::string JSONFormatter::getSpaceOrTab(int tabNum)
     return tab.str();
 }
 
-std::string JSONFormatter::format(const std::string &JSONString)
+std::string JSONFormatter::format(const std::string& JSONString)
 {
     int tabNum = 0;
     std::ostringstream FormattedJSON;

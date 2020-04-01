@@ -54,8 +54,8 @@ namespace MJava
         // declaration / definition contains procedure and function.
         ExprASTPtr              parseMethodDeclaration();
         ExprASTPtr              parseVariableDeclaration();
-        ExprASTPtr              parseVariableDeclaration(const Token &token);
-        ExprASTPtr              parseMethodCallStatement(const Token &token);
+        ExprASTPtr              parseVariableDeclaration(Token token);
+        ExprASTPtr              parseMethodCallStatement(Token token);
         ExprASTPtr              parseMethodParameter();
 
         // I/O routines

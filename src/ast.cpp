@@ -43,11 +43,11 @@ namespace MJava
         return str.str();
     }
 
-    ClassAST::ClassAST(const TokenLocation &loc, const std::string &className, bool isBaseClass, const std::string &baseClassName, ExprASTPtr classBody)
+    ClassAST::ClassAST(const TokenLocation& loc, const std::string& className, bool isBaseClass, const std::string& baseClassName, ExprASTPtr classBody)
         : ExprAST(loc), className_(className), isBaseClass_(isBaseClass), baseClassName_(baseClassName), classBody_(classBody)
     {}
 
-    ClassAST::ClassAST(const TokenLocation &loc, const std::string &className, bool isBaseClass, ExprASTPtr classBody)
+    ClassAST::ClassAST(const TokenLocation& loc, const std::string& className, bool isBaseClass, ExprASTPtr classBody)
         : ExprAST(loc), className_(className), isBaseClass_(isBaseClass), classBody_(classBody)
     {}
 
@@ -63,7 +63,7 @@ namespace MJava
         }   
     }
 
-    VariableDeclarationAST::VariableDeclarationAST(const TokenLocation &loc, const std::string &type, const std::string &name)
+    VariableDeclarationAST::VariableDeclarationAST(const TokenLocation& loc, const std::string& type, const std::string& name)
         : ExprAST(loc), type_(type), name_(name)
     {}
 
@@ -72,7 +72,7 @@ namespace MJava
         return std::string("{\n\"type\": \"VarDeclaration\",\n\"variable type\": \"" + type_ + "\",\n\"variable name\": \"" + name_ + "\"\n}");
     }
 
-    VariableAST::VariableAST(const TokenLocation &loc, const std::string &name, ExprASTPtr index)
+    VariableAST::VariableAST(const TokenLocation& loc, const std::string& name, ExprASTPtr index)
         : ExprAST(loc), name_(name), index_(index)
     {}
 
@@ -88,7 +88,7 @@ namespace MJava
         }   
     }
 
-    MethodDeclarationAST::MethodDeclarationAST(const TokenLocation &loc, const std::string &returnType, const std::string &name, VecExprASTPtr parameters, ExprASTPtr body)
+    MethodDeclarationAST::MethodDeclarationAST(const TokenLocation& loc, const std::string& returnType, const std::string& name, VecExprASTPtr parameters, ExprASTPtr body)
         : ExprAST(loc), returnType_(returnType), name_(name), parameters_(std::move(parameters)), body_(body)
     {}
     
@@ -109,7 +109,7 @@ namespace MJava
         return str.str();
     }
 
-    MethodCallAST::MethodCallAST(const TokenLocation &loc, const std::string &name, VecExprASTPtr parameters)
+    MethodCallAST::MethodCallAST(const TokenLocation& loc, const std::string& name, VecExprASTPtr parameters)
         : ExprAST(loc), name_(name), parameters_(std::move(parameters))
     {}
 
@@ -148,7 +148,7 @@ namespace MJava
         return std::string("{\n\"type\": \"WhileStatement\",\n\"condition\": " + condition_->toString() + ",\n\"body\": [" + body_->toString() + "]\n}");
     }
 
-    ForStatementAST::ForStatementAST(const TokenLocation &loc, ExprASTPtr variable, ExprASTPtr condition, ExprASTPtr action, ExprASTPtr body)
+    ForStatementAST::ForStatementAST(const TokenLocation& loc, ExprASTPtr variable, ExprASTPtr condition, ExprASTPtr action, ExprASTPtr body)
         : ExprAST(loc), variable_(variable), condition_(condition), action_(action), body_(body)
     {}
 
@@ -166,7 +166,7 @@ namespace MJava
         return std::string("{\n\"type\": \"ReturnStatement\",\n\"expression\" :" + returnStatement_->toString() + "\n}");
     }
 
-    BinaryOpExpressionAST::BinaryOpExpressionAST(const TokenLocation& loc, const std::string &binaryOp, ExprASTPtr lhs, ExprASTPtr rhs)
+    BinaryOpExpressionAST::BinaryOpExpressionAST(const TokenLocation& loc, const std::string& binaryOp, ExprASTPtr lhs, ExprASTPtr rhs)
         : ExprAST(loc), binaryOp_(binaryOp), lhs_(lhs), rhs_(rhs)
     {}
 
@@ -175,7 +175,7 @@ namespace MJava
         return std::string("{\n\"type\": \"BinaryOpExpression\",\n\"binary operator\": \"" + binaryOp_ + "\",\n\"lhs\": " + lhs_->toString() + ",\n\"rhs\": " + rhs_->toString() + "\n}");
     }
 
-    UnaryOpExpressionAST::UnaryOpExpressionAST(const TokenLocation& loc, const std::string &unaryOp, ExprASTPtr expression)
+    UnaryOpExpressionAST::UnaryOpExpressionAST(const TokenLocation& loc, const std::string& unaryOp, ExprASTPtr expression)
         : ExprAST(loc), unaryOp_(unaryOp), expression_(expression)
     {}
 
@@ -219,7 +219,7 @@ namespace MJava
         return std::string("{\n\"type\": \"PrintStatement\",\n\"expression\": " + printStatement_->toString() + "\n}");
     }
 
-    NewStatementAST::NewStatementAST(const TokenLocation& loc, const std::string &type, ExprASTPtr length)
+    NewStatementAST::NewStatementAST(const TokenLocation& loc, const std::string& type, ExprASTPtr length)
         : ExprAST(loc), type_(type), length_(length)
     {}
 

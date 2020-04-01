@@ -103,13 +103,13 @@ namespace MJava
       public:
         Token();
         Token(TokenType type, TokenValue value, const TokenLocation& location,
-              std::string name, int symbolPrecedence);
+              const std::string& name, int symbolPrecedence);
         Token(TokenType type, TokenValue value, const TokenLocation& location,
-              const std::string& strValue, std::string name);
+              const std::string& strValue, const std::string& name);
         Token(TokenType type, TokenValue value, const TokenLocation& location,
-              long intValue, std::string name);
+              long intValue, const std::string& name);
         Token(TokenType type, TokenValue value, const TokenLocation& location,
-              double realValue, std::string name);
+              double realValue, const std::string& name);
 
         // get token information
         TokenType getTokenType() const;

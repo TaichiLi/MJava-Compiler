@@ -63,33 +63,33 @@ namespace MJava
 
 
     void Scanner::makeToken(TokenType tt, TokenValue tv,
-                            const TokenLocation& loc, std::string name, int symbolPrecedence)
+                            const TokenLocation& loc, const std::string& name, int symbolPrecedence)
     {
-        token_ = Token(tt, tv, loc, std::move(name), symbolPrecedence);
+        token_ = Token(tt, tv, loc, name, symbolPrecedence);
         buffer_.clear();
         state_ = State::NONE;
     }
 
     void Scanner::makeToken(TokenType tt, TokenValue tv,
-                            const TokenLocation& loc, long intValue, std::string name)
+                            const TokenLocation& loc, long intValue, const std::string& name)
     {
-        token_ = Token(tt, tv, loc, intValue, std::move(name));
+        token_ = Token(tt, tv, loc, intValue, name);
         buffer_.clear();
         state_ = State::NONE;
     }
 
     void Scanner::makeToken(TokenType tt, TokenValue tv,
-                            const TokenLocation& loc, double realValue, std::string name)
+                            const TokenLocation& loc, double realValue, const std::string& name)
     {
-        token_ = Token(tt, tv, loc, realValue, std::move(name));
+        token_ = Token(tt, tv, loc, realValue, name);
         buffer_.clear();
         state_ = State::NONE;
     }
 
     void Scanner::makeToken(TokenType tt, TokenValue tv,
-                            const TokenLocation& loc, const std::string& strValue, std::string name)
+                            const TokenLocation& loc, const std::string& strValue, const std::string& name)
     {
-        token_ = Token(tt, tv, loc, strValue, std::move(name));
+        token_ = Token(tt, tv, loc, strValue, name);
         buffer_.clear();
         state_ = State::NONE;
     }

@@ -31,27 +31,27 @@ namespace MJava
     {}
 
     Token::Token(TokenType type, TokenValue value, const TokenLocation& location,
-                 std::string name, int symbolPrecedence)
-        : type_(type), value_(value), location_(location), name_(std::move(name)),
+                 const std::string& name, int symbolPrecedence)
+        : type_(type), value_(value), location_(location), name_(name),
           symbolPrecedence_(symbolPrecedence)
     {}
 
     Token::Token(TokenType type, TokenValue value, const TokenLocation& location,
-                 const std::string& strValue, std::string name)
+                 const std::string& strValue, const std::string& name)
         : type_(type), value_(value), location_(location),
-          name_(std::move(name)), symbolPrecedence_(-1), strValue_(strValue)
+          name_(name), symbolPrecedence_(-1), strValue_(strValue)
     {}
 
     Token::Token(TokenType type, TokenValue value, const TokenLocation& location,
-                 long intValue, std::string name)
+                 long intValue, const std::string& name)
         : type_(type), value_(value), location_(location),
-          name_(std::move(name)), symbolPrecedence_(-1), intValue_(intValue)
+          name_(name), symbolPrecedence_(-1), intValue_(intValue)
     {}
 
     Token::Token(TokenType type, TokenValue value, const TokenLocation& location,
-                 double realValue, std::string name)
+                 double realValue, const std::string& name)
         : type_(type), value_(value), location_(location),
-          name_(std::move(name)), symbolPrecedence_(-1), realValue_(realValue)
+          name_(name), symbolPrecedence_(-1), realValue_(realValue)
     {}
 
     std::string Token::tokenTypeDescription() const
