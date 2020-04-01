@@ -49,6 +49,7 @@ namespace MJava
         // note: assignment statement implementation will be included parseStatement.
         ExprASTPtr              parseIfStatement();
         ExprASTPtr              parseWhileStatement();
+        ExprASTPtr              parseForStatement();
 
         // declaration / definition contains procedure and function.
         ExprASTPtr              parseMethodDeclaration();

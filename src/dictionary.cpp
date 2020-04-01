@@ -36,6 +36,7 @@ namespace MJava
         addToken("if",                  std::make_tuple(TokenValue::IF,                TokenType::KEYWORD,  -1));
         addToken("else",                std::make_tuple(TokenValue::ELSE,              TokenType::KEYWORD,  -1));
         addToken("while",               std::make_tuple(TokenValue::WHILE,             TokenType::KEYWORD,  -1));
+        addToken("for",                 std::make_tuple(TokenValue::FOR,               TokenType::KEYWORD,  -1));
         addToken("System.out.println",  std::make_tuple(TokenValue::PRINT,             TokenType::KEYWORD,  -1));
         addToken("length",              std::make_tuple(TokenValue::LENGTH,            TokenType::KEYWORD,  -1));
         addToken("this",                std::make_tuple(TokenValue::THIS,              TokenType::KEYWORD,  -1));

@@ -5,7 +5,11 @@
 // Copyright (c) 2020 Li Taiji All rights reserved
 
 #include "error.h"
-#include "parser.h"
+
+#if defined(PARSER)
+    #include "parser.h"
+#endif
+
 #include "scanner.h"
 #include <iostream>
 

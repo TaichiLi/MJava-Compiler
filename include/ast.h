@@ -125,6 +125,19 @@ namespace MJava
         ExprASTPtr          body_;
     };
 
+    class ForStatementAST : public ExprAST
+    {
+    public:
+        ForStatementAST(const TokenLocation& loc, ExprASTPtr variable, ExprASTPtr condition, ExprASTPtr action, ExprASTPtr body);
+        std::string toString() const;
+
+    private:
+        ExprASTPtr          variable_;
+        ExprASTPtr          condition_;
+        ExprASTPtr          action_;
+        ExprASTPtr          body_;
+    };
+    
     class ReturnStatementAST : public ExprAST
     {
     public:

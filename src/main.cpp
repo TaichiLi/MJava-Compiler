@@ -4,7 +4,10 @@
 // Created by Li Taiji 2020-03-18
 // Copyright (c) 2020 Li Taiji All rights reserved
 
-#include "parser.h"
+#if defined(PARSER)
+    #include "parser.h"
+#endif
+
 #include "scanner.h"
 #include <fstream>
 #include <iostream>
@@ -39,11 +42,14 @@ int main(int argc,char** argv)
         {
             of << scanner.getNextToken().toString() << std::endl;;
         }
-#else
+#endif
+
+#if defined(PARSER)
         MJava::Parser parser = MJava::Parser(scanner);
         parser.parse();
         of << parser.toString() << std::endl;
 #endif
+
         of.close();
     }
     else
@@ -56,16 +62,20 @@ int main(int argc,char** argv)
             return 0;
         }
         MJava::Scanner scanner = MJava::Scanner(argv[1]);
+
 #if defined(LEXER)
         while(scanner.getToken().getTokenType() != MJava::TokenType::END_OF_FILE)
         {
             of << scanner.getNextToken().toString() << std::endl;;
         }
-#else
+#endif
+
+#if defined(PARSER)
         MJava::Parser parser = MJava::Parser(scanner);
         parser.parse();
         of << parser.toString() << std::endl;
 #endif
+
         of.close();
     }
     return 0;

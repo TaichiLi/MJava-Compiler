@@ -5,6 +5,8 @@
 // Copyright (c) 2020 Li Taiji All rights reserved
 
 #include "ast.h"
+#include <sstream>
+#include <string>
 
 namespace MJava
 {
@@ -19,7 +21,7 @@ namespace MJava
     
     std::string ExprAST::toString() const
     {
-        return std::string(getLocation().toString());
+        return getLocation().toString();
     }
 
     BlockAST::BlockAST(const TokenLocation& loc, VecExprASTPtr body)
@@ -28,17 +30,17 @@ namespace MJava
 
     std::string BlockAST::toString() const
     {
-        std::string str;
+        std::ostringstream str;
         size_t size = body_.size();
         if (size > 0)
         {
             for (size_t i = 0; i < size - 1; i++)
             {
-                str += body_[i]->toString() + ",\n";
+                str << body_[i]->toString() << ",\n";
             }
-            str += body_[size - 1]->toString() + "\n";
-        }    
-        return str;
+            str << body_[size - 1]->toString() << "\n";
+        }
+        return str.str();
     }
 
     ClassAST::ClassAST(const TokenLocation &loc, const std::string &className, bool isBaseClass, const std::string &baseClassName, ExprASTPtr classBody)
@@ -53,13 +55,11 @@ namespace MJava
     {
         if (isBaseClass_)
         {
-            std::string str = "{\n\"type\": \"ClassDeclaration\",\n\"class name\": \"" + className_ + "\",\n\"base class\": \"" + baseClassName_ + "\",\n\"body\": [" + classBody_->toString() + "]\n}";
-            return str;
+            return std::string("{\n\"type\": \"ClassDeclaration\",\n\"class name\": \"" + className_ + "\",\n\"base class\": \"" + baseClassName_ + "\",\n\"body\": [" + classBody_->toString() + "]\n}");
         }
         else
         {
-            std::string str = "{\n\"type\": \"ClassDeclaration\",\n\"class name\": \"" + className_ + "\",\n\"body\": [" + classBody_->toString() + "]\n}";
-            return str;
+            return std::string("{\n\"type\": \"ClassDeclaration\",\n\"class name\": \"" + className_ + "\",\n\"body\": [" + classBody_->toString() + "]\n}");
         }   
     }
 
@@ -94,17 +94,19 @@ namespace MJava
     
     std::string MethodDeclarationAST::toString() const
     {
-        std::string str;
+        std::ostringstream str;
+        str << "{\n\"type\": \"MethodDeclaration\",\n\"return type\": \"" << returnType_ << "\",\n\"method name\": \"" << name_ << "\",\n\"parameters\": [";
         size_t size = parameters_.size();
         if (size > 0)
         {
             for (size_t i = 0; i < size - 1; i++)
             {
-                str += parameters_[i]->toString() + ",\n";
+                str << parameters_[i]->toString() << ",\n";
             }
-            str += parameters_[size - 1]->toString() + "\n";
+            str << parameters_[size - 1]->toString() << "\n";
         }
-        return std::string("{\n\"type\": \"MethodDeclaration\",\n\"return type\": \"" + returnType_ + "\",\n\"method name\": \"" + name_ + "\",\n\"parameters\": [" + str + "],\n\"body\": [" + body_->toString() + "]\n}");
+        str << "],\n\"body\": [" << body_->toString() << "]\n}";
+        return str.str();
     }
 
     MethodCallAST::MethodCallAST(const TokenLocation &loc, const std::string &name, VecExprASTPtr parameters)
@@ -113,17 +115,19 @@ namespace MJava
 
     std::string MethodCallAST::toString() const
     {
-        std::string str;
+        std::ostringstream str;
+        str << "{\n\"type\": \"MethodCall\",\n\"method name\": \"" << name_ << "\",\n\"parameters\": [";
         size_t size = parameters_.size();
         if (size > 0)
         {
             for (size_t i = 0; i < size - 1; i++)
             {
-                str += parameters_[i]->toString() + ",\n";
+                str << parameters_[i]->toString() << ",\n";
             }
-            str += parameters_[size - 1]->toString() + "\n";
+            str << parameters_[size - 1]->toString() << "\n";
         }
-        return std::string("{\n\"type\": \"MethodCall\",\n\"method name\": \"" + name_ + "\",\n\"parameters\": [" + str + "]\n}");
+        str << "]\n}";
+        return str.str();
     }
 
     IfStatementAST::IfStatementAST(const TokenLocation& loc, ExprASTPtr condition, ExprASTPtr thenPart, ExprASTPtr elsePart)
@@ -142,6 +146,15 @@ namespace MJava
     std::string WhileStatementAST::toString() const
     {
         return std::string("{\n\"type\": \"WhileStatement\",\n\"condition\": " + condition_->toString() + ",\n\"body\": [" + body_->toString() + "]\n}");
+    }
+
+    ForStatementAST::ForStatementAST(const TokenLocation &loc, ExprASTPtr variable, ExprASTPtr condition, ExprASTPtr action, ExprASTPtr body)
+        : ExprAST(loc), variable_(variable), condition_(condition), action_(action), body_(body)
+    {}
+
+    std::string ForStatementAST::toString() const
+    {
+        return std::string("{\n\"type\": \"ForStatement\",\n\"variable\": " + variable_->toString() + ",\n\"condition\": " + condition_->toString() + ",\n\"action\": " + action_->toString() + ",\n\"body\": [" + body_->toString() + "]\n}");
     }
 
     ReturnStatementAST::ReturnStatementAST(const TokenLocation& loc, ExprASTPtr returnStatement)

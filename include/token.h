@@ -47,6 +47,7 @@ namespace MJava
         IF,
         ELSE,
         WHILE,
+        FOR,
         PRINT,
         LENGTH,
         THIS,

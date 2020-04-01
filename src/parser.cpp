@@ -553,12 +553,17 @@ namespace MJava
             case TokenValue::WHILE:
                 return parseWhileStatement();
 
+            case TokenValue::FOR:
+                return parseForStatement();
+
             case TokenValue::NEW:
                 return parseNewStatement();
 
             case TokenValue::NOT:
                 return parseUnaryOp();
 
+            case TokenValue::SEMICOLON:
+                return nullptr;
             default: 
             {
                 switch (scanner_.getToken().getTokenType())
@@ -578,8 +583,8 @@ namespace MJava
                         break;
                     }
                 }
-                errorReport("unknown token when expecting an expression");
-                std::cout <<  scanner_.getToken().getTokenName() << std::endl;
+                errorReport("unknown token when expecting an expression: " + scanner_.getToken().getTokenName());
+                scanner_.getNextToken();
                 return nullptr;
             }
         }
@@ -746,7 +751,8 @@ namespace MJava
             ExprASTPtr currentASTPtr = parseExpression();
             if (currentASTPtr == nullptr)
             {
-               return parseBlockOrStatement(); 
+                continue;
+                // return parseBlockOrStatement(); 
             }
 
             stmts.push_back(currentASTPtr);
@@ -812,75 +818,41 @@ namespace MJava
         return new IfStatementAST(loc, condition, thenPart, elsePart);
     }
 
-    // ExprASTPtr Parser::parseForStatement()
-    // {
-    //     TokenLocation loc = scanner_.getToken().getTokenLocation();
+    ExprASTPtr Parser::parseForStatement()
+    {
+        TokenLocation loc = scanner_.getToken().getTokenLocation();
 
-    //     if(!expectToken(TokenValue::FOR, "for", true))
-    //     {
-    //         return nullptr;
-    //     }
+        if(!expectToken(TokenValue::FOR, "for", true))
+        {
+            return nullptr;
+        }
 
-    //     if(!validateToken(TokenType::IDENTIFIER, false))
-    //     {
-    //         errorReport("For statement control varible expected identifier type but find " + scanner_.getToken().toString());
-    //         return nullptr;
-    //     }
+        if (!expectToken(TokenValue::LPAREN, "(", true))
+        {
+            return nullptr;
+        }
 
-    //     auto controlVariable = scanner_.getToken().getIdentifierName();
+        ExprASTPtr variable = parseExpression();
 
-    //     if(!expectToken(TokenValue::ASSIGN, ":=", true))
-    //     {
-    //         return nullptr;
-    //     }
+        ExprASTPtr condition = parseExpression();
 
-    //     auto startExpr = parseExpression();
+        ExprASTPtr action = parseExpression();
 
-    //     if(!startExpr)
-    //     {
-    //         return nullptr;
-    //     }
+        if (!expectToken(TokenValue::RPAREN, ")", true))
+        {
+            return nullptr;
+        }
 
-    //     bool downOrder = false;
+        ExprASTPtr body = parseBlockOrStatement();
 
-    //     if (validateToken(TokenValue::TO, false) ||
-    //         validateToken(TokenValue::DOWNTO, false))
-    //     {
-    //         if (scanner_.getToken().getTokenValue() == TokenValue::DOWNTO)
-    //         {
-    //             downOrder = true;
-    //         }
-    //         scanner_.getNextToken();
-    //     }
-    //     else
-    //     {
-    //         errorReport("Expected to / downto keyword, but find " + scanner_.getToken().toString());
-    //         return nullptr;
-    //     }
+        if(body == nullptr)
+        {
+            return nullptr;
+        }
 
-    //     auto endExpr = parseExpression();
+        return new ForStatementAST(loc, variable, condition, action, body);
 
-    //     if(!endExpr)
-    //     {
-    //         return nullptr;
-    //     }
-
-    //     if(!expectToken(TokenValue::DO, "do", true))
-    //     {
-    //         return nullptr;
-    //     }
-
-    //     auto body = parseBlockOrStatement();
-
-    //     if(!body)
-    //     {
-    //         return nullptr;
-    //     }
-
-    //     return std::make_unique<ForStatementAST>(loc, controlVariable,
-    //         std::move(startExpr), std::move(endExpr), downOrder, std::move(body));
-
-    // }
+    }
 
     ExprASTPtr Parser::parseWhileStatement()
     {
