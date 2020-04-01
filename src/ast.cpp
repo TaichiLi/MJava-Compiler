@@ -24,8 +24,8 @@ namespace MJava
         return getLocation().toString();
     }
 
-    BlockAST::BlockAST(const TokenLocation& loc, VecExprASTPtr body)
-        : ExprAST(loc), body_(std::move(body))
+    BlockAST::BlockAST(const TokenLocation& loc, const VecExprASTPtr& body)
+        : ExprAST(loc), body_(body)
     {}
 
     std::string BlockAST::toString() const
@@ -88,8 +88,8 @@ namespace MJava
         }   
     }
 
-    MethodDeclarationAST::MethodDeclarationAST(const TokenLocation& loc, const std::string& returnType, const std::string& name, VecExprASTPtr parameters, ExprASTPtr body)
-        : ExprAST(loc), returnType_(returnType), name_(name), parameters_(std::move(parameters)), body_(body)
+    MethodDeclarationAST::MethodDeclarationAST(const TokenLocation& loc, const std::string& returnType, const std::string& name, const VecExprASTPtr& parameters, ExprASTPtr body)
+        : ExprAST(loc), returnType_(returnType), name_(name), parameters_(parameters), body_(body)
     {}
     
     std::string MethodDeclarationAST::toString() const
@@ -109,8 +109,8 @@ namespace MJava
         return str.str();
     }
 
-    MethodCallAST::MethodCallAST(const TokenLocation& loc, const std::string& name, VecExprASTPtr parameters)
-        : ExprAST(loc), name_(name), parameters_(std::move(parameters))
+    MethodCallAST::MethodCallAST(const TokenLocation& loc, const std::string& name, const VecExprASTPtr& parameters)
+        : ExprAST(loc), name_(name), parameters_(parameters)
     {}
 
     std::string MethodCallAST::toString() const

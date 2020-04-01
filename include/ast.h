@@ -35,7 +35,7 @@ namespace MJava
     class BlockAST : public ExprAST
     {
     public:
-        BlockAST(const TokenLocation& loc, VecExprASTPtr body);
+        BlockAST(const TokenLocation& loc, const VecExprASTPtr& body);
         std::string toString() const;
 
     private:
@@ -59,7 +59,7 @@ namespace MJava
     class MethodDeclarationAST : public ExprAST
     {
     public:
-        MethodDeclarationAST(const TokenLocation& loc, const std::string& returnType, const std::string& name, VecExprASTPtr parameters, ExprASTPtr body);
+        MethodDeclarationAST(const TokenLocation& loc, const std::string& returnType, const std::string& name, const VecExprASTPtr& parameters, ExprASTPtr body);
         std::string toString() const;
 
     private:
@@ -72,7 +72,7 @@ namespace MJava
     class MethodCallAST : public ExprAST
     {
     public:
-        MethodCallAST(const TokenLocation& loc, const std::string& name, VecExprASTPtr parameters);
+        MethodCallAST(const TokenLocation& loc, const std::string& name, const VecExprASTPtr& parameters);
         std::string toString() const;
 
     private:
