@@ -51,7 +51,7 @@ namespace MJava
     void Dictionary::addToken(std::string name,
                               std::tuple<TokenValue, TokenType, int> tokenMeta)
     {
-        dictionary_.insert(std::pair<decltype(name), decltype(tokenMeta)>(name, tokenMeta));
+        dictionary_.insert(std::pair<decltype(name), decltype(tokenMeta)>(std::move(name), tokenMeta));
     }
 
     // if we can find it in the dictionary, we change the token type
@@ -83,4 +83,4 @@ namespace MJava
 
         return false;
     }
-}
+} // namespace MJava

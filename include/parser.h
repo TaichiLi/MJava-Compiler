@@ -83,6 +83,6 @@ namespace MJava
         return errorFlag_;
     }
 
-}
+} // namespace MJava
 
 #endif // parser.h

@@ -198,6 +198,6 @@ namespace MJava
         std::string         type_;
         ExprASTPtr          length_;
     };
-}
+} // namespace MJava
 
 #endif // ast.h

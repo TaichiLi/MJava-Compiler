@@ -198,6 +198,6 @@ namespace MJava
         assert(type_ == TokenType::IDENTIFIER && "Token type should be identifier.");
         return name_;
     }
-}
+} // namespace MJava
 
 #endif // token.h

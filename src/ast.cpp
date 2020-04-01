@@ -221,4 +221,4 @@ namespace MJava
             return std::string("{\n\"type\": \"NewStatement\",\n\"variable type\": \"" + type_ + "\"\n}");
         }   
     }
-}
+} // namespace MJava

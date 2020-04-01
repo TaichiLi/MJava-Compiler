@@ -27,6 +27,6 @@ namespace MJava
         // four token property: token name, token value, token type, precedence.
         std::map<std::string, std::tuple<TokenValue, TokenType, int>> dictionary_;
     };
-}
+} // namespace MJava
 
 #endif // dictionary.h

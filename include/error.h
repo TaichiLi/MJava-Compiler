@@ -14,6 +14,6 @@ namespace MJava
 {
     extern void errorToken(const std::string& msg);
     extern void errorSyntax(const std::string& msg);
-}
+} // namespace MJava
 
 #endif // error.h

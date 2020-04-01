@@ -99,6 +99,6 @@ namespace MJava
     {
         return TokenLocation(fileName_, line_, column_);
     }
-}
+} // namespace MJava
 
 #endif // scanner.h

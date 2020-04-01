@@ -1,13 +1,14 @@
 // THIS FILE IS PART OF MJava-Compiler PROJECT
-// main.cpp - The driver of the lexer
+// main.cpp - The driver of the parser
  
 // Created by Li Taiji 2020-03-18
 // Copyright (c) 2020 Li Taiji All rights reserved
 
-#include <fstream>
-#include <string>
-#include "scanner.h"
 #include "parser.h"
+#include "scanner.h"
+#include <fstream>
+#include <iostream>
+#include <string>
 
 int main(int argc,char** argv)
 {

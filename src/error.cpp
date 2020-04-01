@@ -4,10 +4,10 @@
 // Created by Li Taiji 2020-03-18
 // Copyright (c) 2020 Li Taiji All rights reserved
 
-#include <iostream>
 #include "error.h"
-#include "scanner.h"
 #include "parser.h"
+#include "scanner.h"
+#include <iostream>
 
 namespace MJava
 {
@@ -22,4 +22,4 @@ namespace MJava
         std::cerr << "Syntax Error: " << msg << std::endl;
         Parser::setErrorFlag(true);
     }
-}
+} // namespace MJava

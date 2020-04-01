@@ -4,11 +4,11 @@
 // Created by Li Taiji 2020-03-28
 // Copyright (c) 2020 Li Taiji All rights reserved
 
-#include <memory>
-#include <sstream>
-#include "parser.h"
 #include "error.h"
 #include "jsonformatter.h"
+#include "parser.h"
+#include <memory>
+#include <sstream>
 
 namespace MJava
 {
@@ -995,4 +995,4 @@ namespace MJava
     {
         errorSyntax(scanner_.getToken().getTokenLocation().toString() + msg);
     }
-}
+} // namespace MJava

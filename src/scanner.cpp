@@ -4,10 +4,10 @@
 // Created by Li Taiji 2020-03-18
 // Copyright (c) 2020 Li Taiji All rights reserved
 
-#include <algorithm>
-#include <cctype>
 #include "error.h"
 #include "scanner.h"
+#include <algorithm>
+#include <cctype>
 
 
 namespace MJava
@@ -637,4 +637,4 @@ namespace MJava
     {
         errorFlag_ = flag;
     }
-}
+} // namespace MJava
