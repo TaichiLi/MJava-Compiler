@@ -17,9 +17,12 @@ namespace MJava
         Scanner::setErrorFlag(true);
     }
 
+#if defined(PARSER)
     void errorSyntax(const std::string& msg)
     {
         std::cerr << "Syntax Error: " << msg << std::endl;
         Parser::setErrorFlag(true);
     }
+#endif
+
 } // namespace MJava

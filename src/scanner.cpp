@@ -373,7 +373,7 @@ namespace MJava
             else
             {
                 makeToken(TokenType::INTEGER, TokenValue::UNRESERVED, loc_,
-                    std::stol(buffer_, 0, numberBase), buffer_);
+                    std::stol(buffer_, nullptr, numberBase), buffer_);
             }
         }
         else
