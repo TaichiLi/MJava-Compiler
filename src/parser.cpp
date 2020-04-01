@@ -571,7 +571,12 @@ namespace MJava
                     case TokenType::INTEGER:
                     {
                         return parseIntegerExpression();
-                    } 
+                    }
+
+                    default:
+                    {
+                        break;
+                    }
                 }
                 errorReport("unknown token when expecting an expression");
                 std::cout <<  scanner_.getToken().getTokenName() << std::endl;
