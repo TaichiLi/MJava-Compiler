@@ -150,12 +150,12 @@ namespace MJava
     class UnaryOpExpressionAST : public ExprAST
     {
     public:
-        UnaryOpExpressionAST(const TokenLocation& loc, const std::string &unaryOp, ExprASTPtr expr);
+        UnaryOpExpressionAST(const TokenLocation& loc, const std::string &unaryOp, ExprASTPtr expression);
         std::string toString() const;
 
     private:
         std::string         unaryOp_;
-        ExprASTPtr          expr_;
+        ExprASTPtr          expression_;
     };
 
     class BooleanAST : public ExprAST

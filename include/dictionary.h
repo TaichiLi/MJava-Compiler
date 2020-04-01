@@ -21,7 +21,7 @@ namespace MJava
         std::tuple<TokenType, TokenValue, int> lookup(const std::string& name) const;
         bool haveToken(const std::string& name) const;
       private:
-        void addToken(const std::string &name, std::tuple<TokenValue, TokenType, int> tokenMeta);
+        void addToken(std::string name, std::tuple<TokenValue, TokenType, int> tokenMeta);
 
       private:
         // four token property: token name, token value, token type, precedence.

@@ -162,13 +162,13 @@ namespace MJava
         return std::string("{\n\"type\": \"BinaryOpExpression\",\n\"binary operator\": \"" + binaryOp_ + "\",\n\"lhs\": " + lhs_->toString() + ",\n\"rhs\": " + rhs_->toString() + "\n}");
     }
 
-    UnaryOpExpressionAST::UnaryOpExpressionAST(const TokenLocation& loc, const std::string &unaryOp, ExprASTPtr expr)
-        : ExprAST(loc), unaryOp_(unaryOp), expr_(expr)
+    UnaryOpExpressionAST::UnaryOpExpressionAST(const TokenLocation& loc, const std::string &unaryOp, ExprASTPtr expression)
+        : ExprAST(loc), unaryOp_(unaryOp), expression_(expression)
     {}
 
     std::string UnaryOpExpressionAST::toString() const
     {
-        return std::string("{\n\"type\": \"UnaryOpExpression\",\n\"unary operator\": \"" + unaryOp_ + "\",\n\"expression\": " + expr_->toString() + "\n}");
+        return std::string("{\n\"type\": \"UnaryOpExpression\",\n\"unary operator\": \"" + unaryOp_ + "\",\n\"expression\": " + expression_->toString() + "\n}");
     }
 
     BooleanAST::BooleanAST(const TokenLocation& loc, bool boolean)

@@ -106,7 +106,7 @@ namespace MJava
 
             handleLineComment();
             handleBlockComment();
-        } while (std::isspace(currentChar_));
+        } while (std::isspace(currentChar_) || currentChar_ == '/');
     }
 
     void Scanner::handleLineComment()
@@ -115,9 +115,9 @@ namespace MJava
 
         if (currentChar_ == '/' && peekChar() == '/')
         {
-            // currenChar is / and eat /, update currentChar_ to *
+            // currenChar is / and eat /, update currentChar_ to /
             getNextChar();
-            // currentChar is * and eat it, update currentChar_ to the next char.
+            // currentChar is / and eat it, update currentChar_ to the next char.
             getNextChar();
 
             while (currentChar_ != '\n' && !input_.eof())
