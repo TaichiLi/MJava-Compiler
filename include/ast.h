@@ -39,30 +39,29 @@ namespace MJava
         std::string toString() const;
 
     private:
-        VecExprASTPtr body_;
+        VecExprASTPtr       body_;
     };
 
-    class ClassAST : public ExprAST
+    class ClassDeclarationAST : public ExprAST
     {
     public:
-        ClassAST(const TokenLocation& loc, const std::string& className, bool isBaseClass, const std::string& baseClassName, ExprASTPtr classBody);
-        ClassAST(const TokenLocation& loc, const std::string& className, bool isBaseClass, ExprASTPtr classBody);
+        ClassDeclarationAST(const TokenLocation& loc, const std::string& className, const std::string& baseClassName, ExprASTPtr classBody);
         std::string toString() const;
 
     private:
-        std::string   className_;
-        bool          isBaseClass_;
-        std::string   baseClassName_;
-        ExprASTPtr    classBody_;
+        std::string         className_;
+        std::string         baseClassName_;
+        ExprASTPtr          classBody_;
     };
 
     class MethodDeclarationAST : public ExprAST
     {
     public:
-        MethodDeclarationAST(const TokenLocation& loc, const std::string& returnType, const std::string& name, const VecExprASTPtr& parameters, ExprASTPtr body);
+        MethodDeclarationAST(const TokenLocation& loc, const std::vector<std::string>& attributes, const std::string& returnType, const std::string& name, const VecExprASTPtr& parameters, ExprASTPtr body);
         std::string toString() const;
 
     private:
+        std::vector<std::string> attributes_;
         std::string         returnType_;
         std::string         name_;
         VecExprASTPtr       parameters_;

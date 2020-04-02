@@ -13,70 +13,68 @@
 #include <iostream>
 #include <string>
 
-int main(int argc,char** argv)
+int main(int argc, char** argv)
 {
+    std::string programName;
+#if defined(LEXER)
+    programName = "Lexer";
+
+#elif defined(PARSER)
+    programName = "Parser";
+
+#else
+    #error Please pass the macro definition "LEXER" or "PARSER" when compile.
+#endif
+
     if (argc < 2)
     {
-        std::cerr <<"Missing source file!\n";
-        std::cout <<"Usage: Lexer.exe <Source File> [Output File]\nSource file is required. Output File is \"tokenOut.txt\".\n";
+        std::cerr << "Missing source file!" << std::endl;
+        std::cout << "Usage: " << programName << " <Source File> [Output File]\nSource file is required. Output File is \"tokenOut.txt\" by default." << std::endl;
         return 0;
     }
+
     if (argc > 3)
     {
-        std::cerr << "Too many Arguments!\n";
-        std::cout << "Usage: Lexer.exe <Source File> [Output File]\nSource file is required. Output File is \"tokenOut.txt\".\n";
+        std::cerr << "Too many Arguments!" << std::endl;
+        std::cout << "Usage: " << programName << " <Source File> [Output File]\nSource file is required. Output File is \"tokenOut.txt\" by default." << std::endl;
         return 0;
     }
+
+    std::ofstream of;
+
     if (argc == 3)
     {
-        std::ofstream of;
-        of.open(std::string(argv[2]));
-        if (of.fail())
-        {
-            std::cout << "Output file can not be created!";
-            return 0;
-        }
-        MJava::Scanner scanner = MJava::Scanner(argv[1]);
-#if defined(LEXER)
-        while(scanner.getToken().getTokenType() != MJava::TokenType::END_OF_FILE)
-        {
-            of << scanner.getNextToken().toString() << std::endl;;
-        }
-#endif
-
-#if defined(PARSER)
-        MJava::Parser parser = MJava::Parser(scanner);
-        parser.parse();
-        of << parser.toString() << std::endl;
-#endif
-
-        of.close();
+        of.open(argv[2]);
     }
     else
     {
-        std::ofstream of;
         of.open("./tokenOut.txt");
-        if (of.fail())
-        {
-            std::cout << "Output file can not be created!";
-            return 0;
-        }
-        MJava::Scanner scanner = MJava::Scanner(argv[1]);
+    }
+    
+    if (of.fail())
+    {
+        std::cout << "Output file can not be created!" << std::endl;
+        return 0;
+    }
+    
+    MJava::Scanner scanner = MJava::Scanner(argv[1]);
 
 #if defined(LEXER)
-        while(scanner.getToken().getTokenType() != MJava::TokenType::END_OF_FILE)
-        {
-            of << scanner.getNextToken().toString() << std::endl;;
-        }
-#endif
-
-#if defined(PARSER)
-        MJava::Parser parser = MJava::Parser(scanner);
-        parser.parse();
-        of << parser.toString() << std::endl;
-#endif
-
-        of.close();
+    while(scanner.getToken().getTokenType() != MJava::TokenType::END_OF_FILE)
+    {
+        of << scanner.getNextToken().toString();
     }
+
+#elif defined(PARSER)
+    MJava::Parser parser = MJava::Parser(scanner);
+    parser.parse();
+    of << parser.toString();
+
+#else
+    #error Please pass the macro definition "LEXER" or "PARSER" when compile.
+#endif
+
+    of.close();
+    
     return 0;
 }

@@ -30,7 +30,7 @@ namespace MJava
         ExprASTPtr              parseUnaryOp();
         ExprASTPtr              parseIdentifierExpression();
         ExprASTPtr              parseParenExpression();
-        ExprASTPtr              parseClass();
+        ExprASTPtr              parseClassDeclaration();
         ExprASTPtr              parseBlockOrStatement();
         ExprASTPtr              parsePrimary();
         ExprASTPtr              parseReturnStatement();

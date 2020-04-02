@@ -6,7 +6,7 @@
 
 #include "error.h"
 
-#if defined(PARSER)
+#ifndef LEXER
     #include "parser.h"
 #endif
 
@@ -21,7 +21,7 @@ namespace MJava
         Scanner::setErrorFlag(true);
     }
 
-#if defined(PARSER)
+#ifndef LEXER
     void errorSyntax(const std::string& msg)
     {
         std::cerr << "Syntax Error: " << msg << std::endl;

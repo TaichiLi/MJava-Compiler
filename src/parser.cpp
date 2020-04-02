@@ -47,13 +47,14 @@ namespace MJava
         for (;;)
         {
             ExprASTPtr currentASTPtr = nullptr;
+
             switch (scanner_.getToken().getTokenValue())
             {
-                case TokenValue::CLASS:
-                {
-                    currentASTPtr = parseClass();
-                    break;
-                }
+                // case TokenValue::CLASS:
+                // {
+                //     currentASTPtr = parseClassDeclaration();
+                //     break;
+                // }
 
                 case TokenValue::SEMICOLON:
                 {
@@ -80,7 +81,7 @@ namespace MJava
         }
     }
 
-    ExprASTPtr Parser::parseClass()
+    ExprASTPtr Parser::parseClassDeclaration()
     {
         TokenLocation loc = scanner_.getToken().getTokenLocation();
 
@@ -99,15 +100,8 @@ namespace MJava
 
         scanner_.getNextToken();
 
-        bool isBaseClass = false;
-
-        if (!validateToken(TokenValue::EXTENDS, true))
+        if (validateToken(TokenValue::EXTENDS, true))
         {
-            isBaseClass = false;
-        }
-        else
-        {
-            isBaseClass = true;
             if (!expectToken(TokenType::IDENTIFIER, "identifier", false))
             {
                 return nullptr;
@@ -120,113 +114,74 @@ namespace MJava
 
         ExprASTPtr classBody = parseBlockOrStatement();
 
-        if (isBaseClass)
-        {
-            return new ClassAST(loc, className, isBaseClass, baseClassName, classBody);
-        }
-        else
-        {
-            return new ClassAST(loc, className, isBaseClass, classBody);
-        }   
+        return new ClassDeclarationAST(loc, className, baseClassName, classBody);
     }
 
     ExprASTPtr Parser::parseMethodDeclaration()
     {
         TokenLocation loc = scanner_.getToken().getTokenLocation();
 
-        if (!expectToken(TokenValue::PUBLIC, "public", true))
+        if (!expectToken(TokenValue::PUBLIC, "public", false))
+        {
+            return nullptr;
+        }
+        
+        std::vector<std::string> attributes;
+        
+        attributes.push_back(scanner_.getToken().getTokenName());
+        
+        scanner_.getNextToken();
+        
+        while (!validateToken(TokenType::TYPE, false) && !validateToken(TokenType::IDENTIFIER, false) && !validateToken(TokenValue::VOID, false))
+        {
+            if (!expectToken(TokenType::KEYWORD, "keyword", false))
+            {
+                return nullptr;
+            }
+            
+            attributes.push_back(scanner_.getToken().getTokenName());
+        
+            scanner_.getNextToken();
+        }
+        
+        std::string returnType = scanner_.getToken().getTokenName();
+        
+        scanner_.getNextToken();
+        
+        if (!validateToken(TokenValue::MAIN, false) && !validateToken(TokenType::IDENTIFIER, false))
+        {
+            return nullptr;
+        }
+        
+        std::string name = scanner_.getToken().getTokenName();
+        
+        scanner_.getNextToken();
+        
+        if (!expectToken(TokenValue::LPAREN, "(", true))
         {
             return nullptr;
         }
 
-        if (validateToken(TokenValue::STATIC, true))
+        VecExprASTPtr parameters;
+
+        while (!validateToken(TokenValue::RPAREN, true))
         {
-            if (!expectToken(TokenValue::VOID, "void", false))
-            {
-                return nullptr;
-            }
-            std::string returnType = scanner_.getToken().getTokenName();
-            scanner_.getNextToken();
+            ExprASTPtr parameter = parseMethodParameter();
 
-            if (!expectToken(TokenValue::MAIN, "main", false))
+            if (parameter != nullptr)
             {
-                return nullptr;
+                parameters.push_back(parameter);
             }
-            std::string name = scanner_.getToken().getTokenName();
-            scanner_.getNextToken();
-
-            if (!expectToken(TokenValue::LPAREN, "(", true))
-            {
-                return nullptr;
-            }
-
-            VecExprASTPtr parameters;
-            while (!validateToken(TokenValue::RPAREN, true))
-            {
-                ExprASTPtr parameter = parseMethodParameter();
-                if (parameter != nullptr)
-                {
-                    parameters.push_back(parameter);
-                }
-            }
-
-            ExprASTPtr body = parseBlockOrStatement();
-            if (body == nullptr)
-            {
-                return nullptr;
-            }
-
-            return new MethodDeclarationAST(loc, returnType, name, parameters, body);
         }
-        else
+
+        ExprASTPtr body = parseBlockOrStatement();
+        
+        if (body == nullptr)
         {
-            if (!validateToken(TokenType::TYPE, false) && !validateToken(TokenType::IDENTIFIER, false))
-            {
-                errorReport("Expected ' type or identifier ', but find " + scanner_.getToken().tokenTypeDescription() + " " + scanner_.getToken().getTokenName());
-                return nullptr;
-            }
-            std::string returnType = scanner_.getToken().getTokenName();
-            scanner_.getNextToken();
-
-            if (validateToken(TokenValue::LBRACK, true))
-            {
-                if (!expectToken(TokenValue::RBRACK, "]", true))
-                {
-                    return nullptr;
-                }
-                returnType += "[]";
-            }
-
-            if (!expectToken(TokenType::IDENTIFIER, "identifier", false))
-            {
-                return nullptr;
-            }
-            std::string name = scanner_.getToken().getTokenName();
-            scanner_.getNextToken();
-
-            if (!expectToken(TokenValue::LPAREN, "(", true))
-            {
-                return nullptr;
-            }
-
-            VecExprASTPtr parameters;
-            while (!validateToken(TokenValue::RPAREN, true))
-            {
-                ExprASTPtr parameter = parseMethodParameter();
-                if (parameter != nullptr)
-                {
-                    parameters.push_back(parameter);
-                }
-            }
-
-            ExprASTPtr body = parseBlockOrStatement();
-            if (body == nullptr)
-            {
-                return nullptr;
-            }
-
-            return new MethodDeclarationAST(loc, returnType, name, parameters, body);
+            return nullptr;
         }
+
+        return new MethodDeclarationAST(loc, attributes, returnType, name, parameters, body);
     }
 
     ExprASTPtr Parser::parseMethodParameter()
@@ -240,7 +195,9 @@ namespace MJava
                 errorReport("Expected ' type or identifier ', but find " + scanner_.getToken().tokenTypeDescription() + " " + scanner_.getToken().getTokenName());
                 return nullptr;
             }
+
             std::string type = scanner_.getToken().getTokenName();
+
             scanner_.getNextToken();
 
             if (validateToken(TokenValue::LBRACK, true))
@@ -249,6 +206,7 @@ namespace MJava
                 {
                     return nullptr;
                 }
+
                 type += "[]";
             }
 
@@ -256,7 +214,9 @@ namespace MJava
             {
                 return nullptr;
             }
+
             std::string name = scanner_.getToken().getTokenName();
+
             scanner_.getNextToken();
 
             if (validateToken(TokenValue::RPAREN, false))
@@ -281,11 +241,13 @@ namespace MJava
         scanner_.getNextToken();
 
         VecExprASTPtr args;
+
         if (!validateToken(TokenValue::RPAREN, true))
         {
             while (true)
             {
                 ExprASTPtr arg = parseExpression();
+
                 if (arg == nullptr)
                 {
                     return nullptr;
@@ -311,6 +273,7 @@ namespace MJava
     ExprASTPtr Parser::parseIntegerExpression()
     {
         TokenLocation loc = scanner_.getToken().getTokenLocation();
+
         int integer = std::stoi(scanner_.getToken().getTokenName());
 
         scanner_.getNextToken();
@@ -347,6 +310,7 @@ namespace MJava
         }
 
         ExprASTPtr printStatement = parseExpression();
+
         if (printStatement == nullptr)
         {
             return nullptr;
@@ -375,6 +339,7 @@ namespace MJava
         }
 
         ExprASTPtr returnStatement = parseExpression();
+
         if (returnStatement == nullptr)
         {
             return nullptr;
@@ -397,7 +362,9 @@ namespace MJava
             errorReport("Expected ' type or identifier ', but find " + scanner_.getToken().tokenTypeDescription() + " " + scanner_.getToken().getTokenName());
             return nullptr;
         }
+
         std::string type = scanner_.getToken().getTokenName();
+
         scanner_.getNextToken();
 
         if (validateToken(TokenValue::LPAREN, true))
@@ -409,9 +376,11 @@ namespace MJava
         }
 
         ExprASTPtr length = nullptr;
+
         if (validateToken(TokenValue::LBRACK, true))
         {
             length = parseExpression();
+
             if (length == nullptr)
             {
                 return nullptr;
@@ -441,6 +410,7 @@ namespace MJava
         {
             return nullptr;
         }
+
         std::string type = scanner_.getToken().getTokenName();
 
         scanner_.getNextToken();
@@ -458,6 +428,7 @@ namespace MJava
         {
             return nullptr;
         }
+
         std::string name = scanner_.getToken().getTokenName();
 
         scanner_.getNextToken();
@@ -487,6 +458,7 @@ namespace MJava
         {
             return nullptr;
         }
+
         std::string name = scanner_.getToken().getTokenName();
 
         scanner_.getNextToken();
@@ -507,6 +479,7 @@ namespace MJava
         {
             return nullptr;
         }
+
         ExprASTPtr currentASTPtr = parseBinOpRHS(0, lhs);
 
         validateToken(TokenValue::SEMICOLON, true);
@@ -536,7 +509,7 @@ namespace MJava
                 return parseParenExpression();
 
             case TokenValue::CLASS:
-                return parseClass();
+                return parseClassDeclaration();
 
             case TokenValue::IF:
                 return parseIfStatement();
@@ -560,31 +533,26 @@ namespace MJava
                 return parseNewStatement();
 
             case TokenValue::NOT:
-                return parseUnaryOp();
+                return parseUnaryOp();                
 
-            case TokenValue::SEMICOLON:
-                return nullptr;
             default: 
             {
                 switch (scanner_.getToken().getTokenType())
                 {
                     case TokenType::IDENTIFIER:
-                    {
                         return parseIdentifierExpression();
-                    }
 
                     case TokenType::INTEGER:
-                    {
                         return parseIntegerExpression();
-                    }
 
                     default:
-                    {
                         break;
-                    }
                 }
+
                 errorReport("unknown token when expecting an expression: " + scanner_.getToken().getTokenName());
+
                 scanner_.getNextToken();
+
                 return nullptr;
             }
         }
@@ -599,6 +567,7 @@ namespace MJava
             errorReport("Expected ' identifier or this ', but find " + scanner_.getToken().tokenTypeDescription() + " " + scanner_.getToken().getTokenName());
             return nullptr;
         }
+
         Token token = scanner_.getToken();
 
         scanner_.getNextToken();
@@ -618,6 +587,7 @@ namespace MJava
             if (validateToken(TokenValue::RBRACK, true))
             {
                 std::string name = scanner_.getToken().getTokenName();
+
                 scanner_.getNextToken();
 
                 if (!expectToken(TokenValue::SEMICOLON, ";", true))
@@ -653,6 +623,7 @@ namespace MJava
         TokenLocation loc = scanner_.getToken().getTokenLocation();
 
         bool boolean = (scanner_.getToken().getTokenName() == "true");
+
         scanner_.getNextToken();
 
         return new BooleanAST(loc, boolean);
@@ -663,15 +634,18 @@ namespace MJava
         TokenLocation loc = scanner_.getToken().getTokenLocation();
 
         ExprASTPtr expr = lhs;
+
         while (true)
         {
             int currentPrecedence = scanner_.getToken().getSymbolPrecedence();
+
             if (currentPrecedence < precedence)
             {
                 return expr;
             }
 
             std::string binOp = scanner_.getToken().getTokenName();
+
             scanner_.getNextToken();
 
             ExprASTPtr rhs = parsePrimary();
@@ -682,6 +656,7 @@ namespace MJava
             }
 
             int nextPrecedence = scanner_.getToken().getSymbolPrecedence();
+
             if (currentPrecedence < nextPrecedence)
             {
                 rhs = parseBinOpRHS(currentPrecedence + 1, rhs);
@@ -706,10 +681,12 @@ namespace MJava
         scanner_.getNextToken();
 
         auto currentASTPtr = parsePrimary();
+
         if (currentASTPtr == nullptr)
         {
             return nullptr;
         }
+
         return new UnaryOpExpressionAST(loc, unaryOp, currentASTPtr);
     }
 
@@ -720,6 +697,7 @@ namespace MJava
 
         // parse main expression
         ExprASTPtr currentASTPtr = parseExpression();
+
         if (currentASTPtr == nullptr)
         {
             return nullptr;
@@ -749,10 +727,10 @@ namespace MJava
         while (!validateToken(TokenValue::RBRACE, false) && !validateToken(TokenType::END_OF_FILE, false))
         {
             ExprASTPtr currentASTPtr = parseExpression();
+
             if (currentASTPtr == nullptr)
             {
                 continue;
-                // return parseBlockOrStatement(); 
             }
 
             stmts.push_back(currentASTPtr);

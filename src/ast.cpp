@@ -31,7 +31,9 @@ namespace MJava
     std::string BlockAST::toString() const
     {
         std::ostringstream str;
+
         size_t size = body_.size();
+
         if (size > 0)
         {
             for (size_t i = 0; i < size - 1; i++)
@@ -40,27 +42,17 @@ namespace MJava
             }
             str << body_[size - 1]->toString() << "\n";
         }
+
         return str.str();
     }
 
-    ClassAST::ClassAST(const TokenLocation& loc, const std::string& className, bool isBaseClass, const std::string& baseClassName, ExprASTPtr classBody)
-        : ExprAST(loc), className_(className), isBaseClass_(isBaseClass), baseClassName_(baseClassName), classBody_(classBody)
+    ClassDeclarationAST::ClassDeclarationAST(const TokenLocation& loc, const std::string& className, const std::string& baseClassName, ExprASTPtr classBody)
+        : ExprAST(loc), className_(className), baseClassName_(baseClassName), classBody_(classBody)
     {}
 
-    ClassAST::ClassAST(const TokenLocation& loc, const std::string& className, bool isBaseClass, ExprASTPtr classBody)
-        : ExprAST(loc), className_(className), isBaseClass_(isBaseClass), classBody_(classBody)
-    {}
-
-    std::string ClassAST::toString() const
+    std::string ClassDeclarationAST::toString() const
     {
-        if (isBaseClass_)
-        {
-            return std::string("{\n\"type\": \"ClassDeclaration\",\n\"class name\": \"" + className_ + "\",\n\"base class\": \"" + baseClassName_ + "\",\n\"body\": [" + classBody_->toString() + "]\n}");
-        }
-        else
-        {
-            return std::string("{\n\"type\": \"ClassDeclaration\",\n\"class name\": \"" + className_ + "\",\n\"body\": [" + classBody_->toString() + "]\n}");
-        }   
+        return std::string("{\n\"type\": \"ClassDeclaration\",\n\"class name\": \"" + className_ + "\",\n\"base class\": \"" + baseClassName_ + "\",\n\"body\": [" + classBody_->toString() + "]\n}");  
     }
 
     VariableDeclarationAST::VariableDeclarationAST(const TokenLocation& loc, const std::string& type, const std::string& name)
@@ -88,15 +80,30 @@ namespace MJava
         }   
     }
 
-    MethodDeclarationAST::MethodDeclarationAST(const TokenLocation& loc, const std::string& returnType, const std::string& name, const VecExprASTPtr& parameters, ExprASTPtr body)
-        : ExprAST(loc), returnType_(returnType), name_(name), parameters_(parameters), body_(body)
+    MethodDeclarationAST::MethodDeclarationAST(const TokenLocation& loc, const std::vector<std::string>& attributes, const std::string& returnType, const std::string& name, const VecExprASTPtr& parameters, ExprASTPtr body)
+        : ExprAST(loc), attributes_(attributes), returnType_(returnType), name_(name), parameters_(parameters), body_(body)
     {}
     
     std::string MethodDeclarationAST::toString() const
     {
         std::ostringstream str;
-        str << "{\n\"type\": \"MethodDeclaration\",\n\"return type\": \"" << returnType_ << "\",\n\"method name\": \"" << name_ << "\",\n\"parameters\": [";
-        size_t size = parameters_.size();
+        str << "{\n\"type\": \"MethodDeclaration\",\n\"attributes\": [";
+
+        size_t size = attributes_.size();
+
+        if (size > 0)
+        {
+            for (size_t i = 0; i < size - 1; i++)
+            {
+                str << "\"" << attributes_[i] << "\",\n";
+            }
+            str << "\"" << attributes_[size - 1] << "\"\n";
+        }
+
+        str << "],\n\"return type\": \"" << returnType_ << "\",\n\"method name\": \"" << name_ << "\",\n\"parameters\": [";
+
+        size = parameters_.size();
+
         if (size > 0)
         {
             for (size_t i = 0; i < size - 1; i++)
@@ -105,7 +112,9 @@ namespace MJava
             }
             str << parameters_[size - 1]->toString() << "\n";
         }
+
         str << "],\n\"body\": [" << body_->toString() << "]\n}";
+
         return str.str();
     }
 
@@ -117,7 +126,9 @@ namespace MJava
     {
         std::ostringstream str;
         str << "{\n\"type\": \"MethodCall\",\n\"method name\": \"" << name_ << "\",\n\"parameters\": [";
+
         size_t size = parameters_.size();
+
         if (size > 0)
         {
             for (size_t i = 0; i < size - 1; i++)
@@ -126,7 +137,9 @@ namespace MJava
             }
             str << parameters_[size - 1]->toString() << "\n";
         }
+
         str << "]\n}";
+
         return str.str();
     }
 
@@ -136,7 +149,7 @@ namespace MJava
     
     std::string IfStatementAST::toString() const
     {
-        return std::string("{\n\"type\": \"IfStatement\",\n\"condition\": " + condition_->toString() + ",\n\"then part\": [" + thenPart_->toString() + "],\n\"else part\": ["+ elsePart_->toString() + "]\n}");
+        return std::string("{\n\"type\": \"IfStatement\",\n\"condition\": " + condition_->toString() + ",\n\"then part\": [" + thenPart_->toString() + "],\n\"else part\": ["+ (elsePart_ != nullptr ? elsePart_->toString() : "") + "]\n}");
     }
 
     WhileStatementAST::WhileStatementAST(const TokenLocation& loc, ExprASTPtr condition, ExprASTPtr body)
@@ -154,7 +167,7 @@ namespace MJava
 
     std::string ForStatementAST::toString() const
     {
-        return std::string("{\n\"type\": \"ForStatement\",\n\"variable\": " + variable_->toString() + ",\n\"condition\": " + condition_->toString() + ",\n\"action\": " + action_->toString() + ",\n\"body\": [" + body_->toString() + "]\n}");
+        return std::string("{\n\"type\": \"ForStatement\",\n\"variable\": " + (variable_ != nullptr ? variable_->toString() : "") + ",\n\"condition\": " + (condition_ != nullptr ? condition_->toString() : "") + ",\n\"action\": " + (action_ != nullptr ? action_->toString() : "") + ",\n\"body\": [" + body_->toString() + "]\n}");
     }
 
     ReturnStatementAST::ReturnStatementAST(const TokenLocation& loc, ExprASTPtr returnStatement)
@@ -163,7 +176,7 @@ namespace MJava
 
     std::string ReturnStatementAST::toString() const
     {
-        return std::string("{\n\"type\": \"ReturnStatement\",\n\"expression\" :" + returnStatement_->toString() + "\n}");
+        return std::string("{\n\"type\": \"ReturnStatement\",\n\"expression\" :" + (returnStatement_ != nullptr ? returnStatement_->toString() : "") + "\n}");
     }
 
     BinaryOpExpressionAST::BinaryOpExpressionAST(const TokenLocation& loc, const std::string& binaryOp, ExprASTPtr lhs, ExprASTPtr rhs)
@@ -225,13 +238,13 @@ namespace MJava
 
     std::string NewStatementAST::toString() const
     {
-        if (length_ !=nullptr)
+        if (length_ != nullptr)
         {
             return std::string("{\n\"type\": \"NewStatement\",\n\"variable type\": \"" + type_ + "\",\n\"length\": " + length_->toString() + "\n}");
         }
         else
         {
             return std::string("{\n\"type\": \"NewStatement\",\n\"variable type\": \"" + type_ + "\"\n}");
-        }   
+        }
     }
 } // namespace MJava

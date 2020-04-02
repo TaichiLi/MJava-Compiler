@@ -3,6 +3,9 @@ cmake_minimum_required(VERSION 3.5)
 # 指定项目名
 project(Compiler)
 
+# 设置 "make VERBOSE=1"，获取 make 过程的详细输出
+set (CMAKE_VERBOSE_MAKEFILE ON)
+
 # 生成 compile_commands.json
 set (CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
