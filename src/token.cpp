@@ -6,7 +6,6 @@
 
 #include "token.h"
 
-
 namespace MJava
 {
 
@@ -43,7 +42,7 @@ namespace MJava
     {}
 
     Token::Token(TokenType type, TokenValue value, const TokenLocation& location,
-                 long intValue, const std::string& name)
+                 int intValue, const std::string& name)
         : type_(type), value_(value), location_(location),
           name_(name), symbolPrecedence_(-1), intValue_(intValue)
     {}

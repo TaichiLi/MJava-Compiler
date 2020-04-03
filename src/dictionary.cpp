@@ -43,10 +43,11 @@ namespace MJava
         addToken("new",                 std::make_tuple(TokenValue::NEW,               TokenType::KEYWORD,  -1));
         addToken("true",                std::make_tuple(TokenValue::TRUE,              TokenType::BOOLEAN,  -1));
         addToken("false",               std::make_tuple(TokenValue::FALSE,             TokenType::BOOLEAN,  -1));
+        addToken("double",              std::make_tuple(TokenValue::DOUBLE,            TokenType::TYPE,  -1));
         addToken("int",                 std::make_tuple(TokenValue::INT,               TokenType::TYPE,  -1));
-        addToken("boolean",             std::make_tuple(TokenValue::BOOL,              TokenType::TYPE,  -1));
         addToken("char",                std::make_tuple(TokenValue::CHAR,              TokenType::TYPE,  -1));
         addToken("String",              std::make_tuple(TokenValue::STRING,            TokenType::TYPE,  -1));
+        addToken("boolean",             std::make_tuple(TokenValue::BOOL,              TokenType::TYPE,  -1));
     }
 
     void Dictionary::addToken(const std::string& name,

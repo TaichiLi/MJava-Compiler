@@ -170,26 +170,6 @@ namespace MJava
         ExprASTPtr          expression_;
     };
 
-    class BooleanAST : public ExprAST
-    {
-    public:
-        BooleanAST(const TokenLocation& loc, bool boolean);
-        std::string toString() const;
-
-    private:
-        bool                boolean_;
-    };
-
-    class IntegerAST : public ExprAST
-    {
-    public:
-        IntegerAST(const TokenLocation& loc, int integer);
-        std::string toString() const;
-
-    private:
-        int                 integer_;
-    };
-
     class PrintStatementAST : public ExprAST
     {
     public:
@@ -209,6 +189,55 @@ namespace MJava
     private:
         std::string         type_;
         ExprASTPtr          length_;
+    };
+
+    class RealAST : public ExprAST
+    {
+    public:
+        RealAST(const TokenLocation& loc, double real);
+        std::string toString() const;
+
+    private:
+        double              real_;
+    };
+    class IntegerAST : public ExprAST
+    {
+    public:
+        IntegerAST(const TokenLocation& loc, int integer);
+        std::string toString() const;
+
+    private:
+        int                 integer_;
+    };
+
+    class CharAST : public ExprAST
+    {
+    public:
+        CharAST(const TokenLocation& loc, char ch);
+        std::string toString() const;
+
+    private:
+        char         ch_;
+    };
+
+    class StringAST : public ExprAST
+    {
+    public:
+        StringAST(const TokenLocation& loc, const std::string& str);
+        std::string toString() const;
+
+    private:
+        std::string         str_;
+    };
+
+    class BooleanAST : public ExprAST
+    {
+    public:
+        BooleanAST(const TokenLocation& loc, bool boolean);
+        std::string toString() const;
+
+    private:
+        bool                boolean_;
     };
 } // namespace MJava
 

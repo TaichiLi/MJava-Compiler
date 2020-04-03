@@ -7,6 +7,7 @@
 #include "error.h"
 #include "jsonformatter.h"
 #include "parser.h"
+#include <cstdlib>
 #include <memory>
 #include <sstream>
 
@@ -26,11 +27,16 @@ namespace MJava
         str << "[\n";
 
         size_t size = ast_.size();
-        for (size_t i = 0; i < size - 1; i++)
+        if (size > 0)
         {
-            str << ast_[i]->toString() << ",\n";
+            for (size_t i = 0; i < size - 1; i++)
+            {
+                str << ast_[i]->toString() << ",\n";
+            }
+            str << ast_[size - 1]->toString();
         }
-        str << ast_[size - 1]->toString() << "\n]";
+
+        str << "\n]";
 
         return JSONFormatter::format(str.str());
     }
@@ -50,12 +56,6 @@ namespace MJava
 
             switch (scanner_.getToken().getTokenValue())
             {
-                // case TokenValue::CLASS:
-                // {
-                //     currentASTPtr = parseClassDeclaration();
-                //     break;
-                // }
-
                 case TokenValue::SEMICOLON:
                 {
                     scanner_.getNextToken();
@@ -100,6 +100,7 @@ namespace MJava
 
         scanner_.getNextToken();
 
+        // if the current token is extend, then parse base class.
         if (validateToken(TokenValue::EXTENDS, true))
         {
             if (!expectToken(TokenType::IDENTIFIER, "identifier", false))
@@ -128,10 +129,12 @@ namespace MJava
         
         std::vector<std::string> attributes;
         
+        // push public
         attributes.push_back(scanner_.getToken().getTokenName());
         
         scanner_.getNextToken();
-        
+
+        // parse attributes of method.
         while (!validateToken(TokenType::TYPE, false) && !validateToken(TokenType::IDENTIFIER, false) && !validateToken(TokenValue::VOID, false))
         {
             if (!expectToken(TokenType::KEYWORD, "keyword", false))
@@ -164,6 +167,7 @@ namespace MJava
 
         VecExprASTPtr parameters;
 
+        // parse parameters of method.
         while (!validateToken(TokenValue::RPAREN, true))
         {
             ExprASTPtr parameter = parseMethodParameter();
@@ -200,6 +204,7 @@ namespace MJava
 
             scanner_.getNextToken();
 
+            // if the current token is '[', the type will be array.
             if (validateToken(TokenValue::LBRACK, true))
             {
                 if (!expectToken(TokenValue::RBRACK, "]", true))
@@ -235,13 +240,14 @@ namespace MJava
         return nullptr;
     }
 
-    
-    ExprASTPtr Parser::parseMethodCallStatement(Token token)
+    ExprASTPtr Parser::parseMethodCallStatement(const Token& token)
     {
+        // consume '('
         scanner_.getNextToken();
 
         VecExprASTPtr args;
 
+        // parse arguments of method call
         if (!validateToken(TokenValue::RPAREN, true))
         {
             while (true)
@@ -268,17 +274,6 @@ namespace MJava
         }
 
         return new MethodCallAST(token.getTokenLocation(), token.getTokenName(), args);
-    }
-
-    ExprASTPtr Parser::parseIntegerExpression()
-    {
-        TokenLocation loc = scanner_.getToken().getTokenLocation();
-
-        int integer = std::stoi(scanner_.getToken().getTokenName());
-
-        scanner_.getNextToken();
-
-        return new IntegerAST(loc, integer);
     }
 
     ExprASTPtr Parser::parseLengthStatement()
@@ -340,10 +335,8 @@ namespace MJava
 
         ExprASTPtr returnStatement = parseExpression();
 
-        if (returnStatement == nullptr)
-        {
-            return nullptr;
-        }
+        // consume possible ';'
+        validateToken(TokenValue::SEMICOLON, true);
 
         return new ReturnStatementAST(loc, returnStatement);
     }
@@ -367,6 +360,7 @@ namespace MJava
 
         scanner_.getNextToken();
 
+        // TODO: parser new statement that invokes constructor.
         if (validateToken(TokenValue::LPAREN, true))
         {
             if (!expectToken(TokenValue::RPAREN, ")", true))
@@ -379,6 +373,7 @@ namespace MJava
 
         if (validateToken(TokenValue::LBRACK, true))
         {
+            // parse the length of array.
             length = parseExpression();
 
             if (length == nullptr)
@@ -406,7 +401,7 @@ namespace MJava
     {
         TokenLocation loc = scanner_.getToken().getTokenLocation();
 
-        if (!expectToken(TokenType::TYPE, "int or String", false))
+        if (!expectToken(TokenType::TYPE, "type or identifier", false))
         {
             return nullptr;
         }
@@ -415,6 +410,7 @@ namespace MJava
 
         scanner_.getNextToken();
 
+        // if the current token is '[', the type of variable will be array.
         if (validateToken(TokenValue::LBRACK, true))
         {
             if (!expectToken(TokenValue::RBRACK, "]", true))
@@ -441,10 +437,11 @@ namespace MJava
         return new VariableDeclarationAST(loc, type, name);
     }
 
-    ExprASTPtr Parser::parseVariableDeclaration(Token token)
+    ExprASTPtr Parser::parseVariableDeclaration(const Token& token)
     {
         std::string type = token.getTokenName();
 
+        // if the current token is '[', the type of variable will be array.
         if (validateToken(TokenValue::LBRACK, true))
         {
             if (!expectToken(TokenValue::RBRACK, "]", true))
@@ -482,6 +479,7 @@ namespace MJava
 
         ExprASTPtr currentASTPtr = parseBinOpRHS(0, lhs);
 
+        // consume possible ';'
         validateToken(TokenValue::SEMICOLON, true);
 
         return currentASTPtr;
@@ -489,68 +487,103 @@ namespace MJava
 
     ExprASTPtr Parser::parsePrimary()
     {
-        switch (scanner_.getToken().getTokenValue())
+        Token token = scanner_.getToken();
+        switch (token.getTokenType())
         {
-            case TokenValue::PUBLIC:
-                return parseMethodDeclaration();
-
-            case TokenValue::PRINT:
-                return parsePrintStatement();
-
-            case TokenValue::INT: 
-            case TokenValue::BOOL:
-                return parseVariableDeclaration();
-
-            case TokenValue::TRUE:
-            case TokenValue::FALSE:
-                return parseBooleanExpression();
-
-            case TokenValue::LPAREN:
-                return parseParenExpression();
-
-            case TokenValue::CLASS:
-                return parseClassDeclaration();
-
-            case TokenValue::IF:
-                return parseIfStatement();
-
-            case TokenValue::RETURN:
-                return parseReturnStatement();
-
-            case TokenValue::THIS:
-                return parseIdentifierExpression();
-
-            case TokenValue::LENGTH:
-                return parseLengthStatement();
-
-            case TokenValue::WHILE:
-                return parseWhileStatement();
-
-            case TokenValue::FOR:
-                return parseForStatement();
-
-            case TokenValue::NEW:
-                return parseNewStatement();
-
-            case TokenValue::NOT:
-                return parseUnaryOp();                
-
-            default: 
+            case TokenType::KEYWORD:
             {
-                switch (scanner_.getToken().getTokenType())
+                switch (token.getTokenValue())
                 {
-                    case TokenType::IDENTIFIER:
+                    case TokenValue::CLASS:
+                        return parseClassDeclaration();
+
+                    case TokenValue::PUBLIC:
+                        return parseMethodDeclaration();
+
+                    case TokenValue::RETURN:
+                        return parseReturnStatement();
+
+                    case TokenValue::PRINT:
+                        return parsePrintStatement();
+
+                    case TokenValue::IF:
+                        return parseIfStatement();
+
+                    case TokenValue::WHILE:
+                        return parseWhileStatement();
+
+                    case TokenValue::FOR:
+                        return parseForStatement();
+
+                    case TokenValue::THIS:
                         return parseIdentifierExpression();
 
-                    case TokenType::INTEGER:
-                        return parseIntegerExpression();
+                    case TokenValue::LENGTH:
+                        return parseLengthStatement();
+
+                    case TokenValue::NEW:
+                        return parseNewStatement();
 
                     default:
-                        break;
+                        errorReport("I have not completed parsePrimary part");
+                        std::exit(1);
                 }
+            }
 
+            case TokenType::DELIMITER:
+            {
+                switch (token.getTokenValue())
+                {
+                    case TokenValue::LPAREN:
+                        return parseParenExpression();
+                    
+                    case TokenValue::SEMICOLON:
+                        return nullptr;
+
+                    default:
+                        errorReport("should not reach here, unexpected delimiter.");
+                        std::exit(1);
+                }
+            }
+
+            case TokenType::OPERATOR:
+            {
+                switch (token.getTokenValue())
+                {
+                    case TokenValue::NOT:
+                        return parseUnaryOp();
+
+                    default:
+                        errorReport("should not reach here, unexpected operator.");
+                        std::exit(1);
+                }
+            }
+
+            case TokenType::TYPE:
+                return parseVariableDeclaration();
+
+            case TokenType::IDENTIFIER:
+                return parseIdentifierExpression();
+
+            case TokenType::REAL:
+                return parseRealExpression();
+
+            case TokenType::INTEGER:
+                return parseIntegerExpression();
+
+            case TokenType::CHAR_LITERAL:
+                return parseCharExpression();
+
+            case TokenType::STRING_LITERAL:
+                return parseStringExpression();
+
+            case TokenType::BOOLEAN:
+                return parseBooleanExpression();
+
+            default:
+            {
                 errorReport("unknown token when expecting an expression: " + scanner_.getToken().getTokenName());
-
+                // skip the unknown token
                 scanner_.getNextToken();
 
                 return nullptr;
@@ -572,16 +605,19 @@ namespace MJava
 
         scanner_.getNextToken();
 
+        // if the current token is identifier, then parser variable declaration.
         if (validateToken(TokenType::IDENTIFIER, false))
         {
             return parseVariableDeclaration(token);
         }
 
+        // if the current token is '(', then parse method call statement.
         if (validateToken(TokenValue::LPAREN, false))
         {
             return parseMethodCallStatement(token);
         }
 
+        // if the current token is '[', then parse index of array or variable declaration.
         if (validateToken(TokenValue::LBRACK, true))
         {
             if (validateToken(TokenValue::RBRACK, true))
@@ -618,6 +654,50 @@ namespace MJava
         return new VariableAST(loc, token.getTokenName(), nullptr);
     }
 
+    ExprASTPtr Parser::parseRealExpression()
+    {
+        TokenLocation loc = scanner_.getToken().getTokenLocation();
+
+        double real = scanner_.getToken().getRealValue();
+
+        scanner_.getNextToken();
+
+        return new RealAST(loc, real);
+    }
+
+    ExprASTPtr Parser::parseIntegerExpression()
+    {
+        TokenLocation loc = scanner_.getToken().getTokenLocation();
+
+        int integer = scanner_.getToken().getIntValue();
+
+        scanner_.getNextToken();
+
+        return new IntegerAST(loc, integer);
+    }
+
+    ExprASTPtr Parser::parseCharExpression()
+    {
+        TokenLocation loc = scanner_.getToken().getTokenLocation();
+
+        char ch = scanner_.getToken().getIntValue();
+
+        scanner_.getNextToken();
+
+        return new CharAST(loc, ch);
+    }
+
+    ExprASTPtr Parser::parseStringExpression()
+    {
+        TokenLocation loc = scanner_.getToken().getTokenLocation();
+
+        std::string string = scanner_.getToken().getStringValue();
+
+        scanner_.getNextToken();
+
+        return new StringAST(loc, string);
+    }
+
     ExprASTPtr Parser::parseBooleanExpression()
     {
         TokenLocation loc = scanner_.getToken().getTokenLocation();
@@ -639,6 +719,7 @@ namespace MJava
         {
             int currentPrecedence = scanner_.getToken().getSymbolPrecedence();
 
+            // if the precedence of current token less than the precedence of the last token, return current ast.
             if (currentPrecedence < precedence)
             {
                 return expr;
@@ -656,7 +737,7 @@ namespace MJava
             }
 
             int nextPrecedence = scanner_.getToken().getSymbolPrecedence();
-
+            // if the precedence of current token less than the precedence of the next token, continue to parse.
             if (currentPrecedence < nextPrecedence)
             {
                 rhs = parseBinOpRHS(currentPrecedence + 1, rhs);
@@ -715,11 +796,13 @@ namespace MJava
     {
         TokenLocation loc = scanner_.getToken().getTokenLocation();
 
+        // if do not have '{' , then there can be only one statement.
         if (!validateToken(TokenValue::LBRACE, false))
         {
             return parseExpression();
         }
 
+        // consume '{'
         scanner_.getNextToken();
 
         VecExprASTPtr stmts;
@@ -774,7 +857,7 @@ namespace MJava
 
         ExprASTPtr thenPart = parseBlockOrStatement();
 
-        if (!thenPart)
+        if (thenPart == nullptr)
         {
             errorReport("then statement is not valid.");
             return nullptr;
@@ -796,11 +879,12 @@ namespace MJava
         return new IfStatementAST(loc, condition, thenPart, elsePart);
     }
 
-    ExprASTPtr Parser::parseForStatement()
+    ExprASTPtr Parser::parseWhileStatement()
     {
         TokenLocation loc = scanner_.getToken().getTokenLocation();
 
-        if(!expectToken(TokenValue::FOR, "for", true))
+        // current token is keyword while.
+        if (!expectToken(TokenValue::WHILE, "while", true))
         {
             return nullptr;
         }
@@ -810,6 +894,43 @@ namespace MJava
             return nullptr;
         }
 
+        auto condition = parseExpression();
+
+        if (condition == nullptr)
+        {
+            return nullptr;
+        }
+
+        if (!expectToken(TokenValue::RPAREN, ")", true))
+        {
+            return nullptr;
+        }
+
+        auto body = parseBlockOrStatement();
+
+        if (body == nullptr)
+        {
+            return nullptr;
+        }
+
+        return new WhileStatementAST(loc, condition, body);
+    }
+
+    ExprASTPtr Parser::parseForStatement()
+    {
+        TokenLocation loc = scanner_.getToken().getTokenLocation();
+
+        if (!expectToken(TokenValue::FOR, "for", true))
+        {
+            return nullptr;
+        }
+
+        if (!expectToken(TokenValue::LPAREN, "(", true))
+        {
+            return nullptr;
+        }
+
+        // control variable, control condition and action can all be nullptr.
         ExprASTPtr variable = parseExpression();
 
         ExprASTPtr condition = parseExpression();
@@ -823,49 +944,12 @@ namespace MJava
 
         ExprASTPtr body = parseBlockOrStatement();
 
-        if(body == nullptr)
+        if (body == nullptr)
         {
             return nullptr;
         }
 
         return new ForStatementAST(loc, variable, condition, action, body);
-
-    }
-
-    ExprASTPtr Parser::parseWhileStatement()
-    {
-        TokenLocation loc = scanner_.getToken().getTokenLocation();
-
-        if(!expectToken(TokenValue::WHILE, "while", true))
-        {
-            return nullptr;
-        }
-
-        if(!expectToken(TokenValue::LPAREN, "(", true))
-        {
-            return nullptr;
-        }
-
-        auto condition = parseExpression();
-
-        if(!condition)
-        {
-            return nullptr;
-        }
-
-        if(!expectToken(TokenValue::RPAREN, ")", true))
-        {
-            return nullptr;
-        }
-
-        auto body = parseBlockOrStatement();
-
-        if(!body)
-        {
-            return nullptr;
-        }
-
-        return new WhileStatementAST(loc, condition, body);
     }
 
     // Helper Functions.

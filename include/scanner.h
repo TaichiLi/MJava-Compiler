@@ -34,7 +34,7 @@ namespace MJava
                                   const TokenLocation& loc, const std::string& name, int symbolPrecedence);
 
         void            makeToken(TokenType tt, TokenValue tv,
-                                  const TokenLocation& loc, long intValue, const std::string& name);
+                                  const TokenLocation& loc, int intValue, const std::string& name);
 
         void            makeToken(TokenType tt, TokenValue tv,
                                   const TokenLocation& loc, double realValue, const std::string& name);
@@ -54,6 +54,7 @@ namespace MJava
 
         void            handleDigit();
         void            handleXDigit();
+        void            handleODigit();
         void            handleFraction();
         void            handleExponent();
         void            errorReport(const std::string& msg);

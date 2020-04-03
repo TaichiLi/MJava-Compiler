@@ -62,7 +62,7 @@ int main(int argc, char** argv)
 #if defined(LEXER)
     while(scanner.getToken().getTokenType() != MJava::TokenType::END_OF_FILE)
     {
-        of << scanner.getNextToken().toString();
+        of << scanner.getNextToken().toString() << std::endl;
     }
 
 #elif defined(PARSER)

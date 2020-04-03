@@ -167,7 +167,7 @@ namespace MJava
 
     std::string ForStatementAST::toString() const
     {
-        return std::string("{\n\"type\": \"ForStatement\",\n\"variable\": " + (variable_ != nullptr ? variable_->toString() : "") + ",\n\"condition\": " + (condition_ != nullptr ? condition_->toString() : "") + ",\n\"action\": " + (action_ != nullptr ? action_->toString() : "") + ",\n\"body\": [" + body_->toString() + "]\n}");
+        return std::string("{\n\"type\": \"ForStatement\",\n\"variable\": " + (variable_ != nullptr ? variable_->toString() : "{}") + ",\n\"condition\": " + (condition_ != nullptr ? condition_->toString() : "{}") + ",\n\"action\": " + (action_ != nullptr ? action_->toString() : "{}") + ",\n\"body\": [" + body_->toString() + "]\n}");
     }
 
     ReturnStatementAST::ReturnStatementAST(const TokenLocation& loc, ExprASTPtr returnStatement)
@@ -176,7 +176,7 @@ namespace MJava
 
     std::string ReturnStatementAST::toString() const
     {
-        return std::string("{\n\"type\": \"ReturnStatement\",\n\"expression\" :" + (returnStatement_ != nullptr ? returnStatement_->toString() : "") + "\n}");
+        return std::string("{\n\"type\": \"ReturnStatement\",\n\"expression\" :" + (returnStatement_ != nullptr ? returnStatement_->toString() : "{}") + "\n}");
     }
 
     BinaryOpExpressionAST::BinaryOpExpressionAST(const TokenLocation& loc, const std::string& binaryOp, ExprASTPtr lhs, ExprASTPtr rhs)
@@ -196,33 +196,7 @@ namespace MJava
     {
         return std::string("{\n\"type\": \"UnaryOpExpression\",\n\"unary operator\": \"" + unaryOp_ + "\",\n\"expression\": " + expression_->toString() + "\n}");
     }
-
-    BooleanAST::BooleanAST(const TokenLocation& loc, bool boolean)
-        : ExprAST(loc), boolean_(boolean)
-    {}
-
-    std::string BooleanAST::toString() const
-    {
-        if (boolean_)
-        {
-            return std::string("{\n\"type\": \"BooleanLiteral\",\n\"boolean\": true\n}");
-        }
-        else
-        {
-            return std::string("{\n\"type\": \"BooleanLiteral\",\n\"boolean\": false\n}");
-        }
-           
-    }
-
-    IntegerAST::IntegerAST(const TokenLocation& loc, int integer)
-        : ExprAST(loc), integer_(integer)
-    {}
-
-    std::string IntegerAST::toString() const
-    {
-        return std::string("{\n\"type\": \"IntegerLiteral\",\n\"integer\": " + std::to_string(integer_) + "\n}");
-    }
-
+    
     PrintStatementAST::PrintStatementAST(const TokenLocation& loc, ExprASTPtr printStatement)
         : ExprAST(loc), printStatement_(printStatement)
     {}
@@ -247,4 +221,59 @@ namespace MJava
             return std::string("{\n\"type\": \"NewStatement\",\n\"variable type\": \"" + type_ + "\"\n}");
         }
     }
+
+    RealAST::RealAST(const TokenLocation& loc, double real)
+        : ExprAST(loc), real_(real)
+    {}
+    
+    std::string RealAST::toString() const
+    {
+        return std::string("{\n\"type\": \"RealLiteral\",\n\"real\": " + std::to_string(real_) + "\n}");
+    }
+
+    IntegerAST::IntegerAST(const TokenLocation& loc, int integer)
+        : ExprAST(loc), integer_(integer)
+    {}
+
+    std::string IntegerAST::toString() const
+    {
+        return std::string("{\n\"type\": \"IntegerLiteral\",\n\"integer\": " + std::to_string(integer_) + "\n}");
+    }
+    
+    CharAST::CharAST(const TokenLocation& loc, char ch)
+        : ExprAST(loc), ch_(ch)
+    {}
+
+    std::string CharAST::toString() const
+    {
+        return std::string("{\n\"type\": \"CharLiteral\",\n\"char\": \"" + std::string(1, ch_) + "\"\n}");
+    }
+
+    StringAST::StringAST(const TokenLocation& loc, const std::string& str)
+        : ExprAST(loc), str_(str)
+    {}
+
+    std::string StringAST::toString() const
+    {
+        return std::string("{\n\"type\": \"StringLiteral\",\n\"string\": \"" + str_ + "\"\n}");
+    }
+
+    BooleanAST::BooleanAST(const TokenLocation& loc, bool boolean)
+        : ExprAST(loc), boolean_(boolean)
+    {}
+
+    std::string BooleanAST::toString() const
+    {
+        if (boolean_)
+        {
+            return std::string("{\n\"type\": \"BooleanLiteral\",\n\"boolean\": true\n}");
+        }
+        else
+        {
+            return std::string("{\n\"type\": \"BooleanLiteral\",\n\"boolean\": false\n}");
+        }
+           
+    }
+
+    
 } // namespace MJava

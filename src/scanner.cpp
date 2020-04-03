@@ -8,7 +8,7 @@
 #include "scanner.h"
 #include <algorithm>
 #include <cctype>
-
+#include <stdexcept>
 
 namespace MJava
 {
@@ -30,6 +30,7 @@ namespace MJava
     {
         currentChar_ = input_.get();
 
+        // record the location of token
         if (currentChar_ == '\n')
         {
             line_++;
@@ -46,8 +47,6 @@ namespace MJava
         char c = input_.peek();
         return c;
     }
-
-
 
     void Scanner::addToBuffer(char c)
     {
@@ -71,7 +70,7 @@ namespace MJava
     }
 
     void Scanner::makeToken(TokenType tt, TokenValue tv,
-                            const TokenLocation& loc, long intValue, const std::string& name)
+                            const TokenLocation& loc, int intValue, const std::string& name)
     {
         token_ = Token(tt, tv, loc, intValue, name);
         buffer_.clear();
@@ -99,6 +98,7 @@ namespace MJava
     {
         do
         {
+            // eat spaces
             while (std::isspace(currentChar_))
             {
                 getNextChar();
@@ -106,7 +106,7 @@ namespace MJava
 
             handleLineComment();
             handleBlockComment();
-        } while (std::isspace(currentChar_) || currentChar_ == '/');
+        } while (std::isspace(currentChar_) || currentChar_ == '/'); // eat spaces and comment
     }
 
     void Scanner::handleLineComment()
@@ -174,6 +174,9 @@ namespace MJava
 
         do
         {
+            // restore error flag at each time invoke getNextToken()
+            Scanner::errorFlag_ = false;
+
             if (state_ != State::NONE)
             {
                 matched = true;
@@ -228,9 +231,8 @@ namespace MJava
                     {
                         state_ = State::IDENTIFIER;
                     }
-                    // if it is digit or xdigit
-                    else if (std::isdigit(currentChar_) ||
-                             (currentChar_ == '$'))
+                    // if it is digit, xdigit or odigit
+                    else if (std::isdigit(currentChar_))
                     {
                         state_ = State::NUMBER;
                     }
@@ -248,9 +250,8 @@ namespace MJava
                     }
                 }
             }
-        } while (!matched);
+        } while (!matched || getErrorFlag());
 
-        //Scanner::errorFlag_ = false;
         return token_;
     }
 
@@ -271,11 +272,22 @@ namespace MJava
         bool isExponent = false;
         int numberBase = 10;
 
-        if (currentChar_ == '$')
+        if (currentChar_ == '0' && (peekChar() == 'x' || peekChar() == 'X'))
         {
             numberBase = 16;
 
-            // eat $ and update currentChar_
+            // eat 0 and update currentChar_
+            getNextChar();
+
+            // eat x or X and update currentChar_
+            getNextChar();
+        }
+
+        if (currentChar_ == '0' && peekChar() >= '0' && peekChar() <= '7')
+        {
+            numberBase = 8;
+
+            // eat 0 and update currentChar_
             getNextChar();
         }
 
@@ -286,6 +298,7 @@ namespace MJava
             EXPONENT,
             DONE
         };
+
         NumberState numberState = NumberState::INTERGER;
 
         do
@@ -301,8 +314,10 @@ namespace MJava
                     {
                         handleXDigit();
                     }
-
-                    // maybe want to support octal...
+                    else if (numberBase == 8)
+                    {
+                        handleODigit();
+                    }
                     break;
 
                 case NumberState::FRACTION:
@@ -338,12 +353,17 @@ namespace MJava
 
                 if (isExponent)
                 {
-                    errorReport("Scientist number representation in Pascal can not have dot.");
+                    errorReport("Scientist number representation in MJava can not have dot.");
                 }
 
                 if (numberBase == 16)
                 {
-                    errorReport("Hexadecimal number in Pascal can only be integer.");
+                    errorReport("Hexadecimal number in MJava can only be integer.");
+                }
+                
+                if (numberBase == 8)
+                {
+                    errorReport("Octal number in MJava can only be integer.");
                 }
 
                 numberState = NumberState::FRACTION;
@@ -367,13 +387,43 @@ namespace MJava
         {
             if (isFloat || isExponent)
             {
-                makeToken(TokenType::REAL, TokenValue::UNRESERVED, loc_,
-                    std::stod(buffer_), buffer_);
+                try
+                {
+                    makeToken(TokenType::REAL, TokenValue::UNRESERVED, loc_,
+                        std::stod(buffer_), buffer_);
+                }
+                catch(std::out_of_range& e)
+                {
+                    errorReport("Floating-point number literal: " + buffer_ + " is outside the range of the \"double\".");
+                    buffer_.clear();
+                    state_ = State::NONE;
+                }
+                catch(std::invalid_argument& e)
+                {
+                    errorReport("Floating-point number literal: " + buffer_ + " can not be converted to the \"double\".");
+                    buffer_.clear();
+                    state_ = State::NONE;
+                }    
             }
             else
             {
-                makeToken(TokenType::INTEGER, TokenValue::UNRESERVED, loc_,
-                    std::stol(buffer_, nullptr, numberBase), buffer_);
+                try
+                {
+                    makeToken(TokenType::INTEGER, TokenValue::UNRESERVED, loc_,
+                        std::stoi(buffer_, nullptr, numberBase), buffer_);
+                }
+                catch(std::out_of_range& e)
+                {
+                    errorReport("Integer literal: " + buffer_ + " is outside the range of the \"int\".");
+                    buffer_.clear();
+                    state_ = State::NONE;
+                }
+                catch(std::invalid_argument& e)
+                {
+                    errorReport("Integer literal: " + buffer_ + " can not be converted to the \"int\".");
+                    buffer_.clear();
+                    state_ = State::NONE;
+                }               
             }
         }
         else
@@ -393,6 +443,7 @@ namespace MJava
 
         while (true)
         {
+            // skip escape character \'
             if (currentChar_ != '\\' && peekChar() == '\'')
             {
                 addToBuffer(currentChar_);
@@ -420,7 +471,7 @@ namespace MJava
         if (!getErrorFlag() && buffer_.length() == 1)
         {
             makeToken(TokenType::CHAR_LITERAL, TokenValue::UNRESERVED, loc_,
-                      static_cast<long>(buffer_.at(0)), buffer_);
+                      static_cast<int>(buffer_.at(0)), buffer_);
         }
         else
         {
@@ -435,11 +486,12 @@ namespace MJava
     {
         loc_ = getTokenLocation();
         // eat " and NOT update currentChar_
-        // because we don't want ' (single quote).
+        // because we don't want " (double quote).
         getNextChar();
 
         while (true)
         {
+            // skip escape character \"
             if (currentChar_ != '\\' && peekChar() == '\"')
             {
                 addToBuffer(currentChar_);
@@ -470,6 +522,7 @@ namespace MJava
         }
         else
         {
+            // just clear buffer_ and set the state to State::NONE
             buffer_.clear();
             state_ = State::NONE;
         }
@@ -488,17 +541,24 @@ namespace MJava
             getNextChar();
         }
         // end while. currentChar_ is not alpha, number and _.
+
         std::string copy = buffer_;
+        // match "System.out.println"
         if (buffer_ == "System")
         {
+            // length of "System.out.println" from the first '.' to the end
             int length = 12;
+            // set current location of input stream.
             std::streampos index = input_.tellg();
+
             while (length > 0)
             {
                 addToBuffer(currentChar_);
                 getNextChar();
                 --length;
             }
+
+            // if does not match "System.out.println", roll back to the original location.
             if (buffer_ != "System.out.println")
             {
                 buffer_ = copy;
@@ -555,10 +615,10 @@ namespace MJava
 
     void Scanner::handleXDigit()
     {
-        // notice: we have eat $ and update currentChar_
+        // notice: we have eat "0x" and update currentChar_
         // in the handleNumber function. so we need not
         // eat currentChar_ like handleDigit function.
-        // only have $ or not
+        // only have "0x" or not
         bool readFlag = false;
 
         while (std::isxdigit(currentChar_))
@@ -571,6 +631,27 @@ namespace MJava
         if (!readFlag)
         {
             errorReport("Hexadecimal number format error.");
+        }
+    }
+
+    void Scanner::handleODigit()
+    {
+        // notice: we have eat "0" and update currentChar_
+        // in the handleNumber function. so we need not
+        // eat currentChar_ like handleDigit function.
+        // only have "0" or not
+        bool readFlag = false;
+
+        while (currentChar_ >= '0' && currentChar_ <= '7')
+        {
+            readFlag = true;
+            addToBuffer(currentChar_);
+            getNextChar();
+        }
+
+        if (!readFlag)
+        {
+            errorReport("Octal number format error.");
         }
     }
 

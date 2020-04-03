@@ -40,10 +40,10 @@ namespace MJava
         // parse different type expressions.
         // they are also very like parseNumber function in the llvm tutorial,
         // but they are more complex
-        ExprASTPtr              parseRealExpression(Token token);
+        ExprASTPtr              parseRealExpression();
         ExprASTPtr              parseIntegerExpression();
-        ExprASTPtr              parseCharExpression(Token token);
-        ExprASTPtr              parseStringExpression(Token token);
+        ExprASTPtr              parseCharExpression();
+        ExprASTPtr              parseStringExpression();
         ExprASTPtr              parseBooleanExpression();
 
         // note: assignment statement implementation will be included parseStatement.
@@ -54,8 +54,8 @@ namespace MJava
         // declaration / definition contains procedure and function.
         ExprASTPtr              parseMethodDeclaration();
         ExprASTPtr              parseVariableDeclaration();
-        ExprASTPtr              parseVariableDeclaration(Token token);
-        ExprASTPtr              parseMethodCallStatement(Token token);
+        ExprASTPtr              parseVariableDeclaration(const Token& token);
+        ExprASTPtr              parseMethodCallStatement(const Token& token);
         ExprASTPtr              parseMethodParameter();
 
         // I/O routines

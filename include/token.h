@@ -54,10 +54,11 @@ namespace MJava
         NEW,
 
         // type
+        DOUBLE,
         INT,
-        BOOL,
         CHAR,
         STRING,
+        BOOL,
 
         // boolean
         TRUE,
@@ -107,7 +108,7 @@ namespace MJava
         Token(TokenType type, TokenValue value, const TokenLocation& location,
               const std::string& strValue, const std::string& name);
         Token(TokenType type, TokenValue value, const TokenLocation& location,
-              long intValue, const std::string& name);
+              int intValue, const std::string& name);
         Token(TokenType type, TokenValue value, const TokenLocation& location,
               double realValue, const std::string& name);
 
@@ -121,7 +122,7 @@ namespace MJava
         int getSymbolPrecedence() const;
 
         // get constant values of token
-        long getIntValue() const;
+        int getIntValue() const;
         double getRealValue() const;
         std::string getStringValue() const;
 
@@ -147,7 +148,7 @@ namespace MJava
         
 
         // const values of token
-        long            intValue_;
+        int             intValue_;
         double          realValue_;
         std::string     strValue_;
 
@@ -174,7 +175,7 @@ namespace MJava
         return location_;
     }
 
-    inline long Token::getIntValue() const
+    inline int Token::getIntValue() const
     {
         return intValue_;
     }
