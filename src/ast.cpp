@@ -24,8 +24,8 @@ namespace MJava
         return getLocation().toString();
     }
 
-    BlockAST::BlockAST(const TokenLocation& loc, const VecExprASTPtr& body)
-        : ExprAST(loc), body_(body)
+    BlockAST::BlockAST(const TokenLocation& loc, VecExprASTPtr&& body)
+        : ExprAST(loc), body_(std::move(body))
     {}
 
     std::string BlockAST::toString() const
@@ -47,7 +47,7 @@ namespace MJava
     }
 
     ClassDeclarationAST::ClassDeclarationAST(const TokenLocation& loc, const std::string& className, const std::string& baseClassName, ExprASTPtr classBody)
-        : ExprAST(loc), className_(className), baseClassName_(baseClassName), classBody_(classBody)
+        : ExprAST(loc), className_(className), baseClassName_(baseClassName), classBody_(std::move(classBody))
     {}
 
     std::string ClassDeclarationAST::toString() const
@@ -65,7 +65,7 @@ namespace MJava
     }
 
     VariableAST::VariableAST(const TokenLocation& loc, const std::string& name, ExprASTPtr index)
-        : ExprAST(loc), name_(name), index_(index)
+        : ExprAST(loc), name_(name), index_(std::move(index))
     {}
 
     std::string VariableAST::toString() const
@@ -80,8 +80,8 @@ namespace MJava
         }   
     }
 
-    MethodDeclarationAST::MethodDeclarationAST(const TokenLocation& loc, const std::vector<std::string>& attributes, const std::string& returnType, const std::string& name, const VecExprASTPtr& parameters, ExprASTPtr body)
-        : ExprAST(loc), attributes_(attributes), returnType_(returnType), name_(name), parameters_(parameters), body_(body)
+    MethodDeclarationAST::MethodDeclarationAST(const TokenLocation& loc, const std::vector<std::string>& attributes, const std::string& returnType, const std::string& name, VecExprASTPtr&& parameters, ExprASTPtr body)
+        : ExprAST(loc), attributes_(attributes), returnType_(returnType), name_(name), parameters_(std::move(parameters)), body_(std::move(body))
     {}
     
     std::string MethodDeclarationAST::toString() const
@@ -118,8 +118,8 @@ namespace MJava
         return str.str();
     }
 
-    MethodCallAST::MethodCallAST(const TokenLocation& loc, const std::string& name, const VecExprASTPtr& parameters)
-        : ExprAST(loc), name_(name), parameters_(parameters)
+    MethodCallAST::MethodCallAST(const TokenLocation& loc, const std::string& name, VecExprASTPtr&& parameters)
+        : ExprAST(loc), name_(name), parameters_(std::move(parameters))
     {}
 
     std::string MethodCallAST::toString() const
@@ -144,7 +144,7 @@ namespace MJava
     }
 
     IfStatementAST::IfStatementAST(const TokenLocation& loc, ExprASTPtr condition, ExprASTPtr thenPart, ExprASTPtr elsePart)
-        : ExprAST(loc), condition_(condition), thenPart_(thenPart), elsePart_(elsePart)
+        : ExprAST(loc), condition_(std::move(condition)), thenPart_(std::move(thenPart)), elsePart_(std::move(elsePart))
     {}
     
     std::string IfStatementAST::toString() const
@@ -153,7 +153,7 @@ namespace MJava
     }
 
     WhileStatementAST::WhileStatementAST(const TokenLocation& loc, ExprASTPtr condition, ExprASTPtr body)
-        : ExprAST(loc), condition_(condition), body_(body)
+        : ExprAST(loc), condition_(std::move(condition)), body_(std::move(body))
     {}
 
     std::string WhileStatementAST::toString() const
@@ -162,7 +162,7 @@ namespace MJava
     }
 
     ForStatementAST::ForStatementAST(const TokenLocation& loc, ExprASTPtr variable, ExprASTPtr condition, ExprASTPtr action, ExprASTPtr body)
-        : ExprAST(loc), variable_(variable), condition_(condition), action_(action), body_(body)
+        : ExprAST(loc), variable_(std::move(variable)), condition_(std::move(condition)), action_(std::move(action)), body_(std::move(body))
     {}
 
     std::string ForStatementAST::toString() const
@@ -171,7 +171,7 @@ namespace MJava
     }
 
     ReturnStatementAST::ReturnStatementAST(const TokenLocation& loc, ExprASTPtr returnStatement)
-        : ExprAST(loc), returnStatement_(returnStatement)
+        : ExprAST(loc), returnStatement_(std::move(returnStatement))
     {}
 
     std::string ReturnStatementAST::toString() const
@@ -180,7 +180,7 @@ namespace MJava
     }
 
     BinaryOpExpressionAST::BinaryOpExpressionAST(const TokenLocation& loc, const std::string& binaryOp, ExprASTPtr lhs, ExprASTPtr rhs)
-        : ExprAST(loc), binaryOp_(binaryOp), lhs_(lhs), rhs_(rhs)
+        : ExprAST(loc), binaryOp_(binaryOp), lhs_(std::move(lhs)), rhs_(std::move(rhs))
     {}
 
     std::string BinaryOpExpressionAST::toString() const
@@ -189,7 +189,7 @@ namespace MJava
     }
 
     UnaryOpExpressionAST::UnaryOpExpressionAST(const TokenLocation& loc, const std::string& unaryOp, ExprASTPtr expression)
-        : ExprAST(loc), unaryOp_(unaryOp), expression_(expression)
+        : ExprAST(loc), unaryOp_(unaryOp), expression_(std::move(expression))
     {}
 
     std::string UnaryOpExpressionAST::toString() const
@@ -198,7 +198,7 @@ namespace MJava
     }
     
     PrintStatementAST::PrintStatementAST(const TokenLocation& loc, ExprASTPtr printStatement)
-        : ExprAST(loc), printStatement_(printStatement)
+        : ExprAST(loc), printStatement_(std::move(printStatement))
     {}
 
     std::string PrintStatementAST::toString() const
@@ -207,7 +207,7 @@ namespace MJava
     }
 
     NewStatementAST::NewStatementAST(const TokenLocation& loc, const std::string& type, ExprASTPtr length)
-        : ExprAST(loc), type_(type), length_(length)
+        : ExprAST(loc), type_(type), length_(std::move(length))
     {}
 
     std::string NewStatementAST::toString() const

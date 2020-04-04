@@ -17,14 +17,14 @@ namespace MJava
     class ExprAST;
     class ClassAST;
 
-    using VecExprASTPtr = std::vector <ExprAST*>;
-    using ExprASTPtr = ExprAST*;
+    using VecExprASTPtr = std::vector<std::unique_ptr<ExprAST>>;
+    using ExprASTPtr = std::unique_ptr<ExprAST>;
 
     class ExprAST
     {
     public:
         ExprAST(const TokenLocation& loc);
-        virtual       ~ExprAST() = default;
+        virtual ~ExprAST() = default;
         TokenLocation getLocation() const;
         virtual std::string toString() const;
 
@@ -35,7 +35,7 @@ namespace MJava
     class BlockAST : public ExprAST
     {
     public:
-        BlockAST(const TokenLocation& loc, const VecExprASTPtr& body);
+        BlockAST(const TokenLocation& loc, VecExprASTPtr&& body);
         std::string toString() const;
 
     private:
@@ -57,7 +57,7 @@ namespace MJava
     class MethodDeclarationAST : public ExprAST
     {
     public:
-        MethodDeclarationAST(const TokenLocation& loc, const std::vector<std::string>& attributes, const std::string& returnType, const std::string& name, const VecExprASTPtr& parameters, ExprASTPtr body);
+        MethodDeclarationAST(const TokenLocation& loc, const std::vector<std::string>& attributes, const std::string& returnType, const std::string& name, VecExprASTPtr&& parameters, ExprASTPtr body);
         std::string toString() const;
 
     private:
@@ -71,7 +71,7 @@ namespace MJava
     class MethodCallAST : public ExprAST
     {
     public:
-        MethodCallAST(const TokenLocation& loc, const std::string& name, const VecExprASTPtr& parameters);
+        MethodCallAST(const TokenLocation& loc, const std::string& name, VecExprASTPtr&& parameters);
         std::string toString() const;
 
     private:

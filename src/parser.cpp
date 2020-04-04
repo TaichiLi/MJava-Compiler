@@ -71,7 +71,7 @@ namespace MJava
 
             if (currentASTPtr != nullptr)
             {
-                ast_.push_back(currentASTPtr);
+                ast_.push_back(std::move(currentASTPtr));
             }
             
             if (scanner_.getToken().getTokenType() == TokenType::END_OF_FILE)
@@ -115,7 +115,7 @@ namespace MJava
 
         ExprASTPtr classBody = parseBlockOrStatement();
 
-        return new ClassDeclarationAST(loc, className, baseClassName, classBody);
+        return std::make_unique<ClassDeclarationAST>(loc, className, baseClassName, std::move(classBody));
     }
 
     ExprASTPtr Parser::parseMethodDeclaration()
@@ -174,7 +174,7 @@ namespace MJava
 
             if (parameter != nullptr)
             {
-                parameters.push_back(parameter);
+                parameters.push_back(std::move(parameter));
             }
         }
 
@@ -185,7 +185,7 @@ namespace MJava
             return nullptr;
         }
 
-        return new MethodDeclarationAST(loc, attributes, returnType, name, parameters, body);
+        return std::make_unique<MethodDeclarationAST>(loc, attributes, returnType, name, std::move(parameters), std::move(body));
     }
 
     ExprASTPtr Parser::parseMethodParameter()
@@ -226,7 +226,7 @@ namespace MJava
 
             if (validateToken(TokenValue::RPAREN, false))
             {
-                return new VariableDeclarationAST(loc, type, name);
+                return std::make_unique<VariableDeclarationAST>(loc, type, name);
             }
 
             if (!expectToken(TokenValue::COMMA, ",", true))
@@ -234,7 +234,7 @@ namespace MJava
                 return nullptr;
             }
 
-            return new VariableDeclarationAST(loc, type, name);
+            return std::make_unique<VariableDeclarationAST>(loc, type, name);
         }
 
         return nullptr;
@@ -245,21 +245,21 @@ namespace MJava
         // consume '('
         scanner_.getNextToken();
 
-        VecExprASTPtr args;
+        VecExprASTPtr arguments;
 
         // parse arguments of method call
         if (!validateToken(TokenValue::RPAREN, true))
         {
             while (true)
             {
-                ExprASTPtr arg = parseExpression();
+                ExprASTPtr argument = parseExpression();
 
-                if (arg == nullptr)
+                if (argument == nullptr)
                 {
                     return nullptr;
                 }
 
-                args.push_back(arg);
+                arguments.push_back(std::move(argument));
 
                 if (validateToken(TokenValue::RPAREN, true))
                 {
@@ -273,7 +273,7 @@ namespace MJava
             }
         }
 
-        return new MethodCallAST(token.getTokenLocation(), token.getTokenName(), args);
+        return std::make_unique<MethodCallAST>(token.getTokenLocation(), token.getTokenName(), std::move(arguments));
     }
 
     ExprASTPtr Parser::parseLengthStatement()
@@ -285,9 +285,9 @@ namespace MJava
             return nullptr;
         }
 
-        VecExprASTPtr parameters;
+        VecExprASTPtr arguments;
 
-        return new MethodCallAST(loc, "length", parameters);
+        return std::make_unique<MethodCallAST>(loc, "length", std::move(arguments));
     }
 
     ExprASTPtr Parser::parsePrintStatement()
@@ -321,7 +321,7 @@ namespace MJava
             return nullptr;
         }
 
-        return new PrintStatementAST(loc, printStatement);
+        return std::make_unique<PrintStatementAST>(loc, std::move(printStatement));
     }
 
     ExprASTPtr Parser::parseReturnStatement()
@@ -338,7 +338,7 @@ namespace MJava
         // consume possible ';'
         validateToken(TokenValue::SEMICOLON, true);
 
-        return new ReturnStatementAST(loc, returnStatement);
+        return std::make_unique<ReturnStatementAST>(loc, std::move(returnStatement));
     }
 
     ExprASTPtr Parser::parseNewStatement()
@@ -394,7 +394,7 @@ namespace MJava
             return nullptr;
         }
 
-        return new NewStatementAST(loc, type, length);
+        return std::make_unique<NewStatementAST>(loc, type, std::move(length));
     }
 
     ExprASTPtr Parser::parseVariableDeclaration()
@@ -434,7 +434,7 @@ namespace MJava
                 return nullptr;
         }
 
-        return new VariableDeclarationAST(loc, type, name);
+        return std::make_unique<VariableDeclarationAST>(loc, type, name);
     }
 
     ExprASTPtr Parser::parseVariableDeclaration(const Token& token)
@@ -465,7 +465,7 @@ namespace MJava
             return nullptr;
         }
 
-        return new VariableDeclarationAST(token.getTokenLocation(), type, name);
+        return std::make_unique<VariableDeclarationAST>(token.getTokenLocation(), type, name);
     }
 
     ExprASTPtr Parser::parseExpression()
@@ -477,7 +477,7 @@ namespace MJava
             return nullptr;
         }
 
-        ExprASTPtr currentASTPtr = parseBinOpRHS(0, lhs);
+        ExprASTPtr currentASTPtr = parseBinOpRHS(0, std::move(lhs));
 
         // consume possible ';'
         validateToken(TokenValue::SEMICOLON, true);
@@ -631,7 +631,7 @@ namespace MJava
                     return nullptr;
                 }
 
-                return new VariableDeclarationAST(loc, token.getTokenName() + "[]", name);                
+                return std::make_unique<VariableDeclarationAST>(loc, token.getTokenName() + "[]", name);                
             }
             else
             {
@@ -647,11 +647,11 @@ namespace MJava
                     return nullptr;
                 }
 
-                return new VariableAST(loc, token.getTokenName(), index);
+                return std::make_unique<VariableAST>(loc, token.getTokenName(), std::move(index));
             }
         }
 
-        return new VariableAST(loc, token.getTokenName(), nullptr);
+        return std::make_unique<VariableAST>(loc, token.getTokenName(), nullptr);
     }
 
     ExprASTPtr Parser::parseRealExpression()
@@ -662,7 +662,7 @@ namespace MJava
 
         scanner_.getNextToken();
 
-        return new RealAST(loc, real);
+        return std::make_unique<RealAST>(loc, real);
     }
 
     ExprASTPtr Parser::parseIntegerExpression()
@@ -673,7 +673,7 @@ namespace MJava
 
         scanner_.getNextToken();
 
-        return new IntegerAST(loc, integer);
+        return std::make_unique<IntegerAST>(loc, integer);
     }
 
     ExprASTPtr Parser::parseCharExpression()
@@ -684,7 +684,7 @@ namespace MJava
 
         scanner_.getNextToken();
 
-        return new CharAST(loc, ch);
+        return std::make_unique<CharAST>(loc, ch);
     }
 
     ExprASTPtr Parser::parseStringExpression()
@@ -695,7 +695,7 @@ namespace MJava
 
         scanner_.getNextToken();
 
-        return new StringAST(loc, string);
+        return std::make_unique<StringAST>(loc, string);
     }
 
     ExprASTPtr Parser::parseBooleanExpression()
@@ -706,14 +706,14 @@ namespace MJava
 
         scanner_.getNextToken();
 
-        return new BooleanAST(loc, boolean);
+        return std::make_unique<BooleanAST>(loc, boolean);
     }
 
     ExprASTPtr Parser::parseBinOpRHS(int precedence, ExprASTPtr lhs)
     {
         TokenLocation loc = scanner_.getToken().getTokenLocation();
 
-        ExprASTPtr expr = lhs;
+        ExprASTPtr expr = std::move(lhs);
 
         while (true)
         {
@@ -740,14 +740,14 @@ namespace MJava
             // if the precedence of current token less than the precedence of the next token, continue to parse.
             if (currentPrecedence < nextPrecedence)
             {
-                rhs = parseBinOpRHS(currentPrecedence + 1, rhs);
+                rhs = parseBinOpRHS(currentPrecedence + 1, std::move(rhs));
                 if (rhs == nullptr)
                 {
                     return nullptr;
                 }
             }
 
-            expr = new BinaryOpExpressionAST(loc, binOp, expr, rhs);
+            expr = std::make_unique<BinaryOpExpressionAST>(loc, binOp, std::move(expr), std::move(rhs));
         }
 
         return nullptr;
@@ -768,7 +768,7 @@ namespace MJava
             return nullptr;
         }
 
-        return new UnaryOpExpressionAST(loc, unaryOp, currentASTPtr);
+        return std::make_unique<UnaryOpExpressionAST>(loc, unaryOp, std::move(currentASTPtr));
     }
 
     ExprASTPtr Parser::parseParenExpression()
@@ -816,7 +816,7 @@ namespace MJava
                 continue;
             }
 
-            stmts.push_back(currentASTPtr);
+            stmts.push_back(std::move(currentASTPtr));
         }
 
         if (!expectToken(TokenValue::RBRACE, "}", true))
@@ -824,7 +824,7 @@ namespace MJava
             return nullptr;
         }
 
-        return new BlockAST(loc, stmts);
+        return std::make_unique<BlockAST>(loc, std::move(stmts));
     }
 
     ExprASTPtr Parser::parseIfStatement()
@@ -876,7 +876,7 @@ namespace MJava
             }
         }
 
-        return new IfStatementAST(loc, condition, thenPart, elsePart);
+        return std::make_unique<IfStatementAST>(loc, std::move(condition), std::move(thenPart), std::move(elsePart));
     }
 
     ExprASTPtr Parser::parseWhileStatement()
@@ -913,7 +913,7 @@ namespace MJava
             return nullptr;
         }
 
-        return new WhileStatementAST(loc, condition, body);
+        return std::make_unique<WhileStatementAST>(loc, std::move(condition), std::move(body));
     }
 
     ExprASTPtr Parser::parseForStatement()
@@ -949,7 +949,7 @@ namespace MJava
             return nullptr;
         }
 
-        return new ForStatementAST(loc, variable, condition, action, body);
+        return std::make_unique<ForStatementAST>(loc, std::move(variable), std::move(condition), std::move(action), std::move(body));
     }
 
     // Helper Functions.
