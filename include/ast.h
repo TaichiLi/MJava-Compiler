@@ -36,7 +36,7 @@ namespace MJava
     {
     public:
         BlockAST(const TokenLocation& loc, const VecExprASTPtr& body);
-        ~BlockAST() = default;
+        ~BlockAST();
         std::string toString() const;
 
     private:
@@ -75,7 +75,7 @@ namespace MJava
     {
     public:
         MethodCallAST(const TokenLocation& loc, const std::string& name, const VecExprASTPtr& parameters);
-        ~MethodCallAST() = default;
+        ~MethodCallAST();
         std::string toString() const;
 
     private:

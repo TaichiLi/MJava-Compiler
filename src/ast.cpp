@@ -28,6 +28,17 @@ namespace MJava
         : ExprAST(loc), body_(body)
     {}
 
+    BlockAST::~BlockAST()
+    {
+        for (auto exprASTPTr : body_)
+        {
+            if (exprASTPTr != nullptr)
+            {
+                delete exprASTPTr;
+            }
+        }
+    }
+
     std::string BlockAST::toString() const
     {
         std::ostringstream str;
@@ -69,6 +80,14 @@ namespace MJava
 
     MethodDeclarationAST::~MethodDeclarationAST()
     {
+        for (auto exprASTPTr : parameters_)
+        {
+            if (exprASTPTr != nullptr)
+            {
+                delete exprASTPTr;
+            }
+        }
+
         if (body_ != nullptr)
         {
             delete body_;
@@ -112,6 +131,17 @@ namespace MJava
     MethodCallAST::MethodCallAST(const TokenLocation& loc, const std::string& name, const VecExprASTPtr& parameters)
         : ExprAST(loc), name_(name), parameters_(parameters)
     {}
+
+    MethodCallAST::~MethodCallAST()
+    {
+        for (auto exprASTPTr : parameters_)
+        {
+            if (exprASTPTr != nullptr)
+            {
+                delete exprASTPTr;
+            }
+        }
+    }
 
     std::string MethodCallAST::toString() const
     {

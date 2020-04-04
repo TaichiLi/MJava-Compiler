@@ -19,6 +19,7 @@ namespace MJava
     {
     public:
         explicit                Parser(Scanner& scanner);
+                                ~Parser();
         static bool             getErrorFlag();
         static void             setErrorFlag(bool flag);
         VecExprASTPtr&          parse();

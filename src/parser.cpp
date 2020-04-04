@@ -20,6 +20,17 @@ namespace MJava
         // Eat the first token.
         scanner_.getNextToken();
     }
+
+    Parser::~Parser()
+    {
+        for (auto exprASTPTr : ast_)
+        {
+            if (exprASTPTr != nullptr)
+            {
+                delete exprASTPTr;
+            }
+        }
+    }
     
     std::string Parser::toString()
     {
