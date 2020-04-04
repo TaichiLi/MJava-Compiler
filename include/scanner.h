@@ -7,10 +7,10 @@
 #ifndef SCANNER_H_
 #define SCANNER_H_
 
+#include "dictionary.h"
+#include "token.h"
 #include <fstream>
 #include <string>
-#include "token.h"
-#include "dictionary.h"
 
 namespace MJava
 {

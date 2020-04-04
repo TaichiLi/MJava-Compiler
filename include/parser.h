@@ -7,11 +7,11 @@
 #ifndef PARSER_H_
 #define PARSER_H_
 
-#include <vector>
-#include <memory>
-#include "scanner.h"
 #include "ast.h"
+#include "scanner.h"
 #include "token.h"
+#include <memory>
+#include <vector>
 
 namespace MJava
 {

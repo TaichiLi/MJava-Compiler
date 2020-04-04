@@ -8,7 +8,6 @@
 #define ERROR_H_
 
 #include <string>
-#include <cassert>
 
 namespace MJava
 {
