@@ -50,39 +50,30 @@ namespace MJava
         : ExprAST(loc), className_(className), baseClassName_(baseClassName), classBody_(classBody)
     {}
 
+    ClassDeclarationAST::~ClassDeclarationAST()
+    {
+        if (classBody_ != nullptr)
+        {
+            delete classBody_;
+        }
+    }
+
     std::string ClassDeclarationAST::toString() const
     {
         return std::string("{\n\"type\": \"ClassDeclaration\",\n\"class name\": \"" + className_ + "\",\n\"base class\": \"" + baseClassName_ + "\",\n\"body\": [" + classBody_->toString() + "]\n}");  
     }
 
-    VariableDeclarationAST::VariableDeclarationAST(const TokenLocation& loc, const std::string& type, const std::string& name)
-        : ExprAST(loc), type_(type), name_(name)
-    {}
-
-    std::string VariableDeclarationAST::toString() const
-    {
-        return std::string("{\n\"type\": \"VarDeclaration\",\n\"variable type\": \"" + type_ + "\",\n\"variable name\": \"" + name_ + "\"\n}");
-    }
-
-    VariableAST::VariableAST(const TokenLocation& loc, const std::string& name, ExprASTPtr index)
-        : ExprAST(loc), name_(name), index_(index)
-    {}
-
-    std::string VariableAST::toString() const
-    {
-        if (index_ != nullptr)
-        {
-            return std::string("{\n\"type\": \"Variable\",\n\"name\": \"" + name_ + "\",\n\"index\": " + index_->toString() + "\n}");
-        }
-        else
-        {
-            return std::string("{\n\"type\": \"Variable\",\n\"name\": \"" + name_ + "\"\n}");
-        }   
-    }
-
     MethodDeclarationAST::MethodDeclarationAST(const TokenLocation& loc, const std::vector<std::string>& attributes, const std::string& returnType, const std::string& name, const VecExprASTPtr& parameters, ExprASTPtr body)
         : ExprAST(loc), attributes_(attributes), returnType_(returnType), name_(name), parameters_(parameters), body_(body)
     {}
+
+    MethodDeclarationAST::~MethodDeclarationAST()
+    {
+        if (body_ != nullptr)
+        {
+            delete body_;
+        }
+    }
     
     std::string MethodDeclarationAST::toString() const
     {
@@ -143,9 +134,60 @@ namespace MJava
         return str.str();
     }
 
+    VariableDeclarationAST::VariableDeclarationAST(const TokenLocation& loc, const std::string& type, const std::string& name)
+        : ExprAST(loc), type_(type), name_(name)
+    {}
+
+    std::string VariableDeclarationAST::toString() const
+    {
+        return std::string("{\n\"type\": \"VarDeclaration\",\n\"variable type\": \"" + type_ + "\",\n\"variable name\": \"" + name_ + "\"\n}");
+    }
+
+    VariableAST::VariableAST(const TokenLocation& loc, const std::string& name, ExprASTPtr index)
+        : ExprAST(loc), name_(name), index_(index)
+    {}
+
+    VariableAST::~VariableAST()
+    {
+        if (index_ != nullptr)
+        {
+            delete index_;
+        }
+    }
+
+    std::string VariableAST::toString() const
+    {
+        if (index_ != nullptr)
+        {
+            return std::string("{\n\"type\": \"Variable\",\n\"name\": \"" + name_ + "\",\n\"index\": " + index_->toString() + "\n}");
+        }
+        else
+        {
+            return std::string("{\n\"type\": \"Variable\",\n\"name\": \"" + name_ + "\"\n}");
+        }   
+    }
+
     IfStatementAST::IfStatementAST(const TokenLocation& loc, ExprASTPtr condition, ExprASTPtr thenPart, ExprASTPtr elsePart)
         : ExprAST(loc), condition_(condition), thenPart_(thenPart), elsePart_(elsePart)
     {}
+
+    IfStatementAST::~IfStatementAST()
+    {
+        if (condition_ != nullptr)
+        {
+            delete condition_;
+        }
+
+        if (thenPart_ != nullptr)
+        {
+            delete thenPart_;
+        }
+
+        if (elsePart_ != nullptr)
+        {
+            delete elsePart_;
+        }
+    }
     
     std::string IfStatementAST::toString() const
     {
@@ -156,6 +198,19 @@ namespace MJava
         : ExprAST(loc), condition_(condition), body_(body)
     {}
 
+    WhileStatementAST::~WhileStatementAST()
+    {
+        if (condition_ != nullptr)
+        {
+            delete condition_;
+        }
+
+        if (body_ != nullptr)
+        {
+            delete body_;
+        }
+    }
+
     std::string WhileStatementAST::toString() const
     {
         return std::string("{\n\"type\": \"WhileStatement\",\n\"condition\": " + condition_->toString() + ",\n\"body\": [" + body_->toString() + "]\n}");
@@ -164,6 +219,29 @@ namespace MJava
     ForStatementAST::ForStatementAST(const TokenLocation& loc, ExprASTPtr variable, ExprASTPtr condition, ExprASTPtr action, ExprASTPtr body)
         : ExprAST(loc), variable_(variable), condition_(condition), action_(action), body_(body)
     {}
+
+    ForStatementAST::~ForStatementAST()
+    {
+        if (variable_ != nullptr)
+        {
+            delete variable_;
+        }
+
+        if (condition_ != nullptr)
+        {
+            delete condition_;
+        }
+
+        if (action_ != nullptr)
+        {
+            delete action_;
+        }
+
+        if (body_ != nullptr)
+        {
+            delete body_;
+        }
+    }
 
     std::string ForStatementAST::toString() const
     {
@@ -174,32 +252,30 @@ namespace MJava
         : ExprAST(loc), returnStatement_(returnStatement)
     {}
 
+    ReturnStatementAST::~ReturnStatementAST()
+    {
+        if (returnStatement_ != nullptr)
+        {
+            delete returnStatement_;
+        }
+    }
+
     std::string ReturnStatementAST::toString() const
     {
         return std::string("{\n\"type\": \"ReturnStatement\",\n\"expression\" :" + (returnStatement_ != nullptr ? returnStatement_->toString() : "{}") + "\n}");
     }
 
-    BinaryOpExpressionAST::BinaryOpExpressionAST(const TokenLocation& loc, const std::string& binaryOp, ExprASTPtr lhs, ExprASTPtr rhs)
-        : ExprAST(loc), binaryOp_(binaryOp), lhs_(lhs), rhs_(rhs)
-    {}
-
-    std::string BinaryOpExpressionAST::toString() const
-    {
-        return std::string("{\n\"type\": \"BinaryOpExpression\",\n\"binary operator\": \"" + binaryOp_ + "\",\n\"lhs\": " + lhs_->toString() + ",\n\"rhs\": " + rhs_->toString() + "\n}");
-    }
-
-    UnaryOpExpressionAST::UnaryOpExpressionAST(const TokenLocation& loc, const std::string& unaryOp, ExprASTPtr expression)
-        : ExprAST(loc), unaryOp_(unaryOp), expression_(expression)
-    {}
-
-    std::string UnaryOpExpressionAST::toString() const
-    {
-        return std::string("{\n\"type\": \"UnaryOpExpression\",\n\"unary operator\": \"" + unaryOp_ + "\",\n\"expression\": " + expression_->toString() + "\n}");
-    }
-    
     PrintStatementAST::PrintStatementAST(const TokenLocation& loc, ExprASTPtr printStatement)
         : ExprAST(loc), printStatement_(printStatement)
     {}
+
+    PrintStatementAST::~PrintStatementAST()
+    {
+        if (printStatement_ != nullptr)
+        {
+            delete printStatement_;
+        }
+    }
 
     std::string PrintStatementAST::toString() const
     {
@@ -209,6 +285,14 @@ namespace MJava
     NewStatementAST::NewStatementAST(const TokenLocation& loc, const std::string& type, ExprASTPtr length)
         : ExprAST(loc), type_(type), length_(length)
     {}
+
+    NewStatementAST::~NewStatementAST()
+    {
+        if (length_ != nullptr)
+        {
+            delete length_;
+        }
+    }
 
     std::string NewStatementAST::toString() const
     {
@@ -220,6 +304,45 @@ namespace MJava
         {
             return std::string("{\n\"type\": \"NewStatement\",\n\"variable type\": \"" + type_ + "\"\n}");
         }
+    }
+
+    BinaryOpExpressionAST::BinaryOpExpressionAST(const TokenLocation& loc, const std::string& binaryOp, ExprASTPtr lhs, ExprASTPtr rhs)
+        : ExprAST(loc), binaryOp_(binaryOp), lhs_(lhs), rhs_(rhs)
+    {}
+
+    BinaryOpExpressionAST::~BinaryOpExpressionAST()
+    {
+        if (lhs_ != nullptr)
+        {
+            delete lhs_;
+        }
+        
+        if (rhs_ != nullptr)
+        {
+            delete rhs_;
+        }
+    }
+
+    std::string BinaryOpExpressionAST::toString() const
+    {
+        return std::string("{\n\"type\": \"BinaryOpExpression\",\n\"binary operator\": \"" + binaryOp_ + "\",\n\"lhs\": " + lhs_->toString() + ",\n\"rhs\": " + rhs_->toString() + "\n}");
+    }
+
+    UnaryOpExpressionAST::UnaryOpExpressionAST(const TokenLocation& loc, const std::string& unaryOp, ExprASTPtr expression)
+        : ExprAST(loc), unaryOp_(unaryOp), expression_(expression)
+    {}
+
+    UnaryOpExpressionAST::~UnaryOpExpressionAST()
+    {
+        if (expression_ != nullptr)
+        {
+            delete expression_;
+        }
+    }
+
+    std::string UnaryOpExpressionAST::toString() const
+    {
+        return std::string("{\n\"type\": \"UnaryOpExpression\",\n\"unary operator\": \"" + unaryOp_ + "\",\n\"expression\": " + expression_->toString() + "\n}");
     }
 
     RealAST::RealAST(const TokenLocation& loc, double real)

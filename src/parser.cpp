@@ -245,21 +245,21 @@ namespace MJava
         // consume '('
         scanner_.getNextToken();
 
-        VecExprASTPtr args;
+        VecExprASTPtr arguments;
 
         // parse arguments of method call
         if (!validateToken(TokenValue::RPAREN, true))
         {
             while (true)
             {
-                ExprASTPtr arg = parseExpression();
+                ExprASTPtr argument = parseExpression();
 
-                if (arg == nullptr)
+                if (argument == nullptr)
                 {
                     return nullptr;
                 }
 
-                args.push_back(arg);
+                arguments.push_back(argument);
 
                 if (validateToken(TokenValue::RPAREN, true))
                 {
@@ -273,7 +273,7 @@ namespace MJava
             }
         }
 
-        return new MethodCallAST(token.getTokenLocation(), token.getTokenName(), args);
+        return new MethodCallAST(token.getTokenLocation(), token.getTokenName(), arguments);
     }
 
     ExprASTPtr Parser::parseLengthStatement()
@@ -285,9 +285,9 @@ namespace MJava
             return nullptr;
         }
 
-        VecExprASTPtr parameters;
+        VecExprASTPtr arguments;
 
-        return new MethodCallAST(loc, "length", parameters);
+        return new MethodCallAST(loc, "length", arguments);
     }
 
     ExprASTPtr Parser::parsePrintStatement()

@@ -24,7 +24,7 @@ namespace MJava
     {
     public:
         ExprAST(const TokenLocation& loc);
-        virtual       ~ExprAST() = default;
+        virtual ~ExprAST() = default;
         TokenLocation getLocation() const;
         virtual std::string toString() const;
 
@@ -36,6 +36,7 @@ namespace MJava
     {
     public:
         BlockAST(const TokenLocation& loc, const VecExprASTPtr& body);
+        ~BlockAST() = default;
         std::string toString() const;
 
     private:
@@ -46,6 +47,7 @@ namespace MJava
     {
     public:
         ClassDeclarationAST(const TokenLocation& loc, const std::string& className, const std::string& baseClassName, ExprASTPtr classBody);
+        ~ClassDeclarationAST();
         std::string toString() const;
 
     private:
@@ -58,6 +60,7 @@ namespace MJava
     {
     public:
         MethodDeclarationAST(const TokenLocation& loc, const std::vector<std::string>& attributes, const std::string& returnType, const std::string& name, const VecExprASTPtr& parameters, ExprASTPtr body);
+        ~MethodDeclarationAST();
         std::string toString() const;
 
     private:
@@ -72,6 +75,7 @@ namespace MJava
     {
     public:
         MethodCallAST(const TokenLocation& loc, const std::string& name, const VecExprASTPtr& parameters);
+        ~MethodCallAST() = default;
         std::string toString() const;
 
     private:
@@ -83,6 +87,7 @@ namespace MJava
     {
     public:
         VariableDeclarationAST(const TokenLocation& loc, const std::string& type, const std::string& name);
+        ~VariableDeclarationAST() = default;
         std::string toString() const;
 
     private:
@@ -94,6 +99,7 @@ namespace MJava
     {
     public:
         VariableAST(const TokenLocation& loc, const std::string& name, ExprASTPtr index);
+        ~VariableAST();
         std::string toString() const;
 
     private:
@@ -105,6 +111,7 @@ namespace MJava
     {
     public:
         IfStatementAST(const TokenLocation& loc, ExprASTPtr condition, ExprASTPtr thenPart, ExprASTPtr elsePart);
+        ~IfStatementAST();
         std::string toString() const;
 
     private:
@@ -117,6 +124,7 @@ namespace MJava
     {
     public:
         WhileStatementAST(const TokenLocation& loc, ExprASTPtr condition, ExprASTPtr body);
+        ~WhileStatementAST();
         std::string toString() const;
 
     private:
@@ -128,6 +136,7 @@ namespace MJava
     {
     public:
         ForStatementAST(const TokenLocation& loc, ExprASTPtr variable, ExprASTPtr condition, ExprASTPtr action, ExprASTPtr body);
+        ~ForStatementAST();
         std::string toString() const;
 
     private:
@@ -141,16 +150,41 @@ namespace MJava
     {
     public:
         ReturnStatementAST(const TokenLocation& loc, ExprASTPtr returnStatement);
+        ~ReturnStatementAST();
         std::string toString() const;
 
     private:
         ExprASTPtr          returnStatement_;
     };
 
+    class PrintStatementAST : public ExprAST
+    {
+    public:
+        PrintStatementAST(const TokenLocation& loc, ExprASTPtr printStatement);
+        ~PrintStatementAST();
+        std::string toString() const;
+        
+    private:
+        ExprASTPtr          printStatement_;
+    };
+    
+    class NewStatementAST : public ExprAST
+    {
+    public:
+        NewStatementAST(const TokenLocation& loc, const std::string& type, ExprASTPtr length);
+        ~NewStatementAST();
+        std::string toString() const;
+        
+    private:
+        std::string         type_;
+        ExprASTPtr          length_;
+    };
+
     class BinaryOpExpressionAST : public ExprAST
     {
     public:
         BinaryOpExpressionAST(const TokenLocation& loc, const std::string& binaryOp, ExprASTPtr lhs, ExprASTPtr rhs);
+        ~BinaryOpExpressionAST();
         std::string toString() const;
 
     private:
@@ -163,6 +197,7 @@ namespace MJava
     {
     public:
         UnaryOpExpressionAST(const TokenLocation& loc, const std::string& unaryOp, ExprASTPtr expression);
+        ~UnaryOpExpressionAST();
         std::string toString() const;
 
     private:
@@ -170,31 +205,11 @@ namespace MJava
         ExprASTPtr          expression_;
     };
 
-    class PrintStatementAST : public ExprAST
-    {
-    public:
-        PrintStatementAST(const TokenLocation& loc, ExprASTPtr printStatement);
-        std::string toString() const;
-        
-    private:
-        ExprASTPtr          printStatement_;
-    };
-    
-    class NewStatementAST : public ExprAST
-    {
-    public:
-        NewStatementAST(const TokenLocation& loc, const std::string& type, ExprASTPtr length);
-        std::string toString() const;
-        
-    private:
-        std::string         type_;
-        ExprASTPtr          length_;
-    };
-
     class RealAST : public ExprAST
     {
     public:
         RealAST(const TokenLocation& loc, double real);
+        ~RealAST() = default;
         std::string toString() const;
 
     private:
@@ -204,6 +219,7 @@ namespace MJava
     {
     public:
         IntegerAST(const TokenLocation& loc, int integer);
+        ~IntegerAST() = default;
         std::string toString() const;
 
     private:
@@ -214,6 +230,7 @@ namespace MJava
     {
     public:
         CharAST(const TokenLocation& loc, char ch);
+        ~CharAST() = default;
         std::string toString() const;
 
     private:
@@ -224,6 +241,7 @@ namespace MJava
     {
     public:
         StringAST(const TokenLocation& loc, const std::string& str);
+        ~StringAST() = default;
         std::string toString() const;
 
     private:
@@ -234,6 +252,7 @@ namespace MJava
     {
     public:
         BooleanAST(const TokenLocation& loc, bool boolean);
+        ~BooleanAST() = default;
         std::string toString() const;
 
     private:
