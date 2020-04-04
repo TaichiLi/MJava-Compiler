@@ -7,11 +7,11 @@
 #ifndef TOKEN_H_
 #define TOKEN_H_
 
-#include <string>
-#include <iostream>
-#include <tuple>
-#include <map>
 #include <cassert>
+#include <iostream>
+#include <map>
+#include <string>
+#include <tuple>
 
 namespace MJava
 {

@@ -4,6 +4,12 @@
 // Created by Li Taiji 2020-03-18
 // Copyright (c) 2020 Li Taiji All rights reserved
 
+#if defined(LEXER)
+    #if defined(PARSER)
+        #error Can not pass both macro definition "LEXER" and "PARSER" when compile.
+    #endif
+#endif
+
 #if defined(PARSER)
     #include "parser.h"
 #endif
@@ -48,7 +54,15 @@ int main(int argc, char** argv)
     }
     else
     {
+#if defined(LEXER)
         of.open("./tokenOut.txt");
+
+#elif defined(PARSER)
+        of.open("./SyntaxOut.txt");
+
+#else
+    #error Please pass the macro definition "LEXER" or "PARSER" when compile.
+#endif
     }
     
     if (of.fail())

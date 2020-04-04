@@ -7,17 +7,17 @@
 #ifndef AST_H_
 #define AST_H_
 
+#include "token.h"
+#include <memory>
 #include <string>
 #include <vector>
-#include <memory>
-#include "token.h"
 
 namespace MJava
 {
     class ExprAST;
     class ClassAST;
 
-    using VecExprASTPtr = std::vector <ExprAST*>;
+    using VecExprASTPtr = std::vector<ExprAST*>;
     using ExprASTPtr = ExprAST*;
 
     class ExprAST

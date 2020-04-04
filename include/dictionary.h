@@ -7,10 +7,10 @@
 #ifndef DICTIONARY_H_
 #define DICTIONARY_H_
 
+#include "token.h"
+#include <map>
 #include <string>
 #include <tuple>
-#include <map>
-#include "token.h"
 
 namespace MJava
 {
