@@ -217,7 +217,7 @@ namespace MJava
         std::string toString() const;
 
     private:
-        char         ch_;
+        char                ch_;
     };
 
     class StringAST : public ExprAST
