@@ -3,8 +3,8 @@ if exist .\bin (
     if exist .\bin\Lexer.exe (
     .\bin\Lexer.exe %1 %2
     ) else ( 
-        g++ .\src\main.cpp .\src\lexer.cpp -I .\include -o .\bin\Lexer.exe && .\bin\Lexer.exe %1 %2
+        g++ src/main.cpp src/scanner.cpp src/error.cpp src/dictionary.cpp src/token.cpp -I ./include -DLEXER -o .\bin\Lexer.exe && .\bin\Lexer.exe %1 %2
     )
 ) else (
-    md .\bin && g++ .\src\main.cpp .\src\lexer.cpp -I .\include -o .\bin\Lexer.exe && .\bin\Lexer.exe %1 %2
+    md .\bin && g++ src/main.cpp src/scanner.cpp src/error.cpp src/dictionary.cpp src/token.cpp -I ./include -DLEXER -o .\bin\Lexer.exe && .\bin\Lexer.exe %1 %2
 )
