@@ -147,6 +147,27 @@ namespace MJava
         ExprASTPtr          returnStatement_;
     };
 
+    class PrintStatementAST : public ExprAST
+    {
+    public:
+        PrintStatementAST(const TokenLocation& loc, ExprASTPtr printStatement);
+        std::string toString() const;
+        
+    private:
+        ExprASTPtr          printStatement_;
+    };
+    
+    class NewStatementAST : public ExprAST
+    {
+    public:
+        NewStatementAST(const TokenLocation& loc, const std::string& type, ExprASTPtr length);
+        std::string toString() const;
+        
+    private:
+        std::string         type_;
+        ExprASTPtr          length_;
+    };
+
     class BinaryOpExpressionAST : public ExprAST
     {
     public:
@@ -168,27 +189,6 @@ namespace MJava
     private:
         std::string         unaryOp_;
         ExprASTPtr          expression_;
-    };
-
-    class PrintStatementAST : public ExprAST
-    {
-    public:
-        PrintStatementAST(const TokenLocation& loc, ExprASTPtr printStatement);
-        std::string toString() const;
-        
-    private:
-        ExprASTPtr          printStatement_;
-    };
-    
-    class NewStatementAST : public ExprAST
-    {
-    public:
-        NewStatementAST(const TokenLocation& loc, const std::string& type, ExprASTPtr length);
-        std::string toString() const;
-        
-    private:
-        std::string         type_;
-        ExprASTPtr          length_;
     };
 
     class RealAST : public ExprAST

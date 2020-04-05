@@ -179,24 +179,6 @@ namespace MJava
         return std::string("{\n\"type\": \"ReturnStatement\",\n\"expression\" :" + (returnStatement_ != nullptr ? returnStatement_->toString() : "{}") + "\n}");
     }
 
-    BinaryOpExpressionAST::BinaryOpExpressionAST(const TokenLocation& loc, const std::string& binaryOp, ExprASTPtr lhs, ExprASTPtr rhs)
-        : ExprAST(loc), binaryOp_(binaryOp), lhs_(std::move(lhs)), rhs_(std::move(rhs))
-    {}
-
-    std::string BinaryOpExpressionAST::toString() const
-    {
-        return std::string("{\n\"type\": \"BinaryOpExpression\",\n\"binary operator\": \"" + binaryOp_ + "\",\n\"lhs\": " + lhs_->toString() + ",\n\"rhs\": " + rhs_->toString() + "\n}");
-    }
-
-    UnaryOpExpressionAST::UnaryOpExpressionAST(const TokenLocation& loc, const std::string& unaryOp, ExprASTPtr expression)
-        : ExprAST(loc), unaryOp_(unaryOp), expression_(std::move(expression))
-    {}
-
-    std::string UnaryOpExpressionAST::toString() const
-    {
-        return std::string("{\n\"type\": \"UnaryOpExpression\",\n\"unary operator\": \"" + unaryOp_ + "\",\n\"expression\": " + expression_->toString() + "\n}");
-    }
-    
     PrintStatementAST::PrintStatementAST(const TokenLocation& loc, ExprASTPtr printStatement)
         : ExprAST(loc), printStatement_(std::move(printStatement))
     {}
@@ -220,6 +202,24 @@ namespace MJava
         {
             return std::string("{\n\"type\": \"NewStatement\",\n\"variable type\": \"" + type_ + "\"\n}");
         }
+    }
+
+    BinaryOpExpressionAST::BinaryOpExpressionAST(const TokenLocation& loc, const std::string& binaryOp, ExprASTPtr lhs, ExprASTPtr rhs)
+        : ExprAST(loc), binaryOp_(binaryOp), lhs_(std::move(lhs)), rhs_(std::move(rhs))
+    {}
+
+    std::string BinaryOpExpressionAST::toString() const
+    {
+        return std::string("{\n\"type\": \"BinaryOpExpression\",\n\"binary operator\": \"" + binaryOp_ + "\",\n\"lhs\": " + lhs_->toString() + ",\n\"rhs\": " + rhs_->toString() + "\n}");
+    }
+
+    UnaryOpExpressionAST::UnaryOpExpressionAST(const TokenLocation& loc, const std::string& unaryOp, ExprASTPtr expression)
+        : ExprAST(loc), unaryOp_(unaryOp), expression_(std::move(expression))
+    {}
+
+    std::string UnaryOpExpressionAST::toString() const
+    {
+        return std::string("{\n\"type\": \"UnaryOpExpression\",\n\"unary operator\": \"" + unaryOp_ + "\",\n\"expression\": " + expression_->toString() + "\n}");
     }
 
     RealAST::RealAST(const TokenLocation& loc, double real)
