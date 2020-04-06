@@ -129,7 +129,7 @@ namespace MJava
         return new ClassDeclarationAST(loc, className, baseClassName, classBody);
     }
 
-    ExprASTPtr Parser::parseMethodDeclaration()
+    ExprASTPtr Parser::parseMethodOrVariableDeclaration()
     {
         TokenLocation loc = scanner_.getToken().getTokenLocation();
 
@@ -137,7 +137,7 @@ namespace MJava
         {
             return nullptr;
         }
-        
+
         std::vector<std::string> attributes;
         
         // push public
@@ -157,20 +157,43 @@ namespace MJava
         
             scanner_.getNextToken();
         }
-        
-        std::string returnType = scanner_.getToken().getTokenName();
+
+        std::string type = scanner_.getToken().getTokenName();
         
         scanner_.getNextToken();
-        
+
+        if (validateToken(TokenValue::LBRACK, true))
+        {
+            if (!expectToken(TokenValue::RBRACK, "]", true))
+            {
+                return nullptr;
+            }
+            type += "[]";
+        }
+
         if (!validateToken(TokenValue::MAIN, false) && !validateToken(TokenType::IDENTIFIER, false))
         {
             return nullptr;
         }
-        
+
         std::string name = scanner_.getToken().getTokenName();
-        
+
         scanner_.getNextToken();
-        
+
+        if (validateToken(TokenValue::LPAREN, false))
+        {
+            return parseMethodDeclaration(attributes, type, name);
+        }
+        else
+        {
+            return parseVariableDeclaration(attributes, type, name);
+        }
+    }
+
+    ExprASTPtr Parser::parseMethodDeclaration(const std::vector<std::string>& attributes, const std::string& returnType, const std::string& name)
+    {
+        TokenLocation loc = scanner_.getToken().getTokenLocation();
+
         if (!expectToken(TokenValue::LPAREN, "(", true))
         {
             return nullptr;
@@ -235,9 +258,11 @@ namespace MJava
 
             scanner_.getNextToken();
 
+            std::vector<std::string> attributes;
+
             if (validateToken(TokenValue::RPAREN, false))
             {
-                return new VariableDeclarationAST(loc, type, name);
+                return new VariableDeclarationAST(loc, attributes, type, name);
             }
 
             if (!expectToken(TokenValue::COMMA, ",", true))
@@ -245,7 +270,7 @@ namespace MJava
                 return nullptr;
             }
 
-            return new VariableDeclarationAST(loc, type, name);
+            return new VariableDeclarationAST(loc, attributes, type, name);
         }
 
         return nullptr;
@@ -367,27 +392,24 @@ namespace MJava
             return nullptr;
         }
 
-        std::string type = scanner_.getToken().getTokenName();
+        Token token = scanner_.getToken();
+        std::string type = token.getTokenName();
 
         scanner_.getNextToken();
 
-        // TODO: parser new statement that invokes constructor.
-        if (validateToken(TokenValue::LPAREN, true))
-        {
-            if (!expectToken(TokenValue::RPAREN, ")", true))
-            {
-                return nullptr;
-            }
-        }
+        ExprASTPtr expression = nullptr;
 
-        ExprASTPtr length = nullptr;
+        if (validateToken(TokenValue::LPAREN, false))
+        {
+            expression = parseMethodCallStatement(token);
+        }
 
         if (validateToken(TokenValue::LBRACK, true))
         {
             // parse the length of array.
-            length = parseExpression();
+            expression = parseExpression();
 
-            if (length == nullptr)
+            if (expression == nullptr)
             {
                 return nullptr;
             }
@@ -405,7 +427,7 @@ namespace MJava
             return nullptr;
         }
 
-        return new NewStatementAST(loc, type, length);
+        return new NewStatementAST(loc, type, expression);
     }
 
     ExprASTPtr Parser::parseVariableDeclaration()
@@ -445,7 +467,23 @@ namespace MJava
                 return nullptr;
         }
 
-        return new VariableDeclarationAST(loc, type, name);
+        std::vector<std::string> attributes;
+
+        return new VariableDeclarationAST(loc, attributes, type, name);
+    }
+
+    ExprASTPtr Parser::parseVariableDeclaration(const std::vector<std::string>& attributes, const std::string& type, const std::string& name)
+    {
+        TokenLocation loc = scanner_.getToken().getTokenLocation();
+
+        scanner_.getNextToken();
+        
+        if (!expectToken(TokenValue::SEMICOLON, ";", true))
+        {
+                return nullptr;
+        }
+
+        return new VariableDeclarationAST(loc, attributes, type, name);
     }
 
     ExprASTPtr Parser::parseVariableDeclaration(const Token& token)
@@ -476,7 +514,9 @@ namespace MJava
             return nullptr;
         }
 
-        return new VariableDeclarationAST(token.getTokenLocation(), type, name);
+        std::vector<std::string> attributes;
+
+        return new VariableDeclarationAST(token.getTokenLocation(), attributes, type, name);
     }
 
     ExprASTPtr Parser::parseExpression()
@@ -509,7 +549,7 @@ namespace MJava
                         return parseClassDeclaration();
 
                     case TokenValue::PUBLIC:
-                        return parseMethodDeclaration();
+                        return parseMethodOrVariableDeclaration();
 
                     case TokenValue::RETURN:
                         return parseReturnStatement();
@@ -642,7 +682,9 @@ namespace MJava
                     return nullptr;
                 }
 
-                return new VariableDeclarationAST(loc, token.getTokenName() + "[]", name);                
+                std::vector<std::string> attributes;
+
+                return new VariableDeclarationAST(loc, attributes, token.getTokenName() + "[]", name);                
             }
             else
             {

@@ -86,11 +86,12 @@ namespace MJava
     class VariableDeclarationAST : public ExprAST
     {
     public:
-        VariableDeclarationAST(const TokenLocation& loc, const std::string& type, const std::string& name);
+        VariableDeclarationAST(const TokenLocation& loc, const std::vector<std::string>& attributes, const std::string& type, const std::string& name);
         ~VariableDeclarationAST() = default;
         std::string toString() const;
 
     private:
+        std::vector<std::string> attributes_;
         std::string         type_;
         std::string         name_;
     };
@@ -171,13 +172,13 @@ namespace MJava
     class NewStatementAST : public ExprAST
     {
     public:
-        NewStatementAST(const TokenLocation& loc, const std::string& type, ExprASTPtr length);
+        NewStatementAST(const TokenLocation& loc, const std::string& type, ExprASTPtr newStatement);
         ~NewStatementAST();
         std::string toString() const;
         
     private:
         std::string         type_;
-        ExprASTPtr          length_;
+        ExprASTPtr          newStatement_;
     };
 
     class BinaryOpExpressionAST : public ExprAST

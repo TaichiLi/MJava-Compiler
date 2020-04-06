@@ -7,6 +7,7 @@
 #include "ast.h"
 #include <sstream>
 #include <string>
+#include <typeinfo.h>
 
 namespace MJava
 {
@@ -164,13 +165,28 @@ namespace MJava
         return str.str();
     }
 
-    VariableDeclarationAST::VariableDeclarationAST(const TokenLocation& loc, const std::string& type, const std::string& name)
-        : ExprAST(loc), type_(type), name_(name)
+    VariableDeclarationAST::VariableDeclarationAST(const TokenLocation& loc, const std::vector<std::string>& attributes, const std::string& type, const std::string& name)
+        : ExprAST(loc), attributes_(attributes), type_(type), name_(name)
     {}
 
     std::string VariableDeclarationAST::toString() const
     {
-        return std::string("{\n\"type\": \"VarDeclaration\",\n\"variable type\": \"" + type_ + "\",\n\"variable name\": \"" + name_ + "\"\n}");
+        std::ostringstream str;
+        str << "{\n\"type\": \"VarDeclaration\",\n\"attributes\": [";
+
+        size_t size = attributes_.size();
+
+        if (size > 0)
+        {
+            for (size_t i = 0; i < size - 1; i++)
+            {
+                str << "\"" << attributes_[i] << "\",\n";
+            }
+            str << "\"" << attributes_[size - 1] << "\"\n";
+        }
+
+        str << "]\n,\"variable type\": \"" << type_ << "\",\n\"variable name\": \"" << name_ << "\"\n}";
+        return str.str();
     }
 
     VariableAST::VariableAST(const TokenLocation& loc, const std::string& name, ExprASTPtr index)
@@ -312,27 +328,27 @@ namespace MJava
         return std::string("{\n\"type\": \"PrintStatement\",\n\"expression\": " + printStatement_->toString() + "\n}");
     }
 
-    NewStatementAST::NewStatementAST(const TokenLocation& loc, const std::string& type, ExprASTPtr length)
-        : ExprAST(loc), type_(type), length_(length)
+    NewStatementAST::NewStatementAST(const TokenLocation& loc, const std::string& type, ExprASTPtr newStatement)
+        : ExprAST(loc), type_(type), newStatement_(newStatement)
     {}
 
     NewStatementAST::~NewStatementAST()
     {
-        if (length_ != nullptr)
+        if (newStatement_ != nullptr)
         {
-            delete length_;
+            delete newStatement_;
         }
     }
 
     std::string NewStatementAST::toString() const
     {
-        if (length_ != nullptr)
+        if (typeid(*newStatement_) == typeid(MethodCallAST))
         {
-            return std::string("{\n\"type\": \"NewStatement\",\n\"variable type\": \"" + type_ + "\",\n\"length\": " + length_->toString() + "\n}");
+            return std::string("{\n\"type\": \"NewStatement\",\n\"variable type\": \"" + type_ + "\",\n\"expression\": " + newStatement_->toString() + "\n}");
         }
         else
         {
-            return std::string("{\n\"type\": \"NewStatement\",\n\"variable type\": \"" + type_ + "\"\n}");
+            return std::string("{\n\"type\": \"NewStatement\",\n\"variable type\": \"" + type_ + "\",\n\"length\": " + newStatement_->toString() + "\n}");
         }
     }
 
