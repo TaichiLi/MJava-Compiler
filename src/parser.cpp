@@ -110,7 +110,7 @@ namespace MJava
                 }
                 else
                 {
-                    errorSyntax(loc.toString() + "Expected ' variable declaration ', but find an unexpected statement");
+                    errorSyntax(loc.toString() + "Expected ' variable declaration ', but find an unexpected statement\n" + JSONFormatter::format(memberVariable->toString()));
                 }
             }
             else
@@ -139,7 +139,7 @@ namespace MJava
             }
             else
             {
-                errorSyntax(loc.toString() + "Expected ' method declaration ', but find an unexpected statement");
+                errorSyntax(loc.toString() + "Expected ' method declaration ', but find an unexpected statement\n" + JSONFormatter::format(memberMethod->toString()));
             }
         }
 
@@ -240,7 +240,7 @@ namespace MJava
             {
                 if (dynamic_cast<VariableDeclarationAST*>(currentASTPtr) != nullptr)
                 {
-                    errorSyntax(loc.toString() + "Find unexpected variable declaration statement");
+                    errorSyntax(loc.toString() + "Find unexpected variable declaration statement\n" + JSONFormatter::format(currentASTPtr->toString()));
                 }
                 else
                 {
@@ -950,14 +950,26 @@ namespace MJava
 
         while (!validateToken(TokenValue::RBRACE, false) && !validateToken(TokenType::END_OF_FILE, false))
         {
+            TokenLocation loc = scanner_.getToken().getTokenLocation();
+
             ExprASTPtr currentASTPtr = parseExpression();
 
-            if (currentASTPtr == nullptr)
+            if (currentASTPtr != nullptr)
+            {
+                if (dynamic_cast<VariableDeclarationAST*>(currentASTPtr) == nullptr)
+                {
+                    stmts.push_back(currentASTPtr);
+                }
+                else
+                {
+                    errorSyntax(loc.toString() + "Find unexpected variable declaration statement\n" + JSONFormatter::format(currentASTPtr->toString()));
+                    continue;
+                }
+            }
+            else
             {
                 continue;
             }
-
-            stmts.push_back(currentASTPtr);
         }
 
         if (!expectToken(TokenValue::RBRACE, "}", true))

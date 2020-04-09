@@ -14,7 +14,7 @@ std::string JSONFormatter::getSpaceOrTab(int tabNum)
     std::ostringstream tab;
 
     for (int i = 0; i < tabNum; i++) {
-        tab << "\t";
+        tab << "    ";
     }
 
     return tab.str();
