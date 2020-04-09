@@ -338,8 +338,8 @@ void fileScanner(FILE* fp, FILE* of)
                 // char *token = new char[endIndex - startIndex + 1];
                 // strncpy(token, line + startIndex, endIndex - startIndex);
                 // token[endIndex - startIndex] = '\0';
+                fprintf(of, "#%d ERROR: Identifiers can not begin with an underscore: %.*s\n", lineCount, endIndex - startIndex, line + startIndex);
                 startIndex = endIndex;
-                fprintf(of, "#%d ERROR: Identifiers can not begin with an underscore %.*s\n", lineCount, endIndex - startIndex, line + startIndex);
                 // delete[] token;
                 continue;
             }
@@ -361,22 +361,21 @@ void fileScanner(FILE* fp, FILE* of)
                     startIndex = endIndex;
                     continue;
                 }
+                line[endIndex] = c;
                 if (strncmp("System.out.println", line + startIndex, endIndex - startIndex + 12) == 0)
                 {
-                    line[endIndex] = c;
                     // The length of "System.out.println" after 'm' is 12
                     endIndex += 12;
                     // token = new char[endIndex - startIndex + 1];
                     // strncpy(token, line + startIndex, endIndex - startIndex);
                     // token[endIndex - startIndex] = '\0';
-                    startIndex = endIndex;
                     fprintf(of, "#%d %s %.*s\n", lineCount, "PRINT", endIndex - startIndex, line + startIndex);
+                    startIndex = endIndex;
                     // delete[] token;
                     continue;
                 }
                 else
                 {
-                    line[endIndex] = c;
                     fprintf(of, "#%d %s %.*s\n", lineCount, "IDENTIFIER", endIndex - startIndex, line + startIndex);
                     // delete[] token;
                     startIndex = endIndex;
@@ -392,8 +391,8 @@ void fileScanner(FILE* fp, FILE* of)
                     // char* token = new char[endIndex - startIndex + 1];
                     // strncpy(token, line + startIndex, endIndex - startIndex);
                     // token[endIndex - startIndex] = '\0';
-                    startIndex = endIndex;
                     fprintf(of, "#%d %s %.*s\n", lineCount, "INTEGER", endIndex - startIndex, line + startIndex);
+                    startIndex = endIndex;
                     // delete[] token;
                     continue;
                 }
@@ -404,8 +403,8 @@ void fileScanner(FILE* fp, FILE* of)
                     // char* token = new char[endIndex - startIndex + 1];
                     // strncpy(token, line + startIndex, endIndex - startIndex);
                     // token[endIndex - startIndex] = '\0';
-                    startIndex = endIndex;
                     fprintf(of, "#%d ERROR: Identifiers can not begin with a number %.*s\n", lineCount, endIndex - startIndex, line + startIndex);
+                    startIndex = endIndex;
                     // delete[] token;
                     continue;
                 }
@@ -419,8 +418,8 @@ void fileScanner(FILE* fp, FILE* of)
                         // char* token = new char[endIndex - startIndex + 1];
                         // strncpy(token, line + startIndex, endIndex - startIndex);
                         // token[endIndex - startIndex] = '\0';
-                        startIndex = endIndex;
                         fprintf(of, "#%d %s %.*s\n", lineCount, "INTEGER", endIndex - startIndex, line + startIndex);
+                        startIndex = endIndex;
                         ++endIndex;
                         startIndex = endIndex;
                         fprintf(of, "#%d %s %c\n", lineCount, "DOT", '.');
@@ -431,11 +430,16 @@ void fileScanner(FILE* fp, FILE* of)
                         // token = new char[endIndex - startIndex + 1];
                         // strncpy(token, line + startIndex, endIndex - startIndex);
                         // token[endIndex - startIndex] = '\0';
-                        startIndex = endIndex;
                         if (isdigit(line[startIndex]) || line[startIndex] == '_')
-                            fprintf(of, "#%d ERROR: Identifiers can not begin with a number %.*s\n", lineCount, endIndex - startIndex, line + startIndex);
-                        else 
+                        {
+                            fprintf(of, "#%d ERROR: Identifiers can not begin with a number: %.*s\n", lineCount, endIndex - startIndex, line + startIndex);
+                            startIndex = endIndex;
+                        }
+                        else
+                        {
                             fprintf(of, "#%d %s %.*s\n", lineCount, "IDENTIFIER", endIndex - startIndex, line + startIndex);
+                            startIndex = endIndex;
+                        }
                         // delete[] token;
                         continue;
                     }
@@ -445,8 +449,8 @@ void fileScanner(FILE* fp, FILE* of)
                         // char* token = new char[endIndex - startIndex + 1];
                         // strncpy(token, line + startIndex, endIndex - startIndex);
                         // token[endIndex - startIndex] = '\0';
+                        fprintf(of, "#%d ERROR: Floating Numbers are not supported: %.*s\n", lineCount, endIndex - startIndex, line + startIndex);
                         startIndex = endIndex;
-                        fprintf(of, "#%d ERROR: Floating Numbers are not supported %.*s\n", lineCount, endIndex - startIndex, line + startIndex);
                         // delete[] token;
                         continue;
                     }
