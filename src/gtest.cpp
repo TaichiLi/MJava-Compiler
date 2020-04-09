@@ -133,19 +133,19 @@ TEST(LexerTest, HandleExpressionInput) {
 TEST(LexerTest, HandleErrorInput) {
     Lexer lexer = Lexer();
     lexer.parse("0.0");
-    EXPECT_STREQ("ERROR: Floating Numbers are not supported 0.0\n", lexer.getTokens());
+    EXPECT_STREQ("ERROR: Floating Numbers are not supported: 0.0\n", lexer.getTokens());
     lexer.parse("&");
-    EXPECT_STREQ("ERROR: Unknown character &\n", lexer.getTokens());
+    EXPECT_STREQ("ERROR: Unknown character: &\n", lexer.getTokens());
     lexer.parse(">");
-    EXPECT_STREQ("ERROR: Unknown character >\n", lexer.getTokens());
+    EXPECT_STREQ("ERROR: Unknown character: >\n", lexer.getTokens());
     lexer.parse("|");
-    EXPECT_STREQ("ERROR: Unknown character |\n", lexer.getTokens());
+    EXPECT_STREQ("ERROR: Unknown character: |\n", lexer.getTokens());
     lexer.parse("/");
-    EXPECT_STREQ("ERROR: Unknown character /\n", lexer.getTokens());
+    EXPECT_STREQ("ERROR: Unknown character: /\n", lexer.getTokens());
     lexer.parse("_abc123");
-    EXPECT_STREQ("ERROR: Identifiers can not begin with an underscore _abc123\n", lexer.getTokens());
+    EXPECT_STREQ("ERROR: Identifiers can not begin with an underscore: _abc123\n", lexer.getTokens());
     lexer.parse("123abc");
-    EXPECT_STREQ("ERROR: Identifiers can not begin with a number 123abc\n", lexer.getTokens());
+    EXPECT_STREQ("ERROR: Identifiers can not begin with a number: 123abc\n", lexer.getTokens());
 }
 
 int main(int argc, char *argv[]) {

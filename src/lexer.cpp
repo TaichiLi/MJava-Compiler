@@ -140,7 +140,7 @@ void lineScanner(const char *line, char *tokens, int *toklen)
             // char *token = new char[endIndex - startIndex + 1];
             // strncpy(token, line + startIndex, endIndex - startIndex);
             // token[endIndex - startIndex] = '\0';
-            int len = sprintf(tmp, "ERROR: Identifiers can not begin with an underscore %.*s\n", endIndex - startIndex, line + startIndex);
+            int len = sprintf(tmp, "ERROR: Identifiers can not begin with an underscore: %.*s\n", endIndex - startIndex, line + startIndex);
             *toklen += len;
             startIndex = endIndex;
             // delete[] token;
@@ -212,7 +212,7 @@ void lineScanner(const char *line, char *tokens, int *toklen)
                 // char* token = new char[endIndex - startIndex + 1];
                 // strncpy(token, line + startIndex, endIndex - startIndex);
                 // token[endIndex - startIndex] = '\0';
-                int len = sprintf(tmp, "ERROR: Identifiers can not begin with a number %.*s\n", endIndex - startIndex, line + startIndex);
+                int len = sprintf(tmp, "ERROR: Identifiers can not begin with a number: %.*s\n", endIndex - startIndex, line + startIndex);
                 *toklen += len;
                 startIndex = endIndex;
                 // delete[] token;
@@ -247,7 +247,7 @@ void lineScanner(const char *line, char *tokens, int *toklen)
                     // token[endIndex - startIndex] = '\0';
                     if (isdigit(line[startIndex]) || line[startIndex] == '_')
                     {
-                        int len = sprintf(tmp, "ERROR: Identifiers can not begin with a number %.*s\n", endIndex - startIndex, line + startIndex);
+                        int len = sprintf(tmp, "ERROR: Identifiers can not begin with a number: %.*s\n", endIndex - startIndex, line + startIndex);
                         *toklen += len;
                         startIndex = endIndex;
                         strncat(tokens, tmp, len);
@@ -270,7 +270,7 @@ void lineScanner(const char *line, char *tokens, int *toklen)
                     // char* token = new char[endIndex - startIndex + 1];
                     // strncpy(token, line + startIndex, endIndex - startIndex);
                     // token[endIndex - startIndex] = '\0';
-                    int len = sprintf(tmp, "ERROR: Floating Numbers are not supported %.*s\n", endIndex - startIndex, line + startIndex);
+                    int len = sprintf(tmp, "ERROR: Floating Numbers are not supported: %.*s\n", endIndex - startIndex, line + startIndex);
                     *toklen += len;
                     startIndex = endIndex;
                     // delete[] token;
@@ -278,6 +278,38 @@ void lineScanner(const char *line, char *tokens, int *toklen)
                     continue;
                 }
             }
+        }
+        if (line[endIndex] == '.')
+        {
+            int index = endIndex;
+            ++endIndex;
+            while (isdigit(line[endIndex]))
+                ++endIndex;
+            if (endIndex == index + 1)
+            {
+                int len = sprintf(tmp, "%s %c\n", "DOT", '.');
+                *toklen += len;
+                startIndex = endIndex;
+                strncat(tokens, tmp, len);
+                continue;
+            }
+            if (isalpha(line[endIndex]) || line[endIndex] == '_')
+            {
+                while (isalpha(line[endIndex]) || isdigit(line[endIndex]) || line[endIndex] == '_')
+                    ++endIndex;
+                int len = sprintf(tmp, "ERROR: Identifiers can not begin with a dot: %.*s\n", endIndex - startIndex, line + startIndex);
+                *toklen += len;
+                startIndex = endIndex;
+                strncat(tokens, tmp, len);
+            }
+            else
+            {
+                int len = sprintf(tmp, "ERROR: Floating Numbers are not supported: %.*s\n", endIndex - startIndex, line + startIndex);
+                *toklen += len;
+                startIndex = endIndex;
+                strncat(tokens, tmp, len);
+            }
+            continue;
         }
         char *token = new char[2];
         token[0] = line[endIndex];
@@ -301,7 +333,7 @@ void lineScanner(const char *line, char *tokens, int *toklen)
             strncat(tokens, tmp, len);
             continue;
         }
-        int len = sprintf(tmp, "ERROR: Unknown character %c\n", line[endIndex]);
+        int len = sprintf(tmp, "ERROR: Unknown character: %c\n", line[endIndex]);
         *toklen += len;
         strncat(tokens, tmp, len);
         ++endIndex;
@@ -403,7 +435,7 @@ void fileScanner(FILE* fp, FILE* of)
                     // char* token = new char[endIndex - startIndex + 1];
                     // strncpy(token, line + startIndex, endIndex - startIndex);
                     // token[endIndex - startIndex] = '\0';
-                    fprintf(of, "#%d ERROR: Identifiers can not begin with a number %.*s\n", lineCount, endIndex - startIndex, line + startIndex);
+                    fprintf(of, "#%d ERROR: Identifiers can not begin with a number: %.*s\n", lineCount, endIndex - startIndex, line + startIndex);
                     startIndex = endIndex;
                     // delete[] token;
                     continue;
@@ -456,6 +488,32 @@ void fileScanner(FILE* fp, FILE* of)
                     }
                 }
             }
+            if (line[endIndex] == '.')
+            {
+                int index = endIndex;
+                ++endIndex;
+                while (isdigit(line[endIndex]))
+                    ++endIndex;
+                if (endIndex == index + 1)
+                {
+                    fprintf(of, "#%d %s %c\n", lineCount, "DOT", '.');
+                    startIndex = endIndex;
+                    continue;
+                }
+                if (isalpha(line[endIndex]) || line[endIndex] == '_')
+                {
+                    while (isalpha(line[endIndex]) || isdigit(line[endIndex]) || line[endIndex] == '_')
+                        ++endIndex;
+                    fprintf(of, "#%d ERROR: Identifiers can not begin with a dot: %.*s\n", lineCount, endIndex - startIndex, line + startIndex);
+                    startIndex = endIndex;
+                }
+                else
+                {
+                    fprintf(of, "#%d ERROR: Floating Numbers are not supported: %.*s\n", lineCount, endIndex - startIndex, line + startIndex);
+                    startIndex = endIndex;
+                }
+                continue;
+            }
             char *token = new char[2];
             token[0] = line[endIndex];
             token[1] = '\0';
@@ -474,7 +532,7 @@ void fileScanner(FILE* fp, FILE* of)
                 fprintf(of, "#%d %s %s\n", lineCount, "AND", "&&");
                 continue;
             }
-            fprintf(of, "#%d ERROR: Unknown character %c\n", lineCount, line[endIndex]);
+            fprintf(of, "#%d ERROR: Unknown character: %c\n", lineCount, line[endIndex]);
             ++endIndex;
             startIndex = endIndex;
             delete[] token;

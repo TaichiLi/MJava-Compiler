@@ -162,19 +162,23 @@ void testError()
 {
     Lexer lexer = Lexer();
     lexer.parse("0.0");
-    EXPECT_EQ_STRING("ERROR: Floating Numbers are not supported 0.0\n", lexer.getTokens(), lexer.getToklen());
+    EXPECT_EQ_STRING("ERROR: Floating Numbers are not supported: 0.0\n", lexer.getTokens(), lexer.getToklen());
+    lexer.parse(".01");
+    EXPECT_EQ_STRING("ERROR: Floating Numbers are not supported: .01\n", lexer.getTokens(), lexer.getToklen());
+    lexer.parse(".01a");
+    EXPECT_EQ_STRING("ERROR: Identifiers can not begin with a dot: .01a\n", lexer.getTokens(), lexer.getToklen());
     lexer.parse("&");
-    EXPECT_EQ_STRING("ERROR: Unknown character &\n", lexer.getTokens(), lexer.getToklen());
+    EXPECT_EQ_STRING("ERROR: Unknown character: &\n", lexer.getTokens(), lexer.getToklen());
     lexer.parse(">");
-    EXPECT_EQ_STRING("ERROR: Unknown character >\n", lexer.getTokens(), lexer.getToklen());
+    EXPECT_EQ_STRING("ERROR: Unknown character: >\n", lexer.getTokens(), lexer.getToklen());
     lexer.parse("|");
-    EXPECT_EQ_STRING("ERROR: Unknown character |\n", lexer.getTokens(), lexer.getToklen());
+    EXPECT_EQ_STRING("ERROR: Unknown character: |\n", lexer.getTokens(), lexer.getToklen());
     lexer.parse("/");
-    EXPECT_EQ_STRING("ERROR: Unknown character /\n", lexer.getTokens(), lexer.getToklen());
+    EXPECT_EQ_STRING("ERROR: Unknown character: /\n", lexer.getTokens(), lexer.getToklen());
     lexer.parse("_abc123");
-    EXPECT_EQ_STRING("ERROR: Identifiers can not begin with an underscore _abc123\n", lexer.getTokens(), lexer.getToklen());
+    EXPECT_EQ_STRING("ERROR: Identifiers can not begin with an underscore: _abc123\n", lexer.getTokens(), lexer.getToklen());
     lexer.parse("123abc");
-    EXPECT_EQ_STRING("ERROR: Identifiers can not begin with a number 123abc\n", lexer.getTokens(), lexer.getToklen());
+    EXPECT_EQ_STRING("ERROR: Identifiers can not begin with a number: 123abc\n", lexer.getTokens(), lexer.getToklen());
 }
 
 int main()
