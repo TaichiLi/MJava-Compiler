@@ -92,6 +92,60 @@ namespace MJava
         }
     }
 
+    VecExprASTPtr Parser::parseClassMemberVariables()
+    {
+        VecExprASTPtr memberVariables;
+
+        while (!validateToken(TokenValue::RBRACE, false) && !validateToken(TokenValue::PUBLIC, false))
+        {
+            if (validateToken(TokenType::TYPE, false) || validateToken(TokenType::IDENTIFIER, false))
+            {
+                TokenLocation loc = scanner_.getToken().getTokenLocation();
+
+                ExprASTPtr memberVariable = parseExpression();
+
+                if (memberVariable != nullptr && dynamic_cast<VariableDeclarationAST*>(memberVariable) != nullptr)
+                {
+                    memberVariables.push_back(memberVariable);
+                }
+                else
+                {
+                    errorSyntax(loc.toString() + "Expected ' variable declaration ', but find an unexpected statement");
+                }
+            }
+            else
+            {
+                errorReport("Expected ' type or identifier ', but find " + scanner_.getToken().tokenTypeDescription() + " " + scanner_.getToken().getTokenName());
+                scanner_.getNextToken();
+            }
+        }
+
+        return memberVariables;
+    }
+
+    VecExprASTPtr Parser::parseClassMemberMethods()
+    {
+        VecExprASTPtr memberMethods;
+
+        while (!validateToken(TokenValue::RBRACE, false))
+        {
+            TokenLocation loc = scanner_.getToken().getTokenLocation();
+
+            ExprASTPtr memberMethod = parseExpression();
+
+            if (memberMethod != nullptr && dynamic_cast<MethodDeclarationAST*>(memberMethod) != nullptr)
+            {
+                memberMethods.push_back(memberMethod);
+            }
+            else
+            {
+                errorSyntax(loc.toString() + "Expected ' method declaration ', but find an unexpected statement");
+            }
+        }
+
+        return memberMethods;
+    }
+
     ExprASTPtr Parser::parseClassDeclaration()
     {
         TokenLocation loc = scanner_.getToken().getTokenLocation();
@@ -124,12 +178,81 @@ namespace MJava
             scanner_.getNextToken();
         }
 
-        ExprASTPtr classBody = parseBlockOrStatement();
+        if (!expectToken(TokenValue::LBRACE, "{", true))
+        {
+            return nullptr;
+        }
 
-        return new ClassDeclarationAST(loc, className, baseClassName, classBody);
+        const VecExprASTPtr& memberVariables = parseClassMemberVariables();
+        const VecExprASTPtr& memberMethods = parseClassMemberMethods();
+
+        if (!expectToken(TokenValue::RBRACE, "}", true))
+        {
+            return nullptr;
+        }
+
+        return new ClassDeclarationAST(loc, className, baseClassName, memberVariables, memberMethods);
     }
 
-    ExprASTPtr Parser::parseMethodOrVariableDeclaration()
+    ExprASTPtr Parser::parseMethodBody()
+    {
+        TokenLocation loc = scanner_.getToken().getTokenLocation();
+
+        if (!expectToken(TokenValue::LBRACE, "{", true))
+        {
+            return nullptr;
+        }
+
+        VecExprASTPtr localVariables;
+        VecExprASTPtr methodBody;
+
+        ExprASTPtr currentASTPtr = nullptr;
+
+        while (!validateToken(TokenValue::RBRACE, true))
+        {
+            currentASTPtr = parseExpression();
+
+            if (currentASTPtr != nullptr)
+            {
+                if (dynamic_cast<VariableDeclarationAST*>(currentASTPtr) != nullptr)
+                {
+                    localVariables.push_back(currentASTPtr);
+                }
+                else
+                {
+                    methodBody.push_back(currentASTPtr);
+                    break;
+                }
+            }
+            else
+            {
+                continue;
+            }
+        }
+
+        while (!validateToken(TokenValue::RBRACE, true))
+        {
+            TokenLocation loc = scanner_.getToken().getTokenLocation();
+
+            currentASTPtr = parseExpression();
+
+            if (currentASTPtr != nullptr)
+            {
+                if (dynamic_cast<VariableDeclarationAST*>(currentASTPtr) != nullptr)
+                {
+                    errorSyntax(loc.toString() + "Find unexpected variable declaration statement");
+                }
+                else
+                {
+                    methodBody.push_back(currentASTPtr);
+                }
+            }
+        }
+        
+        return new MethodBodyAST(loc, localVariables, methodBody);
+    }
+
+    ExprASTPtr Parser::parseMethodDeclaration()
     {
         TokenLocation loc = scanner_.getToken().getTokenLocation();
 
@@ -158,7 +281,7 @@ namespace MJava
             scanner_.getNextToken();
         }
 
-        std::string type = scanner_.getToken().getTokenName();
+        std::string returnType = scanner_.getToken().getTokenName();
         
         scanner_.getNextToken();
 
@@ -168,7 +291,7 @@ namespace MJava
             {
                 return nullptr;
             }
-            type += "[]";
+            returnType += "[]";
         }
 
         if (!validateToken(TokenValue::MAIN, false) && !validateToken(TokenType::IDENTIFIER, false))
@@ -179,20 +302,6 @@ namespace MJava
         std::string name = scanner_.getToken().getTokenName();
 
         scanner_.getNextToken();
-
-        if (validateToken(TokenValue::LPAREN, false))
-        {
-            return parseMethodDeclaration(attributes, type, name);
-        }
-        else
-        {
-            return parseVariableDeclaration(attributes, type, name);
-        }
-    }
-
-    ExprASTPtr Parser::parseMethodDeclaration(const std::vector<std::string>& attributes, const std::string& returnType, const std::string& name)
-    {
-        TokenLocation loc = scanner_.getToken().getTokenLocation();
 
         if (!expectToken(TokenValue::LPAREN, "(", true))
         {
@@ -212,7 +321,7 @@ namespace MJava
             }
         }
 
-        ExprASTPtr body = parseBlockOrStatement();
+        ExprASTPtr body = parseMethodBody();
         
         if (body == nullptr)
         {
@@ -258,11 +367,9 @@ namespace MJava
 
             scanner_.getNextToken();
 
-            std::vector<std::string> attributes;
-
             if (validateToken(TokenValue::RPAREN, false))
             {
-                return new VariableDeclarationAST(loc, attributes, type, name);
+                return new VariableDeclarationAST(loc, type, name);
             }
 
             if (!expectToken(TokenValue::COMMA, ",", true))
@@ -270,7 +377,7 @@ namespace MJava
                 return nullptr;
             }
 
-            return new VariableDeclarationAST(loc, attributes, type, name);
+            return new VariableDeclarationAST(loc, type, name);
         }
 
         return nullptr;
@@ -434,7 +541,7 @@ namespace MJava
     {
         TokenLocation loc = scanner_.getToken().getTokenLocation();
 
-        if (!expectToken(TokenType::TYPE, "type or identifier", false))
+        if (!expectToken(TokenType::TYPE, "type", false))
         {
             return nullptr;
         }
@@ -467,23 +574,7 @@ namespace MJava
                 return nullptr;
         }
 
-        std::vector<std::string> attributes;
-
-        return new VariableDeclarationAST(loc, attributes, type, name);
-    }
-
-    ExprASTPtr Parser::parseVariableDeclaration(const std::vector<std::string>& attributes, const std::string& type, const std::string& name)
-    {
-        TokenLocation loc = scanner_.getToken().getTokenLocation();
-
-        scanner_.getNextToken();
-        
-        if (!expectToken(TokenValue::SEMICOLON, ";", true))
-        {
-                return nullptr;
-        }
-
-        return new VariableDeclarationAST(loc, attributes, type, name);
+        return new VariableDeclarationAST(loc, type, name);
     }
 
     ExprASTPtr Parser::parseVariableDeclaration(const Token& token)
@@ -514,9 +605,7 @@ namespace MJava
             return nullptr;
         }
 
-        std::vector<std::string> attributes;
-
-        return new VariableDeclarationAST(token.getTokenLocation(), attributes, type, name);
+        return new VariableDeclarationAST(token.getTokenLocation(), type, name);
     }
 
     ExprASTPtr Parser::parseExpression()
@@ -549,7 +638,7 @@ namespace MJava
                         return parseClassDeclaration();
 
                     case TokenValue::PUBLIC:
-                        return parseMethodOrVariableDeclaration();
+                        return parseMethodDeclaration();
 
                     case TokenValue::RETURN:
                         return parseReturnStatement();
@@ -682,9 +771,7 @@ namespace MJava
                     return nullptr;
                 }
 
-                std::vector<std::string> attributes;
-
-                return new VariableDeclarationAST(loc, attributes, token.getTokenName() + "[]", name);                
+                return new VariableDeclarationAST(loc, token.getTokenName() + "[]", name);                
             }
             else
             {
@@ -794,6 +881,7 @@ namespace MJava
             if (currentPrecedence < nextPrecedence)
             {
                 rhs = parseBinOpRHS(currentPrecedence + 1, rhs);
+                
                 if (rhs == nullptr)
                 {
                     return nullptr;

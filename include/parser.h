@@ -31,7 +31,6 @@ namespace MJava
         ExprASTPtr              parseUnaryOp();
         ExprASTPtr              parseIdentifierExpression();
         ExprASTPtr              parseParenExpression();
-        ExprASTPtr              parseClassDeclaration();
         ExprASTPtr              parseBlockOrStatement();
         ExprASTPtr              parsePrimary();
         ExprASTPtr              parseReturnStatement();
@@ -53,10 +52,12 @@ namespace MJava
         ExprASTPtr              parseForStatement();
 
         // declaration / definition contains procedure and function.
-        ExprASTPtr              parseMethodOrVariableDeclaration();
-        ExprASTPtr              parseMethodDeclaration(const std::vector<std::string>& attributes, const std::string& returnType, const std::string& name);
+        ExprASTPtr              parseClassDeclaration();
+        VecExprASTPtr           parseClassMemberVariables();
+        VecExprASTPtr           parseClassMemberMethods();
+        ExprASTPtr              parseMethodDeclaration();
+        ExprASTPtr              parseMethodBody();
         ExprASTPtr              parseVariableDeclaration();
-        ExprASTPtr              parseVariableDeclaration(const std::vector<std::string>& attributes, const std::string& type, const std::string& name);
         ExprASTPtr              parseVariableDeclaration(const Token& token);
         ExprASTPtr              parseMethodCallStatement(const Token& token);
         ExprASTPtr              parseMethodParameter();

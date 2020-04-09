@@ -14,15 +14,10 @@ namespace MJava
     ExprAST::ExprAST(const TokenLocation& loc)
         : loc_(loc)
     {}
-
-    TokenLocation ExprAST::getLocation() const
-    {
-        return loc_;
-    }
     
     std::string ExprAST::toString() const
     {
-        return getLocation().toString();
+        return loc_.toString();
     }
 
     BlockAST::BlockAST(const TokenLocation& loc, const VecExprASTPtr& body)
@@ -58,21 +53,119 @@ namespace MJava
         return str.str();
     }
 
-    ClassDeclarationAST::ClassDeclarationAST(const TokenLocation& loc, const std::string& className, const std::string& baseClassName, ExprASTPtr classBody)
-        : ExprAST(loc), className_(className), baseClassName_(baseClassName), classBody_(classBody)
+    ClassDeclarationAST::ClassDeclarationAST(const TokenLocation& loc, const std::string& className, const std::string& baseClassName, const VecExprASTPtr& memberVariables, const VecExprASTPtr& memberMethods)
+        : ExprAST(loc), className_(className), baseClassName_(baseClassName), memberVariables_(memberVariables), memberMethods_(memberMethods)
     {}
 
     ClassDeclarationAST::~ClassDeclarationAST()
     {
-        if (classBody_ != nullptr)
+        for (auto variable : memberVariables_)
         {
-            delete classBody_;
+            if (variable != nullptr)
+            {
+                delete variable;
+            }
+        }
+
+        for (auto method : memberMethods_)
+        {
+            if (method != nullptr)
+            {
+                delete method;
+            }
         }
     }
 
     std::string ClassDeclarationAST::toString() const
     {
-        return std::string("{\n\"type\": \"ClassDeclaration\",\n\"class name\": \"" + className_ + "\",\n\"base class\": \"" + baseClassName_ + "\",\n\"body\": [" + classBody_->toString() + "]\n}");  
+        std::ostringstream str;
+        str << "{\n\"type\": \"ClassDeclaration\",\n\"class name\": \"" << className_ << "\",\n\"base class\": \"" << baseClassName_ << "\",\n\"member variables\": [";
+
+        size_t size = memberVariables_.size();
+
+        if (size > 0)
+        {
+            for (size_t i = 0; i < size - 1; i++)
+            {
+                str << memberVariables_[i]->toString() << ",\n";
+            }
+
+            str << memberVariables_[size - 1]->toString() << "\n";
+        }
+
+        str << "],\n\"member methods\": [";
+        size = memberMethods_.size();
+
+        if (size > 0)
+        {
+            for (size_t i = 0; i < size - 1; i++)
+            {
+                str << memberMethods_[i]->toString() << ",\n";
+            }
+
+            str << memberMethods_[size - 1]->toString() << "\n";
+        }
+
+        str << "]\n}";
+
+        return str.str();  
+    }
+
+    MethodBodyAST::MethodBodyAST(const TokenLocation& loc, const VecExprASTPtr& localVariables, const VecExprASTPtr& methodBody)
+        : ExprAST(loc), localVariables_(localVariables), methodBody_(methodBody)
+    {}
+
+    MethodBodyAST::~MethodBodyAST()
+    {
+        for (auto variable : localVariables_)
+        {
+            if (variable != nullptr)
+            {
+                delete variable;
+            }
+        }
+
+        for (auto exprASTPTr : methodBody_)
+        {
+            if (exprASTPTr != nullptr)
+            {
+                delete exprASTPTr;
+            }
+        }
+    }
+
+    std::string MethodBodyAST::toString() const
+    {
+        std::ostringstream str;
+        str << "\"local variables\": [";
+
+        size_t size = localVariables_.size();
+
+        if (size > 0)
+        {
+            for (size_t i = 0; i < size - 1; i++)
+            {
+                str << localVariables_[i]->toString() << ",\n";
+            }
+            str << localVariables_[size - 1]->toString() << "\n";
+        }
+
+        str << "],\n\"method body\": [";
+
+        size = methodBody_.size();
+
+        if (size > 0)
+        {
+            for (size_t i = 0; i < size - 1; i++)
+            {
+                str << methodBody_[i]->toString() << ",\n";
+            }
+            str << methodBody_[size - 1]->toString() << "\n";
+        }
+
+        str << "]";
+        
+        return str.str();
     }
 
     MethodDeclarationAST::MethodDeclarationAST(const TokenLocation& loc, const std::vector<std::string>& attributes, const std::string& returnType, const std::string& name, const VecExprASTPtr& parameters, ExprASTPtr body)
@@ -108,6 +201,7 @@ namespace MJava
             {
                 str << "\"" << attributes_[i] << "\",\n";
             }
+
             str << "\"" << attributes_[size - 1] << "\"\n";
         }
 
@@ -124,7 +218,7 @@ namespace MJava
             str << parameters_[size - 1]->toString() << "\n";
         }
 
-        str << "],\n\"body\": [" << body_->toString() << "]\n}";
+        str << "],\n\"body\": {" << body_->toString() << "}\n}";
 
         return str.str();
     }
@@ -157,6 +251,7 @@ namespace MJava
             {
                 str << parameters_[i]->toString() << ",\n";
             }
+
             str << parameters_[size - 1]->toString() << "\n";
         }
 
@@ -165,28 +260,13 @@ namespace MJava
         return str.str();
     }
 
-    VariableDeclarationAST::VariableDeclarationAST(const TokenLocation& loc, const std::vector<std::string>& attributes, const std::string& type, const std::string& name)
-        : ExprAST(loc), attributes_(attributes), type_(type), name_(name)
+    VariableDeclarationAST::VariableDeclarationAST(const TokenLocation& loc, const std::string& type, const std::string& name)
+        : ExprAST(loc), type_(type), name_(name)
     {}
 
     std::string VariableDeclarationAST::toString() const
     {
-        std::ostringstream str;
-        str << "{\n\"type\": \"VarDeclaration\",\n\"attributes\": [";
-
-        size_t size = attributes_.size();
-
-        if (size > 0)
-        {
-            for (size_t i = 0; i < size - 1; i++)
-            {
-                str << "\"" << attributes_[i] << "\",\n";
-            }
-            str << "\"" << attributes_[size - 1] << "\"\n";
-        }
-
-        str << "]\n,\"variable type\": \"" << type_ << "\",\n\"variable name\": \"" << name_ << "\"\n}";
-        return str.str();
+        return std::string("{\n\"type\": \"VarDeclaration\",\n\"variable type\": \"" + type_ + "\",\n\"variable name\": \"" + name_ + "\"\n}");
     }
 
     VariableAST::VariableAST(const TokenLocation& loc, const std::string& name, ExprASTPtr index)
