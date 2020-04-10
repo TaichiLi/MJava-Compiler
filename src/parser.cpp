@@ -96,15 +96,15 @@ namespace MJava
     {
         VecExprASTPtr memberVariables;
 
-        while (!validateToken(TokenValue::RBRACE, false) && !validateToken(TokenValue::PUBLIC, false))
+        while (!validateToken(TokenValue::RBRACE, false) && !validateToken(TokenValue::PUBLIC, false) && !validateToken(TokenType::END_OF_FILE, false))
         {
-            if (validateToken(TokenType::TYPE, false) || validateToken(TokenType::IDENTIFIER, false))
+            TokenLocation loc = scanner_.getToken().getTokenLocation();
+
+            ExprASTPtr memberVariable = parseExpression();
+
+            if (memberVariable != nullptr)
             {
-                TokenLocation loc = scanner_.getToken().getTokenLocation();
-
-                ExprASTPtr memberVariable = parseExpression();
-
-                if (memberVariable != nullptr && dynamic_cast<VariableDeclarationAST*>(memberVariable) != nullptr)
+                if (dynamic_cast<VariableDeclarationAST*>(memberVariable) != nullptr)
                 {
                     memberVariables.push_back(memberVariable);
                 }
@@ -113,11 +113,11 @@ namespace MJava
                     errorSyntax(loc.toString() + "Expected ' variable declaration ', but find an unexpected statement\n" + JSONFormatter::format(memberVariable->toString()));
                 }
             }
-            else
-            {
-                errorReport("Expected ' type or identifier ', but find " + scanner_.getToken().tokenTypeDescription() + " " + scanner_.getToken().getTokenName());
-                scanner_.getNextToken();
-            }
+        }
+
+        if (validateToken(TokenType::END_OF_FILE, false))
+        {
+            errorSyntax(scanner_.getToken().getTokenLocation().toString() + "Unexpected end of file in the class body");
         }
 
         return memberVariables;
@@ -127,20 +127,28 @@ namespace MJava
     {
         VecExprASTPtr memberMethods;
 
-        while (!validateToken(TokenValue::RBRACE, false))
+        while (!validateToken(TokenValue::RBRACE, false) && !validateToken(TokenType::END_OF_FILE, false))
         {
             TokenLocation loc = scanner_.getToken().getTokenLocation();
 
             ExprASTPtr memberMethod = parseExpression();
 
-            if (memberMethod != nullptr && dynamic_cast<MethodDeclarationAST*>(memberMethod) != nullptr)
+            if (memberMethod != nullptr)
             {
-                memberMethods.push_back(memberMethod);
+                if (dynamic_cast<MethodDeclarationAST*>(memberMethod) != nullptr)
+                {
+                    memberMethods.push_back(memberMethod);
+                }
+                else
+                {
+                    errorSyntax(loc.toString() + "Expected ' method declaration ', but find an unexpected statement\n" + JSONFormatter::format(memberMethod->toString()));
+                }
             }
-            else
-            {
-                errorSyntax(loc.toString() + "Expected ' method declaration ', but find an unexpected statement\n" + JSONFormatter::format(memberMethod->toString()));
-            }
+        }
+
+        if (validateToken(TokenType::END_OF_FILE, false))
+        {
+            errorSyntax(scanner_.getToken().getTokenLocation().toString() + "Unexpected end of file in the class body");
         }
 
         return memberMethods;
@@ -184,6 +192,7 @@ namespace MJava
         }
 
         const VecExprASTPtr& memberVariables = parseClassMemberVariables();
+
         const VecExprASTPtr& memberMethods = parseClassMemberMethods();
 
         if (!expectToken(TokenValue::RBRACE, "}", true))
@@ -208,7 +217,7 @@ namespace MJava
 
         ExprASTPtr currentASTPtr = nullptr;
 
-        while (!validateToken(TokenValue::RBRACE, true))
+        while (!validateToken(TokenValue::RBRACE, true) && !validateToken(TokenType::END_OF_FILE, false))
         {
             currentASTPtr = parseExpression();
 
@@ -224,13 +233,15 @@ namespace MJava
                     break;
                 }
             }
-            else
-            {
-                continue;
-            }
         }
 
-        while (!validateToken(TokenValue::RBRACE, true))
+        if (validateToken(TokenType::END_OF_FILE, false))
+        {
+            errorSyntax(scanner_.getToken().getTokenLocation().toString() + "Unexpected end of file in the method body");
+            return nullptr;
+        }
+
+        while (!validateToken(TokenValue::RBRACE, false) && !validateToken(TokenType::END_OF_FILE, false))
         {
             TokenLocation loc = scanner_.getToken().getTokenLocation();
 
@@ -247,6 +258,11 @@ namespace MJava
                     methodBody.push_back(currentASTPtr);
                 }
             }
+        }
+
+        if (!expectToken(TokenValue::RBRACE, "}", true))
+        {
+            return nullptr;
         }
         
         return new MethodBodyAST(loc, localVariables, methodBody);
@@ -787,11 +803,11 @@ namespace MJava
                     return nullptr;
                 }
 
-                return new VariableAST(loc, token.getTokenName(), index);
+                return new ArrayAST(loc, token.getTokenName(), index);
             }
         }
 
-        return new VariableAST(loc, token.getTokenName(), nullptr);
+        return new VariableAST(loc, token.getTokenName());
     }
 
     ExprASTPtr Parser::parseRealExpression()

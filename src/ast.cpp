@@ -20,13 +20,13 @@ namespace MJava
         return loc_.toString();
     }
 
-    BlockAST::BlockAST(const TokenLocation& loc, const VecExprASTPtr& body)
-        : ExprAST(loc), body_(body)
+    BlockAST::BlockAST(const TokenLocation& loc, const VecExprASTPtr& block)
+        : ExprAST(loc), block_(block)
     {}
 
     BlockAST::~BlockAST()
     {
-        for (auto exprASTPTr : body_)
+        for (auto exprASTPTr : block_)
         {
             if (exprASTPTr != nullptr)
             {
@@ -39,15 +39,15 @@ namespace MJava
     {
         std::ostringstream str;
 
-        size_t size = body_.size();
+        size_t size = block_.size();
 
         if (size > 0)
         {
             for (size_t i = 0; i < size - 1; i++)
             {
-                str << body_[i]->toString() << ",\n";
+                str << block_[i]->toString() << ",\n";
             }
-            str << body_[size - 1]->toString() << "\n";
+            str << block_[size - 1]->toString() << "\n";
         }
 
         return str.str();
@@ -269,11 +269,20 @@ namespace MJava
         return std::string("{\n\"type\": \"VarDeclaration\",\n\"variable type\": \"" + type_ + "\",\n\"variable name\": \"" + name_ + "\"\n}");
     }
 
-    VariableAST::VariableAST(const TokenLocation& loc, const std::string& name, ExprASTPtr index)
+    VariableAST::VariableAST(const TokenLocation& loc, const std::string& name)
+        : ExprAST(loc), name_(name)
+    {}
+
+    std::string VariableAST::toString() const
+    {
+        return std::string("{\n\"type\": \"Variable\",\n\"name\": \"" + name_ + "\"\n}");
+    }
+
+    ArrayAST::ArrayAST(const TokenLocation& loc, const std::string& name, ExprASTPtr index)
         : ExprAST(loc), name_(name), index_(index)
     {}
 
-    VariableAST::~VariableAST()
+    ArrayAST::~ArrayAST()
     {
         if (index_ != nullptr)
         {
@@ -281,16 +290,9 @@ namespace MJava
         }
     }
 
-    std::string VariableAST::toString() const
+    std::string ArrayAST::toString() const
     {
-        if (index_ != nullptr)
-        {
-            return std::string("{\n\"type\": \"Variable\",\n\"name\": \"" + name_ + "\",\n\"index\": " + index_->toString() + "\n}");
-        }
-        else
-        {
-            return std::string("{\n\"type\": \"Variable\",\n\"name\": \"" + name_ + "\"\n}");
-        }   
+        return std::string("{\n\"type\": \"array\",\n\"name\": \"" + name_ + "\",\n\"index\": " + index_->toString() + "\n}");
     }
 
     IfStatementAST::IfStatementAST(const TokenLocation& loc, ExprASTPtr condition, ExprASTPtr thenPart, ExprASTPtr elsePart)

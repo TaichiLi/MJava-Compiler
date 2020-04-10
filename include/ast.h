@@ -15,7 +15,6 @@
 namespace MJava
 {
     class ExprAST;
-    class ClassDeclarationAST;
 
     using VecExprASTPtr = std::vector<ExprAST*>;
     using ExprASTPtr = ExprAST*;
@@ -34,12 +33,13 @@ namespace MJava
     class BlockAST : public ExprAST
     {
     public:
-        BlockAST(const TokenLocation& loc, const VecExprASTPtr& body);
+        BlockAST(const TokenLocation& loc, const VecExprASTPtr& block);
         ~BlockAST();
+        VecExprASTPtr getBlock() const { return block_; }
         std::string toString() const override;
 
     private:
-        VecExprASTPtr       body_;
+        VecExprASTPtr       block_;
     };
 
     class ClassDeclarationAST : public ExprAST
@@ -47,6 +47,10 @@ namespace MJava
     public:
         ClassDeclarationAST(const TokenLocation& loc, const std::string& className, const std::string& baseClassName, const VecExprASTPtr& memberVariables, const VecExprASTPtr& memberMethods);
         ~ClassDeclarationAST();
+        std::string getClassName() const { return className_; }
+        std::string getBaseClassName() const { return baseClassName_; }
+        VecExprASTPtr getMemberVariables() const { return memberVariables_; }
+        VecExprASTPtr getMemberMemthods() const { return memberMethods_; }
         std::string toString() const override;
 
     private:
@@ -61,6 +65,8 @@ namespace MJava
     public:
         MethodBodyAST(const TokenLocation& loc, const VecExprASTPtr& localVariables, const VecExprASTPtr& methodBody);
         ~MethodBodyAST();
+        VecExprASTPtr getLocalVariables() const { return localVariables_; }
+        VecExprASTPtr getMethodBody() const { return methodBody_; }
         std::string toString() const override;
 
     private:
@@ -73,6 +79,11 @@ namespace MJava
     public:
         MethodDeclarationAST(const TokenLocation& loc, const std::vector<std::string>& attributes, const std::string& returnType, const std::string& name, const VecExprASTPtr& parameters, ExprASTPtr body);
         ~MethodDeclarationAST();
+        std::vector<std::string> getAttributes() const { return attributes_; }
+        std::string getReturnType() const { return returnType_; }
+        std::string getMethodName() const { return name_; }
+        VecExprASTPtr getParameters() const { return parameters_; }
+        ExprASTPtr getBody() const { return body_; }
         std::string toString() const override;
 
     private:
@@ -88,6 +99,8 @@ namespace MJava
     public:
         MethodCallAST(const TokenLocation& loc, const std::string& name, const VecExprASTPtr& parameters);
         ~MethodCallAST();
+        std::string getName() const { return name_; }
+        VecExprASTPtr getParameters() const { return parameters_; }
         std::string toString() const override;
 
     private:
@@ -100,6 +113,8 @@ namespace MJava
     public:
         VariableDeclarationAST(const TokenLocation& loc, const std::string& type, const std::string& name);
         ~VariableDeclarationAST() = default;
+        std::string getType() const { return type_; }
+        std::string getName() const { return name_; }
         std::string toString() const override;
 
     private:
@@ -110,10 +125,23 @@ namespace MJava
     class VariableAST : public ExprAST
     {
     public:
-        VariableAST(const TokenLocation& loc, const std::string& name, ExprASTPtr index);
-        ~VariableAST();
+        VariableAST(const TokenLocation& loc, const std::string& name);
+        ~VariableAST() = default;
+        std::string getName() const { return name_; }
         std::string toString() const override;
 
+    private:
+        std::string         name_;
+    };
+
+    class ArrayAST : public ExprAST
+    {
+    public:
+        ArrayAST(const TokenLocation &loc, const std::string &name, ExprASTPtr index);
+        ~ArrayAST();
+        std::string getName() const { return name_; }
+        ExprASTPtr getIndex() const { return index_; }
+        std::string toString() const override;
     private:
         std::string         name_;
         ExprASTPtr          index_;
@@ -197,6 +225,9 @@ namespace MJava
     public:
         BinaryOpExpressionAST(const TokenLocation& loc, const std::string& binaryOp, ExprASTPtr lhs, ExprASTPtr rhs);
         ~BinaryOpExpressionAST();
+        std::string getBinaryOp() const { return binaryOp_; }
+        ExprASTPtr getLhs() const { return lhs_; }
+        ExprASTPtr getRhs() const { return rhs_; }
         std::string toString() const override;
 
     private:
@@ -210,6 +241,8 @@ namespace MJava
     public:
         UnaryOpExpressionAST(const TokenLocation& loc, const std::string& unaryOp, ExprASTPtr expression);
         ~UnaryOpExpressionAST();
+        std::string getUnaryOp() const { return unaryOp_; }
+        ExprASTPtr getExpression() const { return expression_; }
         std::string toString() const override;
 
     private:
@@ -222,6 +255,7 @@ namespace MJava
     public:
         RealAST(const TokenLocation& loc, double real);
         ~RealAST() = default;
+        double getReal() const { return real_; }
         std::string toString() const override;
 
     private:
@@ -232,6 +266,7 @@ namespace MJava
     public:
         IntegerAST(const TokenLocation& loc, int integer);
         ~IntegerAST() = default;
+        int getInteger() const { return integer_; }
         std::string toString() const override;
 
     private:
@@ -243,6 +278,7 @@ namespace MJava
     public:
         CharAST(const TokenLocation& loc, char ch);
         ~CharAST() = default;
+        char getChar() const { return ch_; }
         std::string toString() const override;
 
     private:
@@ -254,6 +290,7 @@ namespace MJava
     public:
         StringAST(const TokenLocation& loc, const std::string& str);
         ~StringAST() = default;
+        std::string getString() const { return str_; }
         std::string toString() const override;
 
     private:
@@ -265,6 +302,7 @@ namespace MJava
     public:
         BooleanAST(const TokenLocation& loc, bool boolean);
         ~BooleanAST() = default;
+        bool getBoolean() const { return boolean_; }
         std::string toString() const override;
 
     private:
