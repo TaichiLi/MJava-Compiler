@@ -315,6 +315,7 @@ void lineScanner(const char *line, char *tokens, int *toklen)
         token[0] = line[endIndex];
         token[1] = '\0';
         auto it = tokenLabelMap.find(token);
+        delete[] token;
         if (it != tokenLabelMap.end())
         {
             ++endIndex;
@@ -518,6 +519,7 @@ void fileScanner(FILE* fp, FILE* of)
             token[0] = line[endIndex];
             token[1] = '\0';
             auto it = tokenLabelMap.find(token);
+            delete[] token;
             if (it != tokenLabelMap.end())
             {
                 ++endIndex;
@@ -535,7 +537,6 @@ void fileScanner(FILE* fp, FILE* of)
             fprintf(of, "#%d ERROR: Unknown character: %c\n", lineCount, line[endIndex]);
             ++endIndex;
             startIndex = endIndex;
-            delete[] token;
         }
     }
 }

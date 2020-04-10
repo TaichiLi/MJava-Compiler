@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.12.4)
 
 add_compile_definitions (GTEST_INCLUDE_DIR="./include")
 add_compile_definitions (GTEST_LIBRARY_DIR="./lib")
