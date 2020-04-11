@@ -15,19 +15,64 @@
 namespace MJava
 {
     class ExprAST;
+    class ProgramAST;
 
     using VecExprASTPtr = std::vector<ExprAST*>;
     using ExprASTPtr = ExprAST*;
+    using ProgramASTPtr = ProgramAST*;
+
+    enum class ASTType
+    {
+        BASE = 0,
+        PROGRAM,
+        BLOCK,
+        CLASSDECLARATION,
+        MAINCLASS,
+        METHODBODY,
+        METHODDECLARATION,
+        METHODCALL,
+        VARIABLEDECLARATION,
+        VARIABLE,
+        ARRAY,
+        IFSTATEMENT,
+        WHILESTATEMENT,
+        FORSTATEMENT,
+        RETURNSTATEMENT,
+        PRINTSTATEMENT,
+        NEWSTATEMENT,
+        BINARYOPEXPRESSION,
+        UNARYOPEXPRESSION,
+        REAL,
+        INTEGER,
+        CHAR,
+        STRING,
+        BOOLEAN
+    };
 
     class ExprAST
     {
     public:
-        ExprAST(const TokenLocation& loc);
+        ExprAST(const TokenLocation& loc, ASTType type);
         virtual ~ExprAST() = default;
+        TokenLocation getTokenLocation() const { return loc_; }
+        ASTType getID() const { return type_; }
+        std::string getASTTypeDescription() const;
         virtual std::string toString() const;
 
     private:
-        TokenLocation loc_;
+        TokenLocation       loc_;
+        ASTType             type_;
+    };
+
+    class ProgramAST : public ExprAST
+    {
+    public:
+        ProgramAST(const TokenLocation& loc, const VecExprASTPtr& classes);
+        ~ProgramAST();
+        std::string toString() const;
+        
+    private:
+        VecExprASTPtr       classes_;
     };
 
     class BlockAST : public ExprAST
@@ -58,6 +103,18 @@ namespace MJava
         std::string         baseClassName_;
         VecExprASTPtr       memberVariables_;
         VecExprASTPtr       memberMethods_;
+    };
+
+    class MainClassAST : public ExprAST
+    {
+    public:
+        MainClassAST(const TokenLocation& loc, const std::string& className, ExprASTPtr mainMethod);
+        ~MainClassAST();
+        std::string toString() const override;
+
+    private:
+        std::string         className_;
+        ExprASTPtr          mainMethod_;
     };
 
     class MethodBodyAST : public ExprAST
@@ -142,6 +199,7 @@ namespace MJava
         std::string getName() const { return name_; }
         ExprASTPtr getIndex() const { return index_; }
         std::string toString() const override;
+
     private:
         std::string         name_;
         ExprASTPtr          index_;
@@ -152,6 +210,9 @@ namespace MJava
     public:
         IfStatementAST(const TokenLocation& loc, ExprASTPtr condition, ExprASTPtr thenPart, ExprASTPtr elsePart);
         ~IfStatementAST();
+        ExprASTPtr getCondition() const { return condition_; }
+        ExprASTPtr getThenPart() const { return thenPart_; }
+        ExprASTPtr getElsePart() const { return elsePart_; }
         std::string toString() const override;
 
     private:
@@ -165,6 +226,8 @@ namespace MJava
     public:
         WhileStatementAST(const TokenLocation& loc, ExprASTPtr condition, ExprASTPtr body);
         ~WhileStatementAST();
+        ExprASTPtr getCondition() const { return condition_; }
+        ExprASTPtr getBody() const { return body_; }
         std::string toString() const override;
 
     private:
@@ -177,6 +240,10 @@ namespace MJava
     public:
         ForStatementAST(const TokenLocation& loc, ExprASTPtr variable, ExprASTPtr condition, ExprASTPtr action, ExprASTPtr body);
         ~ForStatementAST();
+        ExprASTPtr getVariable() const { return variable_; }
+        ExprASTPtr getCondition() const { return condition_; }
+        ExprASTPtr getAction() const { return action_; }
+        ExprASTPtr getBody() const { return body_; }
         std::string toString() const override;
 
     private:
@@ -191,6 +258,7 @@ namespace MJava
     public:
         ReturnStatementAST(const TokenLocation& loc, ExprASTPtr returnStatement);
         ~ReturnStatementAST();
+        ExprASTPtr getReturnStatement() const { return returnStatement_; }
         std::string toString() const override;
 
     private:
@@ -202,6 +270,7 @@ namespace MJava
     public:
         PrintStatementAST(const TokenLocation& loc, ExprASTPtr printStatement);
         ~PrintStatementAST();
+        ExprASTPtr getPrintStatement() const { return printStatement_; }
         std::string toString() const override;
         
     private:
@@ -213,6 +282,8 @@ namespace MJava
     public:
         NewStatementAST(const TokenLocation& loc, const std::string& type, ExprASTPtr newStatement);
         ~NewStatementAST();
+        std::string getType() const { return type_; }
+        ExprASTPtr getNewStatement() const { return newStatement_; }
         std::string toString() const override;
         
     private:
@@ -308,6 +379,7 @@ namespace MJava
     private:
         bool                boolean_;
     };
+
 } // namespace MJava
 
 #endif // ast.h

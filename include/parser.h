@@ -22,7 +22,7 @@ namespace MJava
                                 ~Parser();
         static bool             getErrorFlag();
         static void             setErrorFlag(bool flag);
-        VecExprASTPtr&          parse();
+        ProgramASTPtr           parse();
         std::string             toString();
 
     private:
@@ -52,6 +52,8 @@ namespace MJava
         ExprASTPtr              parseForStatement();
 
         // declaration / definition contains procedure and function.
+        ExprASTPtr              parseMainClass();
+        ExprASTPtr              parseMainMethod();
         ExprASTPtr              parseClassDeclaration();
         VecExprASTPtr           parseClassMemberVariables();
         VecExprASTPtr           parseClassMemberMethods();
@@ -77,7 +79,8 @@ namespace MJava
         void                    errorReport(const std::string& msg);
     private:
         Scanner&                scanner_;
-        VecExprASTPtr           ast_;
+        // VecExprASTPtr           ast_;
+        ProgramASTPtr           program_;
         static bool             errorFlag_;
         std::vector<Token>      stack_;
 
