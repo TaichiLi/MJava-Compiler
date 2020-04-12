@@ -120,15 +120,17 @@ namespace MJava
     class MethodBodyAST : public ExprAST
     {
     public:
-        MethodBodyAST(const TokenLocation& loc, const VecExprASTPtr& localVariables, const VecExprASTPtr& methodBody);
+        MethodBodyAST(const TokenLocation& loc, const VecExprASTPtr& localVariables, const VecExprASTPtr& methodBody, ExprASTPtr returnStatement);
         ~MethodBodyAST();
         VecExprASTPtr getLocalVariables() const { return localVariables_; }
         VecExprASTPtr getMethodBody() const { return methodBody_; }
+        ExprASTPtr getReturnStatement() const { return returnStatement_; }
         std::string toString() const override;
 
     private:
         VecExprASTPtr       localVariables_;
         VecExprASTPtr       methodBody_;
+        ExprASTPtr          returnStatement_;
     };
 
     class MethodDeclarationAST : public ExprAST

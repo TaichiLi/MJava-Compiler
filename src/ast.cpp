@@ -273,8 +273,8 @@ namespace MJava
         return std::string("{\n\"id\": " + std::to_string((int)getID()) + ",\n\"type\": \"" + getASTTypeDescription() + "\",\n\"main method\": " + mainMethod_->toString() + "\n}");
     }
 
-    MethodBodyAST::MethodBodyAST(const TokenLocation& loc, const VecExprASTPtr& localVariables, const VecExprASTPtr& methodBody)
-        : ExprAST(loc, ASTType::METHODBODY), localVariables_(localVariables), methodBody_(methodBody)
+    MethodBodyAST::MethodBodyAST(const TokenLocation& loc, const VecExprASTPtr& localVariables, const VecExprASTPtr& methodBody, ExprASTPtr returnStatement)
+        : ExprAST(loc, ASTType::METHODBODY), localVariables_(localVariables), methodBody_(methodBody), returnStatement_(returnStatement)
     {}
 
     MethodBodyAST::~MethodBodyAST()
@@ -293,6 +293,11 @@ namespace MJava
             {
                 delete exprASTPTr;
             }
+        }
+
+        if (returnStatement_ != nullptr)
+        {
+            delete returnStatement_;
         }
     }
 
@@ -325,7 +330,7 @@ namespace MJava
             str << methodBody_[size - 1]->toString() << "\n";
         }
 
-        str << "]";
+        str << "],\n\"return statement\": " << (returnStatement_ != nullptr ? returnStatement_->toString() : "{}") << "\n";
         
         return str.str();
     }
@@ -481,7 +486,7 @@ namespace MJava
     
     std::string IfStatementAST::toString() const
     {
-        return std::string("{\n\"id\": " + std::to_string((int)getID()) + ",\n\"type\": \"" + getASTTypeDescription() + "\",\n\"condition\": " + condition_->toString() + ",\n\"then part\": [" + thenPart_->toString() + "],\n\"else part\": ["+ (elsePart_ != nullptr ? elsePart_->toString() : "") + "]\n}");
+        return std::string("{\n\"id\": " + std::to_string((int)getID()) + ",\n\"type\": \"" + getASTTypeDescription() + "\",\n\"condition\": " + condition_->toString() + ",\n\"then part\": [" + thenPart_->toString() + "],\n\"else part\": ["+ elsePart_->toString() + "]\n}");
     }
 
     WhileStatementAST::WhileStatementAST(const TokenLocation& loc, ExprASTPtr condition, ExprASTPtr body)

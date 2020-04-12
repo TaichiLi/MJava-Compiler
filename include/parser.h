@@ -54,6 +54,7 @@ namespace MJava
         // declaration / definition contains procedure and function.
         ExprASTPtr              parseMainClass();
         ExprASTPtr              parseMainMethod();
+        ExprASTPtr              parseMainMethodBody();
         ExprASTPtr              parseClassDeclaration();
         VecExprASTPtr           parseClassMemberVariables();
         VecExprASTPtr           parseClassMemberMethods();
@@ -72,14 +73,17 @@ namespace MJava
 
         // Helper Functions.
     private:
+        bool                    expectAST(ASTType type, const std::string& astName, ExprASTPtr ast);
         bool                    expectToken(TokenValue value, const std::string& tokenName, bool advanceToNextToken);
         bool                    expectToken(TokenType type, const std::string& tokenTypeDescription, bool advanceToNextToken);
+        bool                    validateAST(ASTType type, ExprASTPtr ast);
         bool                    validateToken(TokenValue value, bool advanceToNextToken);
         bool                    validateToken(TokenType type, bool advanceToNextToken);
         void                    errorReport(const std::string& msg);
+        void                    errorReport(ExprASTPtr ast, const std::string& msg);
+
     private:
         Scanner&                scanner_;
-        // VecExprASTPtr           ast_;
         ProgramASTPtr           program_;
         static bool             errorFlag_;
         std::vector<Token>      stack_;

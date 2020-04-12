@@ -41,6 +41,7 @@ namespace MJava
         }
     }
 
+    // Goal ::= MainClass ( TypeDeclaration )* <EOF>
     ProgramASTPtr Parser::parse()
     {
         TokenLocation loc = scanner_.getToken().getTokenLocation();
@@ -55,6 +56,7 @@ namespace MJava
             return program_;
         }
 
+        // the first class must be main class
         ExprASTPtr mainClass = parseMainClass();
 
         if (mainClass != nullptr)
@@ -83,13 +85,10 @@ namespace MJava
 
             if (currentASTPtr != nullptr)
             {
-                if (currentASTPtr->getID() == ASTType::CLASSDECLARATION)
+                // program can only contain classes.
+                if (expectAST(ASTType::CLASSDECLARATION, "class declaration", currentASTPtr))
                 {
-                   classes.push_back(currentASTPtr); 
-                }
-                else
-                {
-                    errorSyntax(currentASTPtr->getTokenLocation().toString() + "Expected ' class declaration ', but find an unexpected statement\n");
+                    classes.push_back(currentASTPtr);
                 }
             }
             
@@ -101,6 +100,7 @@ namespace MJava
         }
     }
 
+    // MainClass ::= "class" Identifier "{" "public" "static" "void" "main" "(" "String" "[" "]" Identifier ")" "{" ( VarDeclaration )* ( Statement )* "}" "}"
     ExprASTPtr Parser::parseMainClass()
     {
         TokenLocation loc = scanner_.getToken().getTokenLocation();
@@ -124,6 +124,7 @@ namespace MJava
             return nullptr;
         }
 
+        // main class can only have one main method.
         ExprASTPtr mainMethod = parseMainMethod();
 
         if (mainMethod == nullptr)
@@ -150,7 +151,7 @@ namespace MJava
 
         std::vector<std::string> attributes;
         
-        // push public
+        // push "public"
         attributes.push_back("public");
 
         if (!expectToken(TokenValue::STATIC, "static", true))
@@ -158,6 +159,7 @@ namespace MJava
             return nullptr;
         }
 
+        // push "static"
         attributes.push_back("static");
 
         if (!expectToken(TokenValue::VOID, "void", true))
@@ -167,6 +169,7 @@ namespace MJava
 
         std::string returnType = "void";
 
+        // main method name should be "main"
         if (!expectToken(TokenValue::MAIN, "main", true))
         {
             return nullptr;
@@ -183,6 +186,7 @@ namespace MJava
 
         TokenLocation parameterLoc = scanner_.getToken().getTokenLocation();
 
+        // parameter should be String[]
         if (!expectToken(TokenValue::STRING, "String", true))
         {
             return nullptr;
@@ -212,7 +216,7 @@ namespace MJava
             return nullptr;
         }
 
-        ExprASTPtr body = parseMethodBody();
+        ExprASTPtr body = parseMainMethodBody();
         
         if (body == nullptr)
         {
@@ -222,30 +226,91 @@ namespace MJava
         return new MethodDeclarationAST(loc, attributes, returnType, name, parameters, body);
     }
 
-    VecExprASTPtr Parser::parseClassMemberVariables()
+    ExprASTPtr Parser::parseMainMethodBody()
     {
-        VecExprASTPtr memberVariables;
+        TokenLocation loc = scanner_.getToken().getTokenLocation();
 
-        while (!validateToken(TokenValue::RBRACE, false) && !validateToken(TokenValue::PUBLIC, false) && !validateToken(TokenType::END_OF_FILE, false))
+        if (!expectToken(TokenValue::LBRACE, "{", true))
         {
-            ExprASTPtr memberVariable = parseExpression();
+            return nullptr;
+        }
 
-            if (memberVariable != nullptr)
+        VecExprASTPtr localVariables;
+        VecExprASTPtr methodBody;
+
+        ExprASTPtr currentASTPtr = nullptr;
+
+        while (!validateToken(TokenValue::RBRACE, false) && !validateToken(TokenType::END_OF_FILE, false))
+        {
+            currentASTPtr = parseExpression();
+
+            if (currentASTPtr != nullptr)
             {
-                if (memberVariable->getID() == ASTType::VARIABLEDECLARATION)
+                if (validateAST(ASTType::VARIABLEDECLARATION, currentASTPtr))
                 {
-                    memberVariables.push_back(memberVariable);
+                    localVariables.push_back(currentASTPtr);
                 }
                 else
                 {
-                    errorSyntax(memberVariable->getTokenLocation().toString() + "Expected ' variable declaration ', but find an unexpected statement\n" + JSONFormatter::format(memberVariable->toString()));
+                    methodBody.push_back(currentASTPtr);
+                    break;
                 }
             }
         }
 
         if (validateToken(TokenType::END_OF_FILE, false))
         {
-            errorSyntax(scanner_.getToken().getTokenLocation().toString() + "Unexpected end of file in the class body");
+            errorReport("Unexpected end of file in the method body");
+            return nullptr;
+        }
+
+        while (!validateToken(TokenValue::RBRACE, false) && !validateToken(TokenType::END_OF_FILE, false))
+        {
+            currentASTPtr = parseExpression();
+
+            if (currentASTPtr != nullptr)
+            {
+                if (!validateAST(ASTType::CLASSDECLARATION, currentASTPtr) && !validateAST(ASTType::MAINCLASS, currentASTPtr) && !validateAST(ASTType::METHODDECLARATION, currentASTPtr) && !validateAST(ASTType::VARIABLEDECLARATION, currentASTPtr))
+                {
+                    methodBody.push_back(currentASTPtr);
+                }
+                else
+                {
+                    errorReport(currentASTPtr, "Find unexpected " + currentASTPtr->getASTTypeDescription());
+                }
+            }
+        }
+
+        if (!expectToken(TokenValue::RBRACE, "}", true))
+        {
+            return nullptr;
+        }
+
+        // main method don't have return statement.
+        return new MethodBodyAST(loc, localVariables, methodBody, nullptr);
+    }
+
+    VecExprASTPtr Parser::parseClassMemberVariables()
+    {
+        VecExprASTPtr memberVariables;
+
+        // All shoule be member variables before method declaration.
+        while (!validateToken(TokenValue::RBRACE, false) && !validateToken(TokenValue::PUBLIC, false) && !validateToken(TokenType::END_OF_FILE, false))
+        {
+            ExprASTPtr memberVariable = parseExpression();
+
+            if (memberVariable != nullptr)
+            {
+                if (expectAST(ASTType::VARIABLEDECLARATION, "variable declaration", memberVariable))
+                {
+                    memberVariables.push_back(memberVariable);
+                }
+            }
+        }
+
+        if (validateToken(TokenType::END_OF_FILE, false))
+        {
+            errorReport("Unexpected end of file in the class body");
         }
 
         return memberVariables;
@@ -261,25 +326,23 @@ namespace MJava
 
             if (memberMethod != nullptr)
             {
-                if (memberMethod->getID() == ASTType::METHODDECLARATION)
+                if (expectAST(ASTType::METHODDECLARATION, "method declaration", memberMethod))
                 {
                     memberMethods.push_back(memberMethod);
-                }
-                else
-                {
-                    errorSyntax(memberMethod->getTokenLocation().toString() + "Expected ' method declaration ', but find an unexpected statement\n" + JSONFormatter::format(memberMethod->toString()));
                 }
             }
         }
 
         if (validateToken(TokenType::END_OF_FILE, false))
         {
-            errorSyntax(scanner_.getToken().getTokenLocation().toString() + "Unexpected end of file in the class body");
+            errorReport("Unexpected end of file in the class body");
         }
 
         return memberMethods;
     }
 
+    // ClassDeclaration ::= "class" Identifier "{" ( VarDeclaration )* ( MethodDeclaration )* "}"
+    // ClassExtendsDeclaration ::= "class" Identifier "extends" Identifier "{" ( VarDeclaration )* ( MethodDeclaration )* "}"
     ExprASTPtr Parser::parseClassDeclaration()
     {
         TokenLocation loc = scanner_.getToken().getTokenLocation();
@@ -317,6 +380,7 @@ namespace MJava
             return nullptr;
         }
 
+        // In a class declaration, the first is member variables and then is member methods.
         const VecExprASTPtr& memberVariables = parseClassMemberVariables();
 
         const VecExprASTPtr& memberMethods = parseClassMemberMethods();
@@ -329,6 +393,7 @@ namespace MJava
         return new ClassDeclarationAST(loc, className, baseClassName, memberVariables, memberMethods);
     }
 
+    // MethodBody := "{" ( VarDeclaration )* ( Statement )* "return" Expression ";" "}"
     ExprASTPtr Parser::parseMethodBody()
     {
         TokenLocation loc = scanner_.getToken().getTokenLocation();
@@ -343,13 +408,13 @@ namespace MJava
 
         ExprASTPtr currentASTPtr = nullptr;
 
-        while (!validateToken(TokenValue::RBRACE, true) && !validateToken(TokenType::END_OF_FILE, false))
+        while (!validateToken(TokenValue::RETURN, false) && !validateToken(TokenType::END_OF_FILE, false))
         {
             currentASTPtr = parseExpression();
 
             if (currentASTPtr != nullptr)
             {
-                if (currentASTPtr->getID() == ASTType::VARIABLEDECLARATION)
+                if (validateAST(ASTType::VARIABLEDECLARATION, currentASTPtr))
                 {
                     localVariables.push_back(currentASTPtr);
                 }
@@ -363,25 +428,38 @@ namespace MJava
 
         if (validateToken(TokenType::END_OF_FILE, false))
         {
-            errorSyntax(scanner_.getToken().getTokenLocation().toString() + "Unexpected end of file in the method body");
+            errorReport("Unexpected end of file in the method body");
             return nullptr;
         }
 
-        while (!validateToken(TokenValue::RBRACE, false) && !validateToken(TokenType::END_OF_FILE, false))
+        while (!validateToken(TokenValue::RETURN, false) && !validateToken(TokenType::END_OF_FILE, false))
         {
             currentASTPtr = parseExpression();
 
             if (currentASTPtr != nullptr)
             {
-                if (currentASTPtr->getID() == ASTType::VARIABLEDECLARATION)
-                {
-                    errorSyntax(currentASTPtr->getTokenLocation().toString() + "Find unexpected variable declaration statement\n" + JSONFormatter::format(currentASTPtr->toString()));
-                }
-                else
+                if (!validateAST(ASTType::CLASSDECLARATION, currentASTPtr) && !validateAST(ASTType::MAINCLASS, currentASTPtr) && !validateAST(ASTType::METHODDECLARATION, currentASTPtr) && !validateAST(ASTType::VARIABLEDECLARATION, currentASTPtr))
                 {
                     methodBody.push_back(currentASTPtr);
                 }
+                else
+                {
+                    errorReport(currentASTPtr, "Find unexpected " + currentASTPtr->getASTTypeDescription());
+                }
             }
+        }
+
+        // method must have one return statement.
+        if (!expectToken(TokenValue::RETURN, "return", false))
+        {
+            return nullptr;
+        }
+
+        ExprASTPtr returnStatement = parseReturnStatement();
+
+        if (returnStatement == nullptr)
+        {
+            return nullptr;
         }
 
         if (!expectToken(TokenValue::RBRACE, "}", true))
@@ -389,14 +467,15 @@ namespace MJava
             return nullptr;
         }
         
-        return new MethodBodyAST(loc, localVariables, methodBody);
+        return new MethodBodyAST(loc, localVariables, methodBody, returnStatement);
     }
 
+    // MethodDeclaration ::= "public" Type Identifier "(" ( FormalParameterList )? ")" "{" ( VarDeclaration )* ( Statement )* "return" Expression ";" "}"
     ExprASTPtr Parser::parseMethodDeclaration()
     {
         TokenLocation loc = scanner_.getToken().getTokenLocation();
 
-        if (!expectToken(TokenValue::PUBLIC, "public", false))
+        if (!expectToken(TokenValue::PUBLIC, "public", true))
         {
             return nullptr;
         }
@@ -404,9 +483,7 @@ namespace MJava
         std::vector<std::string> attributes;
         
         // push public
-        attributes.push_back(scanner_.getToken().getTokenName());
-        
-        scanner_.getNextToken();
+        attributes.push_back("public");
 
         // parse attributes of method.
         while (!validateToken(TokenType::TYPE, false) && !validateToken(TokenType::IDENTIFIER, false) && !validateToken(TokenValue::VOID, false))
@@ -431,6 +508,7 @@ namespace MJava
             {
                 return nullptr;
             }
+
             returnType += "[]";
         }
 
@@ -451,6 +529,10 @@ namespace MJava
         VecExprASTPtr parameters;
 
         // parse parameters of method.
+        // FormalParameterList ::= FormalParameter FormalParameterTail
+        // FormalParameter ::= Type Identifier
+        // FormalParameterTail ::= ( FormalParameterTerm )*
+        // FormalParameterTerm ::= "," FormalParameter
         while (!validateToken(TokenValue::RPAREN, true))
         {
             ExprASTPtr parameter = parseMethodParameter();
@@ -573,6 +655,7 @@ namespace MJava
         return new MethodCallAST(loc, "length", arguments);
     }
 
+    // PrintStatement ::= "System.out.println" "(" Expression ")" ";"
     ExprASTPtr Parser::parsePrintStatement()
     {
         TokenLocation loc = scanner_.getToken().getTokenLocation();
@@ -607,6 +690,7 @@ namespace MJava
         return new PrintStatementAST(loc, printStatement);
     }
 
+    // ReturnStatement ::= "return" Expression ";"
     ExprASTPtr Parser::parseReturnStatement()
     {
         TokenLocation loc = scanner_.getToken().getTokenLocation();
@@ -624,6 +708,10 @@ namespace MJava
         return new ReturnStatementAST(loc, returnStatement);
     }
 
+    // ArrayAllocationExpression ::= BooleanArrayAllocationExpression | IntegerArrayAllocationExpression
+    // BooleanArrayAllocationExpression ::= "new" "boolean" "[" Expression "]"
+    // IntegerArrayAllocationExpression ::= "new" "int" "[" Expression "]"
+    // AllocationExpression ::= "new" Identifier "(" ")"
     ExprASTPtr Parser::parseNewStatement()
     {
         TokenLocation loc = scanner_.getToken().getTokenLocation();
@@ -677,6 +765,12 @@ namespace MJava
         return new NewStatementAST(loc, type, expression);
     }
 
+    // VarDeclaration ::= Type Identifier ";"
+    // Type ::=	ArrayType | booleanType	|IntegerType |Identifier
+    // BooleanArrayType ::= "boolean" "[" "]"
+    // IntegerArrayType ::= "int" "[" "]"
+    // BooleanType ::= "boolean"
+    // IntegerType ::= "int"
     ExprASTPtr Parser::parseVariableDeclaration()
     {
         TokenLocation loc = scanner_.getToken().getTokenLocation();
@@ -765,6 +859,7 @@ namespace MJava
         return currentASTPtr;
     }
 
+    // parse all primary expression
     ExprASTPtr Parser::parsePrimary()
     {
         Token token = scanner_.getToken();
@@ -934,6 +1029,7 @@ namespace MJava
         return new VariableAST(loc, token.getTokenName());
     }
 
+    // RealLiteral ::= <REALLITERAL>
     ExprASTPtr Parser::parseRealExpression()
     {
         TokenLocation loc = scanner_.getToken().getTokenLocation();
@@ -945,6 +1041,7 @@ namespace MJava
         return new RealAST(loc, real);
     }
 
+    // IntegerLiteral ::= <INTEGER_LITERAL>
     ExprASTPtr Parser::parseIntegerExpression()
     {
         TokenLocation loc = scanner_.getToken().getTokenLocation();
@@ -956,6 +1053,7 @@ namespace MJava
         return new IntegerAST(loc, integer);
     }
 
+    // CharLiteral ::= <CHATLITERAL>
     ExprASTPtr Parser::parseCharExpression()
     {
         TokenLocation loc = scanner_.getToken().getTokenLocation();
@@ -967,6 +1065,7 @@ namespace MJava
         return new CharAST(loc, ch);
     }
 
+    // StringLiteral ::= <STRINGLITERAL>
     ExprASTPtr Parser::parseStringExpression()
     {
         TokenLocation loc = scanner_.getToken().getTokenLocation();
@@ -978,6 +1077,8 @@ namespace MJava
         return new StringAST(loc, string);
     }
 
+    // TrueLiteral ::= "true"
+    // FalseLiteral ::= "false"
     ExprASTPtr Parser::parseBooleanExpression()
     {
         TokenLocation loc = scanner_.getToken().getTokenLocation();
@@ -989,6 +1090,13 @@ namespace MJava
         return new BooleanAST(loc, boolean);
     }
 
+    // AssignmentStatement ::= Identifier "=" Expression ";"
+    // ArrayAssignmentStatement ::= Identifier "[" Expression "]" "=" Expression ";"
+    // AndExpression ::= Clause "&&" Clause
+    // CompareExpression ::= PrimaryExpression "<" PrimaryExpression
+    // PlusExpression ::= PrimaryExpression "+" PrimaryExpression
+    // MinusExpression ::= PrimaryExpression "-" PrimaryExpression
+    // TimesExpression ::= PrimaryExpression "*" PrimaryExpression
     ExprASTPtr Parser::parseBinOpRHS(int precedence, ExprASTPtr lhs)
     {
         TokenLocation loc = scanner_.getToken().getTokenLocation();
@@ -1034,6 +1142,9 @@ namespace MJava
         return nullptr;
     }
 
+    // NotExpression ::= "!" Clause
+    // Clause ::= NotExpression | PrimaryExpression
+    // MJava have only one unary operator "!", but we can add other unary operators.
     ExprASTPtr Parser::parseUnaryOp()
     {
         TokenLocation loc = scanner_.getToken().getTokenLocation();
@@ -1052,6 +1163,7 @@ namespace MJava
         return new UnaryOpExpressionAST(loc, unaryOp, currentASTPtr);
     }
 
+    // BracketExpression ::= "(" Expression ")"
     ExprASTPtr Parser::parseParenExpression()
     {
         // consume '('
@@ -1073,6 +1185,7 @@ namespace MJava
         return currentASTPtr;
     }
 
+    // Block ::= "{" ( Statement )* "}"
     ExprASTPtr Parser::parseBlockOrStatement()
     {
         TokenLocation loc = scanner_.getToken().getTokenLocation();
@@ -1094,19 +1207,14 @@ namespace MJava
 
             if (currentASTPtr != nullptr)
             {
-                if (currentASTPtr->getID() != ASTType::VARIABLEDECLARATION)
+                if (!validateAST(ASTType::CLASSDECLARATION, currentASTPtr) && !validateAST(ASTType::MAINCLASS, currentASTPtr) && !validateAST(ASTType::METHODDECLARATION, currentASTPtr) && !validateAST(ASTType::VARIABLEDECLARATION, currentASTPtr))
                 {
                     stmts.push_back(currentASTPtr);
                 }
                 else
                 {
-                    errorSyntax(currentASTPtr->getTokenLocation().toString() + "Find unexpected variable declaration statement\n" + JSONFormatter::format(currentASTPtr->toString()));
-                    continue;
+                    errorReport(currentASTPtr, "Find unexpected " + currentASTPtr->getASTTypeDescription());
                 }
-            }
-            else
-            {
-                continue;
             }
         }
 
@@ -1118,6 +1226,7 @@ namespace MJava
         return new BlockAST(loc, stmts);
     }
 
+    // IfStatement ::= "if" "(" Expression ")" Statement "else" Statement
     ExprASTPtr Parser::parseIfStatement()
     {
         TokenLocation loc = scanner_.getToken().getTokenLocation();
@@ -1133,7 +1242,7 @@ namespace MJava
             return nullptr;
         }
 
-        auto condition = parseExpression();
+        ExprASTPtr condition = parseExpression();
 
         if (condition == nullptr)
         {
@@ -1154,22 +1263,24 @@ namespace MJava
             return nullptr;
         }
 
-        ExprASTPtr elsePart = nullptr;
-
-        // if we have token else.
-        if (validateToken(TokenValue::ELSE, true))
+        if (!expectToken(TokenValue::ELSE, "else", true))
         {
-            elsePart = parseBlockOrStatement();
-            if (!elsePart)
-            {
-                errorReport("else statement is not valid.");
-                return nullptr;
-            }
+            return nullptr;
+        }
+        
+        // MJava ifstatement must have else part
+        ExprASTPtr elsePart = parseBlockOrStatement();
+
+        if (elsePart == nullptr)
+        {
+            errorReport("else statement is not valid.");
+            return nullptr;
         }
 
         return new IfStatementAST(loc, condition, thenPart, elsePart);
     }
 
+    // WhileStatement ::= "while" "(" Expression ")" Statement
     ExprASTPtr Parser::parseWhileStatement()
     {
         TokenLocation loc = scanner_.getToken().getTokenLocation();
@@ -1245,6 +1356,17 @@ namespace MJava
 
     // Helper Functions.
 
+    bool Parser::expectAST(ASTType type, const std::string& astName, ExprASTPtr ast)
+    {
+        if (ast->getID() != type)
+        {
+            errorSyntax(ast->getTokenLocation().toString() + "Expected ' " + astName + " ', but find " + ast->getASTTypeDescription());
+            return false;
+        }
+
+        return true;
+    }
+
     bool Parser::expectToken(TokenValue value, const std::string& tokenName, bool advanceToNextToken)
     {
         if (scanner_.getToken().getTokenValue() != value)
@@ -1280,6 +1402,16 @@ namespace MJava
     void Parser::setErrorFlag(bool flag)
     {
         errorFlag_ = flag;
+    }
+
+    bool Parser::validateAST(ASTType type, ExprASTPtr ast)
+    {
+        if (ast->getID() != type)
+        {
+            return false;
+        }
+
+        return true;
     }
 
     // validate the token.
@@ -1325,4 +1457,10 @@ namespace MJava
     {
         errorSyntax(scanner_.getToken().getTokenLocation().toString() + msg);
     }
+
+    void Parser::errorReport(ExprASTPtr ast, const std::string& msg)
+    {
+        errorSyntax(ast->getTokenLocation().toString() + msg);
+    }
+
 } // namespace MJava
