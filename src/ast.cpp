@@ -147,7 +147,7 @@ namespace MJava
     {
         std::ostringstream str;
 
-        str << "{\n\"id\": " + std::to_string((int)getID()) + ",\n\"type\": \"" + getASTTypeDescription() + "\",\n\"classes\": [";
+        str << "{\n\"id\": " + std::to_string(static_cast<int>(getID())) + ",\n\"type\": \"" + getASTTypeDescription() + "\",\n\"classes\": [";
 
         size_t size = classes_.size();
 
@@ -224,7 +224,7 @@ namespace MJava
     std::string ClassDeclarationAST::toString() const
     {
         std::ostringstream str;
-        str << "{\n\"id\": " + std::to_string((int)getID()) + ",\n\"type\": \"" + getASTTypeDescription() + "\",\n\"class name\": \"" << className_ << "\",\n\"base class\": \"" << baseClassName_ << "\",\n\"member variables\": [";
+        str << "{\n\"id\": " + std::to_string(static_cast<int>(getID())) + ",\n\"type\": \"" + getASTTypeDescription() + "\",\n\"class name\": \"" << className_ << "\",\n\"base class\": \"" << baseClassName_ << "\",\n\"member variables\": [";
 
         size_t size = memberVariables_.size();
 
@@ -239,6 +239,7 @@ namespace MJava
         }
 
         str << "],\n\"member methods\": [";
+        
         size = memberMethods_.size();
 
         if (size > 0)
@@ -270,7 +271,7 @@ namespace MJava
 
     std::string MainClassAST::toString() const
     {
-        return std::string("{\n\"id\": " + std::to_string((int)getID()) + ",\n\"type\": \"" + getASTTypeDescription() + "\",\n\"main method\": " + mainMethod_->toString() + "\n}");
+        return std::string("{\n\"id\": " + std::to_string(static_cast<int>(getID())) + ",\n\"type\": \"" + getASTTypeDescription() + "\",\n\"main method\": " + mainMethod_->toString() + "\n}");
     }
 
     MethodBodyAST::MethodBodyAST(const TokenLocation& loc, const VecExprASTPtr& localVariables, const VecExprASTPtr& methodBody, ExprASTPtr returnStatement)
@@ -358,7 +359,7 @@ namespace MJava
     std::string MethodDeclarationAST::toString() const
     {
         std::ostringstream str;
-        str << "{\n\"id\": " + std::to_string((int)getID()) + ",\n\"type\": \"" + getASTTypeDescription() + "\",\n\"attributes\": [";
+        str << "{\n\"id\": " + std::to_string(static_cast<int>(getID())) + ",\n\"type\": \"" + getASTTypeDescription() + "\",\n\"attributes\": [";
 
         size_t size = attributes_.size();
 
@@ -408,7 +409,7 @@ namespace MJava
     std::string MethodCallAST::toString() const
     {
         std::ostringstream str;
-        str << "{\n\"id\": " + std::to_string((int)getID()) + ",\n\"type\": \"" + getASTTypeDescription() + "\",\n\"method name\": \"" << name_ << "\",\n\"parameters\": [";
+        str << "{\n\"id\": " + std::to_string(static_cast<int>(getID())) + ",\n\"type\": \"" + getASTTypeDescription() + "\",\n\"method name\": \"" << name_ << "\",\n\"parameters\": [";
 
         size_t size = parameters_.size();
 
@@ -433,7 +434,7 @@ namespace MJava
 
     std::string VariableDeclarationAST::toString() const
     {
-        return std::string("{\n\"id\": " + std::to_string((int)getID()) + ",\n\"type\": \"" + getASTTypeDescription() + "\",\n\"variable type\": \"" + type_ + "\",\n\"variable name\": \"" + name_ + "\"\n}");
+        return std::string("{\n\"id\": " + std::to_string(static_cast<int>(getID())) + ",\n\"type\": \"" + getASTTypeDescription() + "\",\n\"variable type\": \"" + type_ + "\",\n\"variable name\": \"" + name_ + "\"\n}");
     }
 
     VariableAST::VariableAST(const TokenLocation& loc, const std::string& name)
@@ -442,7 +443,7 @@ namespace MJava
 
     std::string VariableAST::toString() const
     {
-        return std::string("{\n\"id\": " + std::to_string((int)getID()) + ",\n\"type\": \"" + getASTTypeDescription() + "\",\n\"name\": \"" + name_ + "\"\n}");
+        return std::string("{\n\"id\": " + std::to_string(static_cast<int>(getID())) + ",\n\"type\": \"" + getASTTypeDescription() + "\",\n\"name\": \"" + name_ + "\"\n}");
     }
 
     ArrayAST::ArrayAST(const TokenLocation& loc, const std::string& name, ExprASTPtr index)
@@ -459,7 +460,7 @@ namespace MJava
 
     std::string ArrayAST::toString() const
     {
-        return std::string("{\n\"id\": " + std::to_string((int)getID()) + ",\n\"type\": \"" + getASTTypeDescription() + "\",\n\"name\": \"" + name_ + "\",\n\"index\": " + index_->toString() + "\n}");
+        return std::string("{\n\"id\": " + std::to_string(static_cast<int>(getID())) + ",\n\"type\": \"" + getASTTypeDescription() + "\",\n\"name\": \"" + name_ + "\",\n\"index\": " + index_->toString() + "\n}");
     }
 
     IfStatementAST::IfStatementAST(const TokenLocation& loc, ExprASTPtr condition, ExprASTPtr thenPart, ExprASTPtr elsePart)
@@ -486,7 +487,7 @@ namespace MJava
     
     std::string IfStatementAST::toString() const
     {
-        return std::string("{\n\"id\": " + std::to_string((int)getID()) + ",\n\"type\": \"" + getASTTypeDescription() + "\",\n\"condition\": " + condition_->toString() + ",\n\"then part\": [" + thenPart_->toString() + "],\n\"else part\": ["+ elsePart_->toString() + "]\n}");
+        return std::string("{\n\"id\": " + std::to_string(static_cast<int>(getID())) + ",\n\"type\": \"" + getASTTypeDescription() + "\",\n\"condition\": " + condition_->toString() + ",\n\"then part\": [" + thenPart_->toString() + "],\n\"else part\": ["+ elsePart_->toString() + "]\n}");
     }
 
     WhileStatementAST::WhileStatementAST(const TokenLocation& loc, ExprASTPtr condition, ExprASTPtr body)
@@ -508,7 +509,7 @@ namespace MJava
 
     std::string WhileStatementAST::toString() const
     {
-        return std::string("{\n\"id\": " + std::to_string((int)getID()) + ",\n\"type\": \"" + getASTTypeDescription() + "\",\n\"condition\": " + condition_->toString() + ",\n\"body\": [" + body_->toString() + "]\n}");
+        return std::string("{\n\"id\": " + std::to_string(static_cast<int>(getID())) + ",\n\"type\": \"" + getASTTypeDescription() + "\",\n\"condition\": " + condition_->toString() + ",\n\"body\": [" + body_->toString() + "]\n}");
     }
 
     ForStatementAST::ForStatementAST(const TokenLocation& loc, ExprASTPtr variable, ExprASTPtr condition, ExprASTPtr action, ExprASTPtr body)
@@ -540,7 +541,7 @@ namespace MJava
 
     std::string ForStatementAST::toString() const
     {
-        return std::string("{\n\"id\": " + std::to_string((int)getID()) + ",\n\"type\": \"" + getASTTypeDescription() + "\",\n\"variable\": " + (variable_ != nullptr ? variable_->toString() : "{}") + ",\n\"condition\": " + (condition_ != nullptr ? condition_->toString() : "{}") + ",\n\"action\": " + (action_ != nullptr ? action_->toString() : "{}") + ",\n\"body\": [" + body_->toString() + "]\n}");
+        return std::string("{\n\"id\": " + std::to_string(static_cast<int>(getID())) + ",\n\"type\": \"" + getASTTypeDescription() + "\",\n\"variable\": " + (variable_ != nullptr ? variable_->toString() : "{}") + ",\n\"condition\": " + (condition_ != nullptr ? condition_->toString() : "{}") + ",\n\"action\": " + (action_ != nullptr ? action_->toString() : "{}") + ",\n\"body\": [" + body_->toString() + "]\n}");
     }
 
     ReturnStatementAST::ReturnStatementAST(const TokenLocation& loc, ExprASTPtr returnStatement)
@@ -557,7 +558,7 @@ namespace MJava
 
     std::string ReturnStatementAST::toString() const
     {
-        return std::string("{\n\"id\": " + std::to_string((int)getID()) + ",\n\"type\": \"" + getASTTypeDescription() + "\",\n\"expression\" :" + (returnStatement_ != nullptr ? returnStatement_->toString() : "{}") + "\n}");
+        return std::string("{\n\"id\": " + std::to_string(static_cast<int>(getID())) + ",\n\"type\": \"" + getASTTypeDescription() + "\",\n\"expression\" :" + (returnStatement_ != nullptr ? returnStatement_->toString() : "{}") + "\n}");
     }
 
     PrintStatementAST::PrintStatementAST(const TokenLocation& loc, ExprASTPtr printStatement)
@@ -574,7 +575,7 @@ namespace MJava
 
     std::string PrintStatementAST::toString() const
     {
-        return std::string("{\n\"id\": " + std::to_string((int)getID()) + ",\n\"type\": \"" + getASTTypeDescription() + "\",\n\"expression\": " + printStatement_->toString() + "\n}");
+        return std::string("{\n\"id\": " + std::to_string(static_cast<int>(getID())) + ",\n\"type\": \"" + getASTTypeDescription() + "\",\n\"expression\": " + printStatement_->toString() + "\n}");
     }
 
     NewStatementAST::NewStatementAST(const TokenLocation& loc, const std::string& type, ExprASTPtr newStatement)
@@ -593,11 +594,11 @@ namespace MJava
     {
         if (newStatement_->getID() == ASTType::METHODCALL)
         {
-            return std::string("{\n\"id\": " + std::to_string((int)getID()) + ",\n\"type\": \"" + getASTTypeDescription() + "\",\n\"variable type\": \"" + type_ + "\",\n\"expression\": " + newStatement_->toString() + "\n}");
+            return std::string("{\n\"id\": " + std::to_string(static_cast<int>(getID())) + ",\n\"type\": \"" + getASTTypeDescription() + "\",\n\"variable type\": \"" + type_ + "\",\n\"expression\": " + newStatement_->toString() + "\n}");
         }
         else
         {
-            return std::string("{\n\"id\": " + std::to_string((int)getID()) + ",\n\"type\": \"" + getASTTypeDescription() + "\",\n\"variable type\": \"" + type_ + "\",\n\"length\": " + newStatement_->toString() + "\n}");
+            return std::string("{\n\"id\": " + std::to_string(static_cast<int>(getID())) + ",\n\"type\": \"" + getASTTypeDescription() + "\",\n\"variable type\": \"" + type_ + "\",\n\"length\": " + newStatement_->toString() + "\n}");
         }
     }
 
@@ -620,7 +621,7 @@ namespace MJava
 
     std::string BinaryOpExpressionAST::toString() const
     {
-        return std::string("{\n\"id\": " + std::to_string((int)getID()) + ",\n\"type\": \"" + getASTTypeDescription() + "\",\n\"binary operator\": \"" + binaryOp_ + "\",\n\"lhs\": " + lhs_->toString() + ",\n\"rhs\": " + rhs_->toString() + "\n}");
+        return std::string("{\n\"id\": " + std::to_string(static_cast<int>(getID())) + ",\n\"type\": \"" + getASTTypeDescription() + "\",\n\"binary operator\": \"" + binaryOp_ + "\",\n\"lhs\": " + lhs_->toString() + ",\n\"rhs\": " + rhs_->toString() + "\n}");
     }
 
     UnaryOpExpressionAST::UnaryOpExpressionAST(const TokenLocation& loc, const std::string& unaryOp, ExprASTPtr expression)
@@ -637,7 +638,7 @@ namespace MJava
 
     std::string UnaryOpExpressionAST::toString() const
     {
-        return std::string("{\n\"id\": " + std::to_string((int)getID()) + ",\n\"type\": \"" + getASTTypeDescription() + "\",\n\"unary operator\": \"" + unaryOp_ + "\",\n\"expression\": " + expression_->toString() + "\n}");
+        return std::string("{\n\"id\": " + std::to_string(static_cast<int>(getID())) + ",\n\"type\": \"" + getASTTypeDescription() + "\",\n\"unary operator\": \"" + unaryOp_ + "\",\n\"expression\": " + expression_->toString() + "\n}");
     }
 
     RealAST::RealAST(const TokenLocation& loc, double real)
@@ -646,7 +647,7 @@ namespace MJava
     
     std::string RealAST::toString() const
     {
-        return std::string("{\n\"id\": " + std::to_string((int)getID()) + ",\n\"type\": \"" + getASTTypeDescription() + "\",\n\"real\": " + std::to_string(real_) + "\n}");
+        return std::string("{\n\"id\": " + std::to_string(static_cast<int>(getID())) + ",\n\"type\": \"" + getASTTypeDescription() + "\",\n\"real\": " + std::to_string(real_) + "\n}");
     }
 
     IntegerAST::IntegerAST(const TokenLocation& loc, int integer)
@@ -655,7 +656,7 @@ namespace MJava
 
     std::string IntegerAST::toString() const
     {
-        return std::string("{\n\"id\": " + std::to_string((int)getID()) + ",\n\"type\": \"" + getASTTypeDescription() + "\",\n\"integer\": " + std::to_string(integer_) + "\n}");
+        return std::string("{\n\"id\": " + std::to_string(static_cast<int>(getID())) + ",\n\"type\": \"" + getASTTypeDescription() + "\",\n\"integer\": " + std::to_string(integer_) + "\n}");
     }
     
     CharAST::CharAST(const TokenLocation& loc, char ch)
@@ -664,7 +665,7 @@ namespace MJava
 
     std::string CharAST::toString() const
     {
-        return std::string("{\n\"id\": " + std::to_string((int)getID()) + ",\n\"type\": \"" + getASTTypeDescription() + "\",\n\"char\": \"" + std::string(1, ch_) + "\"\n}");
+        return std::string("{\n\"id\": " + std::to_string(static_cast<int>(getID())) + ",\n\"type\": \"" + getASTTypeDescription() + "\",\n\"char\": \"" + std::string(1, ch_) + "\"\n}");
     }
 
     StringAST::StringAST(const TokenLocation& loc, const std::string& str)
@@ -673,7 +674,7 @@ namespace MJava
 
     std::string StringAST::toString() const
     {
-        return std::string("{\n\"id\": " + std::to_string((int)getID()) + ",\n\"type\": \"" + getASTTypeDescription() + "\",\n\"string\": \"" + str_ + "\"\n}");
+        return std::string("{\n\"id\": " + std::to_string(static_cast<int>(getID())) + ",\n\"type\": \"" + getASTTypeDescription() + "\",\n\"string\": \"" + str_ + "\"\n}");
     }
 
     BooleanAST::BooleanAST(const TokenLocation& loc, bool boolean)
@@ -684,11 +685,11 @@ namespace MJava
     {
         if (boolean_)
         {
-            return std::string("{\n\"id\": " + std::to_string((int)getID()) + ",\n\"type\": \"" + getASTTypeDescription() + "\",\n\"boolean\": true\n}");
+            return std::string("{\n\"id\": " + std::to_string(static_cast<int>(getID())) + ",\n\"type\": \"" + getASTTypeDescription() + "\",\n\"boolean\": true\n}");
         }
         else
         {
-            return std::string("{\n\"id\": " + std::to_string((int)getID()) + ",\n\"type\": \"" + getASTTypeDescription() + "\",\n\"boolean\": false\n}");
+            return std::string("{\n\"id\": " + std::to_string(static_cast<int>(getID())) + ",\n\"type\": \"" + getASTTypeDescription() + "\",\n\"boolean\": false\n}");
         }
            
     }

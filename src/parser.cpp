@@ -512,7 +512,7 @@ namespace MJava
             returnType += "[]";
         }
 
-        if (!validateToken(TokenValue::MAIN, false) && !validateToken(TokenType::IDENTIFIER, false))
+        if (!validateToken(TokenType::IDENTIFIER, false))
         {
             return nullptr;
         }
