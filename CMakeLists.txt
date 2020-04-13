@@ -35,7 +35,7 @@ if (GTest_FOUND)
     message(STATUS "GTEST_LIBRARY_DIR: ${GTEST_LIBRARY_DIR}")
     # 添加可执行文件
     add_executable(${PROJECT_NAME}_test
-               src/gtest.cpp # 添加源文件，建议在此逐个列出而不是使用变量
+               test/gtest.cpp # 添加源文件，建议在此逐个列出而不是使用变量
                src/lexer.cpp
     )
     # 添加头文件目录
@@ -56,7 +56,7 @@ else()
     message(STATUS "Build Ordinary Test Project")
     # 添加可执行文件
     add_executable(${PROJECT_NAME}_test 
-                src/test.cpp # 添加源文件，建议在此逐个列出而不是使用变量
+                test/test.cpp # 添加源文件，建议在此逐个列出而不是使用变量
                 src/lexer.cpp
     )
     # 添加头文件目录
