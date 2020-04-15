@@ -63,6 +63,10 @@ namespace MJava
         {
             classes.push_back(mainClass);
         }
+        else
+        {
+            errorReport("Missing main class definition.");
+        }
 
         for (;;)
         {
@@ -129,6 +133,7 @@ namespace MJava
 
         if (mainMethod == nullptr)
         {
+            errorReport("Missing main method definition.");
             return nullptr;
         }
 
@@ -220,6 +225,7 @@ namespace MJava
         
         if (body == nullptr)
         {
+            errorReport("Missing method body.");
             return nullptr;
         }
 
@@ -432,7 +438,7 @@ namespace MJava
             return nullptr;
         }
 
-        while (!validateToken(TokenValue::RETURN, false) && !validateToken(TokenType::END_OF_FILE, false))
+        while (!validateToken(TokenValue::RETURN, false) && !validateToken(TokenValue::RBRACE, false) && !validateToken(TokenType::END_OF_FILE, false))
         {
             currentASTPtr = parseExpression();
 
@@ -452,6 +458,7 @@ namespace MJava
         // method must have one return statement.
         if (!expectToken(TokenValue::RETURN, "return", false))
         {
+            errorReport("Missing return expression.");
             return nullptr;
         }
 
@@ -459,6 +466,7 @@ namespace MJava
 
         if (returnStatement == nullptr)
         {
+            errorReport("Missing return expression.");
             return nullptr;
         }
 
@@ -547,6 +555,7 @@ namespace MJava
         
         if (body == nullptr)
         {
+            errorReport("Missing method body.");
             return nullptr;
         }
 
@@ -562,6 +571,7 @@ namespace MJava
             if (!validateToken(TokenType::TYPE, false) && !validateToken(TokenType::IDENTIFIER, false))
             {
                 errorReport("Expected ' type or identifier ', but find " + scanner_.getToken().tokenTypeDescription() + " " + scanner_.getToken().getTokenName());
+                scanner_.getNextToken();
                 return nullptr;
             }
 
@@ -674,6 +684,7 @@ namespace MJava
 
         if (printStatement == nullptr)
         {
+            errorReport("Missing print expression.");
             return nullptr;
         }
 
@@ -702,8 +713,16 @@ namespace MJava
 
         ExprASTPtr returnStatement = parseExpression();
 
-        // consume possible ';'
-        validateToken(TokenValue::SEMICOLON, true);
+        if (returnStatement == nullptr)
+        {
+            errorReport("Missing return statement.");
+            return nullptr;
+        }
+
+        if (!expectToken(TokenValue::SEMICOLON, ";", true))
+        {
+            return nullptr;
+        }
 
         return new ReturnStatementAST(loc, returnStatement);
     }
@@ -746,6 +765,7 @@ namespace MJava
 
             if (expression == nullptr)
             {
+                errorReport("Missing length of array.");
                 return nullptr;
             }
 
@@ -755,11 +775,6 @@ namespace MJava
             }
             
             type += "[]";
-        }
-
-        if (!expectToken(TokenValue::SEMICOLON, ";", true))
-        {
-            return nullptr;
         }
 
         return new NewStatementAST(loc, type, expression);
@@ -853,9 +868,14 @@ namespace MJava
 
         ExprASTPtr currentASTPtr = parseBinOpRHS(0, lhs);
 
-        // consume possible ';'
-        validateToken(TokenValue::SEMICOLON, true);
-
+        if (currentASTPtr != nullptr && (currentASTPtr->getID() == ASTType::BINARYOPEXPRESSION && static_cast<BinaryOpExpressionAST*>(currentASTPtr)->getBinaryOp() == "="))
+        {
+            if (!expectToken(TokenValue::SEMICOLON, ";", true))
+            {
+                return nullptr;
+            }
+        }
+        
         return currentASTPtr;
     }
 
@@ -911,9 +931,6 @@ namespace MJava
                 {
                     case TokenValue::LPAREN:
                         return parseParenExpression();
-                    
-                    case TokenValue::SEMICOLON:
-                        return nullptr;
 
                     default:
                         errorReport("should not reach here, unexpected delimiter.");
@@ -1014,6 +1031,7 @@ namespace MJava
 
                 if (index == nullptr)
                 {
+                    errorReport("Missing index of array.");
                     return nullptr;
                 }
 
@@ -1157,6 +1175,7 @@ namespace MJava
 
         if (currentASTPtr == nullptr)
         {
+            errorReport("Missing unary operator expression.");
             return nullptr;
         }
 
@@ -1174,6 +1193,7 @@ namespace MJava
 
         if (currentASTPtr == nullptr)
         {
+            errorReport("Missing parent expression.");
             return nullptr;
         }
 
@@ -1300,6 +1320,7 @@ namespace MJava
 
         if (condition == nullptr)
         {
+            errorReport("while condition is not valid.");
             return nullptr;
         }
 
@@ -1312,6 +1333,7 @@ namespace MJava
 
         if (body == nullptr)
         {
+            errorReport("Missing while body.");
             return nullptr;
         }
 
@@ -1348,6 +1370,7 @@ namespace MJava
 
         if (body == nullptr)
         {
+            errorReport("Missing for body.");
             return nullptr;
         }
 
